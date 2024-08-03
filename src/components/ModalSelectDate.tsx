@@ -10,9 +10,11 @@ import DatePickerCustomDay from "./DatePickerCustomDay";
 
 interface ModalSelectDateProps {
   renderChildren?: (p: { openModal: () => void }) => React.ReactNode;
+  setStartOne: (startDate: Date | null) => void;
+  setEndOne: (endDate: Date | null) => void;
 }
 
-const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
+const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren, setStartOne, setEndOne }) => {
   const [showModal, setShowModal] = useState(false);
 
   // const [startDate, setStartDate] = useState<Date | null>(
@@ -43,14 +45,16 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
-    // console.log('date changed: ', start, end);
+    setStartOne(start);
+    setEndOne(end);
+    console.log('date changed: ', start, end);
   };
 
 
-  // useEffect(() => {
-  //   const dates = {startDate: startDate, endDate: endDate};
-  //   localStorage.setItem('dates', JSON.stringify(dates));
-  // }, [startDate, endDate])
+  useEffect(() => {
+    const dates = {startDate: startDate, endDate: endDate};
+    localStorage.setItem('dates', JSON.stringify(dates));
+  }, [startDate, endDate])
 
   // FOR RESET ALL DATA WHEN CLICK CLEAR BUTTON
   //
@@ -141,16 +145,14 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
                         className="underline font-semibold flex-shrink-0"
                         onClick={() => {
                           onChangeDate([null, null]);
-                        }}
-                      >
+                        }}>
                         Clear dates
                       </button>
                       <ButtonPrimary
                         sizeClass="px-6 py-3 !rounded-xl"
                         onClick={() => {
                           closeModal();
-                        }}
-                      >
+                        }}>
                         Save
                       </ButtonPrimary>
                     </div>
@@ -166,3 +168,4 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
 };
 
 export default ModalSelectDate;
+

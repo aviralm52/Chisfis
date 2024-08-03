@@ -26,6 +26,8 @@ export interface CheckOutPagePageMainProps {
   className?: string;
 }
 
+
+
 interface Properties {
   _id: ObjectId;
   userId: string;
@@ -135,6 +137,10 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return new Date(date.endDate);
   });
 
+  const [startone , setStartOne] = useState<Date | null>(null);
+  const [endone , setEndOne] = useState<Date | null>(null);
+
+
   const [dateDiff, setDateDiff] = useState<number>(3);
   const calculateDifferenceBetweenDates = (
     startDate: Date | null,
@@ -148,20 +154,26 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return 3;
   };
 
+
+  useEffect(()=>{
+      if(!startone){
+        setStartOne(startDate)
+      }
+      if(!endone){
+        setEndOne(endDate)
+      }
+  },[])
+
   useEffect(() => {
-    console.log('called use effect for diff');
     const diff = calculateDifferenceBetweenDates(startDate, endDate);
     setDateDiff(diff);
   }, [startDate, endDate]);
 
   useEffect(() => {
-    console.log('called use effect for date');
     const savedDates = JSON.stringify({
       startDate: startDate,
       endDate: endDate,
     });
-    setStartDate(startDate);
-    setEndDate(endDate);
     localStorage.setItem("dates", savedDates);
   }, [startDate, endDate]);
 
@@ -172,15 +184,15 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   // });
 
   const [guests, setGuests] = useState<GuestsObject>(() => {
-    const savedGuests = localStorage.getItem("guestsState");
+    const savedGuests = localStorage.getItem("guests");
     if (!savedGuests) {
       return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
     }
     const gsts = JSON.parse(savedGuests);
     return {
-      guestAdults: gsts.adutls,
-      guestChildren: gsts.childen,
-      guestInfants: gsts.infants,
+      guestAdults: gsts.guestAdults,
+      guestChildren: gsts.guestChildren,
+      guestInfants: gsts.guestInfants,
     };
   });
 
@@ -265,7 +277,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between font-semibold">
             <span>Total</span>
             <span>
-              € {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}{" "}
+              $ {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}{" "}
             </span>
           </div>
         </div>
@@ -284,6 +296,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div>
             <h3 className="text-2xl font-semibold">Your trip</h3>
             <NcModal
+              
               renderTrigger={(openModal) => (
                 <span
                   onClick={() => openModal()}
@@ -298,6 +311,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           </div>
           <div className="mt-6 border border-neutral-200 dark:border-neutral-700 rounded-3xl flex flex-col sm:flex-row divide-y sm:divide-x sm:divide-y-0 divide-neutral-200 dark:divide-neutral-700 overflow-hidden z-10">
             <ModalSelectDate
+              setStartOne={(value) => setStartOne(value)}
+              setEndOne={(value) => setEndOne(value)}
               renderChildren={({ openModal }) => (
                 <button
                   onClick={openModal}
@@ -307,7 +322,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                   <div className="flex flex-col">
                     <span className="text-sm text-neutral-400">Date</span>
                     <span className="mt-1.5 text-lg font-semibold">
-                      {converSelectedDateToString([startDate, endDate])}
+                      {/* {converSelectedDateToString([startDate, endDate])} */}
+                      {converSelectedDateToString([startone, endone])}
                     </span>
                   </div>
                   <PencilSquareIcon className="w-6 h-6 text-neutral-6000 dark:text-neutral-400" />
