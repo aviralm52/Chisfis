@@ -11,7 +11,7 @@ import Textarea from "@/shared/Textarea";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import StartRating from "@/components/StartRating";
 import NcModal from "@/shared/NcModal";
-import ModalSelectDate from "@/components/ModalSelectDate";
+import ModalSelectDate from "@/components/ModalSelectDateTwo";
 import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalSelectGuests from "@/components/ModalSelectGuests";
 import Image from "next/image";
