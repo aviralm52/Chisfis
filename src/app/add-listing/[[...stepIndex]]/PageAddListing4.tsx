@@ -1,6 +1,6 @@
 "use client";
 import React, { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
-import Checkbox from "@/shared/Checkbox";
+import Checkbox from "@/shared/CheckboxTwo";
 
 export interface PageAddListing4Props {}
 
@@ -145,6 +145,12 @@ const PageAddListing4: FC<PageAddListing4Props> = () => {
       "Inner Courtyard View": amenitiesState?.generalAmenities?.["Inner Courtyard View"] || false,
       "Coffee Machine": amenitiesState?.generalAmenities?.["Coffee Machine"] || false,
       "Hand Sanitizer": amenitiesState?.generalAmenities?.["Hand Sanitizer"] || false,
+      "Satellite Channels": amenitiesState?.generalAmenities?.["Satellite Channels"] || false,
+      "Hot Tub/ Jacuzzi": amenitiesState?.generalAmenities?.["Hot Tub/ Jacuzzi"] || false,
+      "Sun Umbrellas": amenitiesState?.generalAmenities?.["Sun Umbrellas"] || false,
+      "Beach Front": amenitiesState?.generalAmenities?.["Beach Front"] || false,
+      "Hypoallergenic": amenitiesState?.generalAmenities?.["Hypoallergenic"] || false,
+      "Lake View": amenitiesState?.generalAmenities?.["Lake View"] || false,
     }),
     [savedAmenities]
   );

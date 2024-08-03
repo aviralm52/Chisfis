@@ -91,8 +91,9 @@ export interface StayDataType {
 }
 
 export interface PropertyDataType{
-  id: string;
+  id?: string;
   userId: string;
+  VSID: string;
 
   propertyType: string;
   placeName: string;
