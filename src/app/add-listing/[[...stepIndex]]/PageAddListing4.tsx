@@ -1,6 +1,6 @@
 "use client";
 import React, { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
-import Checkbox from "@/shared/CheckboxTwo";
+import Checkbox from "@/shared/Checkbox"
 
 export interface PageAddListing4Props {}
 
