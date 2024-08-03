@@ -211,9 +211,9 @@ const TabFilters = () => {
               className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-primary-500 bg-primary-50 text-primary-700 focus:outline-none `}
             >
               <span>
-                {`$${convertNumbThousand(
+                {`€${convertNumbThousand(
                   rangePrices[0]
-                )} - $${convertNumbThousand(rangePrices[1])}`}{" "}
+                )} - €${convertNumbThousand(rangePrices[1])}`}{" "}
               </span>
               {renderXClear()}
             </Popover.Button>
@@ -253,7 +253,7 @@ const TabFilters = () => {
                         <div className="mt-1 relative rounded-md">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-neutral-500 sm:text-sm">
-                              $
+                              €
                             </span>
                           </div>
                           <input
@@ -276,7 +276,7 @@ const TabFilters = () => {
                         <div className="mt-1 relative rounded-md">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-neutral-500 sm:text-sm">
-                              $
+                              €
                             </span>
                           </div>
                           <input
