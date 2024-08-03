@@ -1,78 +1,136 @@
 "use client";
 
-import React, { Fragment, useState } from "react";
+import React, { FC, Fragment, useEffect, useState } from "react";
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import NcInputNumber from "@/components/NcInputNumber";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonThird from "@/shared/ButtonThird";
 import ButtonClose from "@/shared/ButtonClose";
-import Checkbox from "@/shared/Checkbox";
+// import Checkbox from "@/shared/Checkbox";
+import Checkbox from "@/shared/CheckboxTwo";
 import Slider from "rc-slider";
 import convertNumbThousand from "@/utils/convertNumbThousand";
+import SectionGridFeaturePlaces from "@/components/SectionGridFeaturePlaces";
+import axios from "axios";
 
-// DEMO DATA
 const typeOfPaces = [
   {
-    name: "Entire place",
+    name: "Private room",
     description: "Have a place to yourself",
   },
   {
-    name: "Private room",
+    name: "Private room by portion",
     description: "Have your own room and share some common spaces",
   },
   {
-    name: "Hotel room",
+    name: "Shared Room",
     description:
       "Have a private or shared room in a boutique hotel, hostel, and more",
   },
   {
-    name: "Shared room",
+    name: "Hotel Room",
+    description: "Stay in a shared space, like a common room",
+  },
+  {
+    name: "Random",
     description: "Stay in a shared space, like a common room",
   },
 ];
 
-const moreFilter1 = [
-  { name: "Kitchen", defaultChecked: true },
-  { name: "Air conditioning", defaultChecked: true },
-  { name: "Heating" },
-  { name: "Dryer" },
-  { name: "Washer" },
-  { name: "Wifi" },
-  { name: "Indoor fireplace" },
-  { name: "Breakfast" },
-  { name: "Hair dryer" },
-  { name: " Dedicated workspace" },
-];
+// const moreFilter1 = [
+//   { name: "Kitchen", defaultChecked: true },
+//   { name: "Air conditioning", defaultChecked: true },
+//   { name: "Heating" },
+//   { name: "Dryer" },
+//   { name: "Washer" },
+//   { name: "Wifi" },
+//   { name: "Indoor fireplace" },
+//   { name: "Breakfast" },
+//   { name: "Hair dryer" },
+//   { name: " Dedicated workspace" },
+// ];
 
-const moreFilter2 = [
-  { name: " Free parking on premise" },
-  { name: "Hot tub" },
-  { name: "Gym" },
-  { name: " Pool" },
-  { name: " EV charger" },
-];
+// const moreFilter2 = [
+//   { name: " Free parking on premise" },
+//   { name: "Hot tub" },
+//   { name: "Gym" },
+//   { name: " Pool" },
+//   { name: " EV charger" },
+// ];
 
 const moreFilter3 = [
-  { name: " House" },
-  { name: "Bed and breakfast" },
-  { name: "Apartment", defaultChecked: true },
-  { name: " Boutique hotel" },
-  { name: " Bungalow" },
-  { name: " Chalet", defaultChecked: true },
-  { name: " Condominium", defaultChecked: true },
-  { name: " Cottage" },
-  { name: " Guest suite" },
-  { name: " Guesthouse" },
+  { name: "Hotel" },
+  { name: "Cottage" },
+  { name: "Villa" },
+  { name: "Cabin" },
+  { name: "Farm stay" },
+  { name: "Houseboat" },
+  { name: "Lighthouse" },
+  { name: "Studio" },
+  { name: "Apartment" },
+  { name: "Detached House" },
+  { name: "Loft" },
+  { name: "Maisonette" },
+  { name: "Farmhouse" },
+  { name: "Holiday " },
+  { name: "Farmstay" },
+  { name: "Resort" },
+  { name: "Lodge" },
+  { name: "Apart Hotel" },
 ];
 
 const moreFilter4 = [{ name: " Pets allowed" }, { name: "Smoking allowed" }];
 
-const TabFilters = () => {
+export interface RentalType {
+  // rentalType: (value: string) => void;
+  setBedRooms: (value: number) => void;
+  setBathrooms: (value: number) => void;
+  setBeds: (value: number) => void;
+  setRentalForm: (value: string) => void;
+  setPropertyType: (value: string) => void;
+  setMaxPrice: (value: number) => void;
+  setMinPrice: (value: number) => void;
+}
+
+const TabFilters: FC<RentalType> = ({
+  setBathrooms,
+  setBedRooms,
+  setBeds,
+  setRentalForm,
+  setPropertyType,
+  setMaxPrice,
+  setMinPrice,
+}) => {
   const [isOpenMoreFilter, setisOpenMoreFilter] = useState(false);
   const [isOpenMoreFilterMobile, setisOpenMoreFilterMobile] = useState(false);
   const [rangePrices, setRangePrices] = useState([0, 1000]);
 
-  //
+
+
+  const [selectValue, setSelectValue] = useState<string>("");
+
+  const [selectedValue, setSelectedValue] = useState<string>("");
+
+  const handleRadioChange = (value: string) => {
+    setSelectedValue(value);
+    setRentalForm(value);
+  };
+
+  useEffect(()=>{
+    console.log(rangePrices)
+    setMinPrice(rangePrices[0])
+    setMaxPrice(rangePrices[1])
+  }, [rangePrices])
+
+  const roomtype = async (selectValue: string) => {
+    try {
+      const response = await axios.post("api/filters", { selectValue });
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error making the request:", error);
+    }
+  };
+
   const closeModalMoreFilter = () => setisOpenMoreFilter(false);
   const openModalMoreFilter = () => setisOpenMoreFilter(true);
   //
@@ -106,8 +164,7 @@ const TabFilters = () => {
             <Popover.Button
               className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-6000 focus:outline-none ${
                 open ? "!border-primary-500 " : ""
-              }`}
-            >
+              }`}>
               <span>Type of place</span>
               <i className="las la-angle-down ml-2"></i>
             </Popover.Button>
@@ -118,22 +175,36 @@ const TabFilters = () => {
               enterTo="opacity-100 translate-y-0"
               leave="transition ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1"
-            >
+              leaveTo="opacity-0 translate-y-1">
               <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
                 <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
                   <div className="relative flex flex-col px-5 py-6 space-y-5">
                     {typeOfPaces.map((item) => (
-                      <div key={item.name} className="">
-                        <Checkbox
-                          name={item.name}
-                          label={item.name}
-                          subLabel={item.description}
+                      <div
+                        key={item.name}
+                        className="flex items-center gap-x-4"
+                      >
+                        <input
+                          id={item.name}
+                          type="radio"
+                          name="typeOfPlace"
+                          value={item.name}
+                          checked={selectedValue === item.name}
+                          onChange={() => handleRadioChange(item.name)}
+                          className="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out"
                         />
+                        <label htmlFor={item.name} className="flex flex-col">
+                          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                            {item.name}
+                          </span>
+                          <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                            {item.description}
+                          </span>
+                        </label>
                       </div>
                     ))}
                   </div>
-                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
                     <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
                       Clear
                     </ButtonThird>
@@ -143,7 +214,7 @@ const TabFilters = () => {
                     >
                       Apply
                     </ButtonPrimary>
-                  </div>
+                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -178,11 +249,23 @@ const TabFilters = () => {
               <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
                 <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900   border border-neutral-200 dark:border-neutral-700">
                   <div className="relative flex flex-col px-5 py-6 space-y-5">
-                    <NcInputNumber label="Beds" max={10} />
-                    <NcInputNumber label="Bedrooms" max={10} />
-                    <NcInputNumber label="Bathrooms" max={10} />
+                    <NcInputNumber
+                      label="Beds"
+                      max={10}
+                      onChange={(value) => setBeds(value)}
+                    />
+                    <NcInputNumber
+                      label="Bedrooms"
+                      max={10}
+                      onChange={(value) => setBedRooms(value)}
+                    />
+                    <NcInputNumber
+                      label="Bathrooms"
+                      max={10}
+                      onChange={(value) => setBathrooms(value)}
+                    />
                   </div>
-                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
                     <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
                       Clear
                     </ButtonThird>
@@ -192,7 +275,7 @@ const TabFilters = () => {
                     >
                       Apply
                     </ButtonPrimary>
-                  </div>
+                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -211,9 +294,9 @@ const TabFilters = () => {
               className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-primary-500 bg-primary-50 text-primary-700 focus:outline-none `}
             >
               <span>
-                {`$${convertNumbThousand(
+                {`€ ${convertNumbThousand(
                   rangePrices[0]
-                )} - $${convertNumbThousand(rangePrices[1])}`}{" "}
+                )} - € ${convertNumbThousand(rangePrices[1])}`}{" "}
               </span>
               {renderXClear()}
             </Popover.Button>
@@ -246,8 +329,7 @@ const TabFilters = () => {
                       <div>
                         <label
                           htmlFor="minPrice"
-                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-                        >
+                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300" >
                           Min price
                         </label>
                         <div className="mt-1 relative rounded-md">
@@ -269,14 +351,13 @@ const TabFilters = () => {
                       <div>
                         <label
                           htmlFor="maxPrice"
-                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-                        >
+                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                           Max price
                         </label>
                         <div className="mt-1 relative rounded-md">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-neutral-500 sm:text-sm">
-                              €
+                            €
                             </span>
                           </div>
                           <input
@@ -291,7 +372,7 @@ const TabFilters = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
                     <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
                       Clear
                     </ButtonThird>
@@ -301,7 +382,7 @@ const TabFilters = () => {
                     >
                       Apply
                     </ButtonPrimary>
-                  </div>
+                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -324,20 +405,22 @@ const TabFilters = () => {
         <div className="flex flex-col space-y-5">
           {list1.map((item) => (
             <Checkbox
+              setPropertyType={(value: string) => setPropertyType(value)}
               key={item.name}
               name={item.name}
               label={item.name}
-              defaultChecked={!!item.defaultChecked}
+              // defaultChecked={!!item.defaultChecked}
             />
           ))}
         </div>
         <div className="flex flex-col space-y-5">
           {list2.map((item) => (
             <Checkbox
+              setPropertyType={(value: string) => setPropertyType(value)}
               key={item.name}
               name={item.name}
               label={item.name}
-              defaultChecked={!!item.defaultChecked}
+              // defaultChecked={!!item.defaultChecked}
             />
           ))}
         </div>
@@ -406,18 +489,18 @@ const TabFilters = () => {
 
                   <div className="flex-grow overflow-y-auto">
                     <div className="px-10 divide-y divide-neutral-200 dark:divide-neutral-800">
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Amenities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter1)}
                         </div>
-                      </div>
-                      <div className="py-7">
+                      </div> */}
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Facilities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter2)}
                         </div>
-                      </div>
+                      </div> */}
                       <div className="py-7">
                         <h3 className="text-xl font-medium">Property type</h3>
                         <div className="mt-6 relative ">
@@ -433,7 +516,7 @@ const TabFilters = () => {
                     </div>
                   </div>
 
-                  <div className="p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                  {/* <div className="p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
                     <ButtonThird
                       onClick={closeModalMoreFilter}
                       sizeClass="px-4 py-2 sm:px-5"
@@ -446,7 +529,7 @@ const TabFilters = () => {
                     >
                       Apply
                     </ButtonPrimary>
-                  </div>
+                  </div> */}
                 </div>
               </Transition.Child>
             </div>
@@ -461,8 +544,7 @@ const TabFilters = () => {
       <div>
         <div
           className={`flex lg:hidden items-center justify-center px-4 py-2 text-sm rounded-full border border-primary-500 bg-primary-50 text-primary-700 focus:outline-none cursor-pointer`}
-          onClick={openModalMoreFilterMobile}
-        >
+          onClick={openModalMoreFilterMobile}>
           <span>More filters (3)</span>
           {renderXClear()}
         </div>
@@ -500,14 +582,12 @@ const TabFilters = () => {
                 enterTo="opacity-100 scale-100"
                 leave="ease-in duration-200"
                 leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
+                leaveTo="opacity-0 scale-95" >
                 <div className="inline-flex flex-col w-full max-w-4xl text-left align-middle transition-all transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-700 dark:text-neutral-100 shadow-xl h-full">
                   <div className="relative flex-shrink-0 px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 text-center">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
-                    >
+                      className="text-lg font-medium leading-6 text-gray-900">
                       More filters
                     </Dialog.Title>
                     <span className="absolute left-3 top-3">
@@ -605,20 +685,20 @@ const TabFilters = () => {
                       </div>
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Amenities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter1)}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* ---- */}
-                      <div className="py-7">
+                      {/* <div className="py-7">
                         <h3 className="text-xl font-medium">Facilities</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter2)}
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* ---- */}
                       <div className="py-7">
@@ -638,8 +718,8 @@ const TabFilters = () => {
                     </div>
                   </div>
 
-                  <div className="p-4 sm:p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird
+                  {/* <div className="p-4 sm:p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
+                    <
                       onClick={closeModalMoreFilterMobile}
                       sizeClass="px-4 py-2 sm:px-5"
                     >
@@ -651,7 +731,7 @@ const TabFilters = () => {
                     >
                       Apply
                     </ButtonPrimary>
-                  </div>
+                  </div> */}
                 </div>
               </Transition.Child>
             </div>
@@ -670,6 +750,7 @@ const TabFilters = () => {
         {renderTabMoreFilter()}
       </div>
       {renderTabMoreFilterMobile()}
+     
     </div>
   );
 };

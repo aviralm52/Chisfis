@@ -9,7 +9,7 @@ import StayCard from "@/components/StayCard";
 import CustomStayCard from "./CustomStayCard";
 import { useSearchParams } from "next/navigation";
 import FilterCard from "./FilterCard";
-import TabFilters from "../(stay-listings)/TabFilters";
+import TabFilters from "../(stay-listings)/TabFiltersTwo"
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonThird from "@/shared/ButtonThird";
 
