@@ -287,6 +287,9 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
     }
   };
 
+
+  const placeholderImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVfDzHO5T-1AIUN90MPnN3ARV-PISlz8EAdQ&s';
+
   return (
     <div className=" flex flex-col gap-12">
       <div>
@@ -330,9 +333,14 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
               height={300}
               layout="responsive"
             /> */}
-            <img src={propertyCoverFileUrl} alt="coverImage" className="card-img-top h-56 w-96 rounded-xl" />
+            {/* <img src={propertyCoverFileUrl} alt="coverImage" className="card-img-top h-56 w-96 rounded-xl" /> */}
+            <img
+  src={propertyCoverFileUrl ? propertyCoverFileUrl : placeholderImage}
+  alt="coverImage"
+  className="card-img-top object-cover h-56 w-96 rounded-xl"
+/>
             <div className="card-body mt-2 ml-2">
-              <h1 className="mt-2">{page3.portionName[0]}</h1>
+              <h1 className="mt-2">{page3.portionName?.[0]}</h1>
             </div>
             <div className="flex gap-2 ml-2 mt-2 items-center">
               <FaLocationDot />
