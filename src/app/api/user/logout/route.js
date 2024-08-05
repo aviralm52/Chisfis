@@ -2,7 +2,7 @@ import { connectDb } from "../../../../helper/db";
 import { NextResponse } from "next/server";
 connectDb();
 
-export async function POST(request) {
+export async function GET(request) {
   try {
     const response = NextResponse.json(
       { message: "Logged out successfully" },
