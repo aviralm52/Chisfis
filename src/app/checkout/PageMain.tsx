@@ -138,15 +138,15 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   });
 
   const [guests, setGuests] = useState<GuestsObject>(() => {
-    const savedGuests = localStorage.getItem("guests");
+    const savedGuests = localStorage.getItem("guestsState");
     if (!savedGuests) {
       return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
     }
     const gsts = JSON.parse(savedGuests);
     return {
-      guestAdults: gsts.guestAdults,
-      guestChildren: gsts.guestChildren,
-      guestInfants: gsts.guestInfants,
+      guestAdults: gsts.adults,
+      guestChildren: gsts.children,
+      guestInfants: gsts.infants,
     };
   });
 
@@ -196,16 +196,14 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     setDateDiff(diff);
   }, [startDate, endDate]);
 
-  useEffect(() => {
 
+  useEffect(() => {
     const updatedGuests: GuestsObject = {
       guestAdults: guestAdult,
       guestChildren: guestChildren,
       guestInfants: guestInfants,
     };
-    
     setGuests(updatedGuests);
-
   }, [guestAdult, guestChildren, guestInfants]);
 
   useEffect(() => {
@@ -216,34 +214,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     localStorage.setItem("dates", savedDates);
   }, [startDate, endDate]);
 
-  // const [guests, setGuests] = useState<GuestsObject>({
-  //   guestAdults: 3,
-  //   guestChildren: 0,
-  //   guestInfants: 0,
-  // });
-
-
-  const handleLocalStorageChange = () => {
-    const savedDates = localStorage.getItem("dates");
-    if (!savedDates) {
-      return startDate;
-    }
-    const dates = JSON.parse(savedDates);
-    setStartDate(new Date(dates.startDate));
-    setEndDate(new Date(dates.endDate));
-
-    const savedGuests = localStorage.getItem("guests");
-    if (!savedGuests) {
-      return guests;
-    }
-    const gsts = JSON.parse(savedGuests);
-    setGuests({
-      guestAdults: gsts.guestAdults,
-      guestChildren: gsts.guestChildren,
-      guestInfants: gsts.guestInfants,
-    });
-  };
-  window.addEventListener("storage", handleLocalStorageChange);
 
   const renderSidebar = () => {
     return (
@@ -315,14 +285,13 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return (
       <div className="w-full flex flex-col sm:rounded-2xl sm:border border-neutral-200 dark:border-neutral-700 space-y-8 px-0 sm:p-6 xl:p-8">
         <h2 className="text-3xl lg:text-4xl font-semibold">
-          Confirm and payment
+          Confirm and Request
         </h2>
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
         <div>
           <div>
             <h3 className="text-2xl font-semibold">Your trip</h3>
             <NcModal
-              
               renderTrigger={(openModal) => (
                 <span
                   onClick={() => openModal()}
@@ -359,7 +328,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 
             <ModalSelectGuests
               setAdults={(value) => setGuestAdult(value)}
-              setChildren={(value) => setGuestAdult(value)}
+              setChildren={(value) => setGuestChildren(value)}
               renderChildren={({ openModal }) => (
                 <button
                   type="button"
@@ -370,10 +339,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                     <span className="text-sm text-neutral-400">Guests</span>
                     <span className="mt-1.5 text-lg font-semibold">
                       <span className="line-clamp-1">
-                        {/* {`${
-                          (guests.guestAdults || 0) +
-                          (guests.guestChildren || 0)
-                        } Guests, ${guests.guestInfants || 0} Infants`} */}
                         {`${
                           (guests.guestAdults || 0) +
                           (guests.guestChildren || 0)

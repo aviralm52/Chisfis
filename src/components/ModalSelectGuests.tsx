@@ -13,7 +13,11 @@ interface ModalSelectGuestsProps {
   setChildren: (children: number | undefined) => void;
 }
 
-const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren, setAdults, setChildren }) => {
+const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({
+  renderChildren,
+  setAdults,
+  setChildren,
+}) => {
   const [showModal, setShowModal] = useState(false);
 
   // FOR RESET ALL DATA WHEN CLICK CLEAR BUTTON
@@ -71,7 +75,10 @@ const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren, setAdul
                           <div
                             className={`flex-1 relative flex z-10 overflow-hidden`}
                           >
-                            <GuestsInput setAdults={setAdults} setChildren={setChildren} />
+                            <GuestsInput
+                              setAdults={(value) => setAdults(value)}
+                              setChildren={(value) => setChildren(value)}
+                            />
                           </div>
                         </div>
                       </div>
@@ -84,13 +91,7 @@ const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren, setAdul
                       >
                         Clear data
                       </button>
-                      <ButtonPrimary
-                        sizeClass="px-6 py-3 !rounded-xl"
-                        onClick={() => {
-                          window.location.reload();
-                          closeModal();
-                        }}
-                      >
+                      <ButtonPrimary sizeClass="px-6 py-3 !rounded-xl" onClick={closeModal}>
                         Save
                       </ButtonPrimary>
                     </div>

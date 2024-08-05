@@ -173,14 +173,14 @@ const GuestsInput: FC<GuestsInputProps> = ({
                 desc="Ages 2–12"
               />
 
-              <NcInputNumber
+              {/* <NcInputNumber
                 className="w-full mt-6"
                 defaultValue={guestInfantsInputValue}
                 onChange={(value) => handleChangeData(value, "guestInfants")}
                 max={4}
                 label="Infants"
                 desc="Ages 0–2"
-              />
+              /> */}
             </Popover.Panel>
           </Transition>
         </>

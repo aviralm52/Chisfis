@@ -120,6 +120,7 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren, setStartOne
                                 onChange={onChangeDate}
                                 startDate={startDate}
                                 endDate={endDate}
+                                minDate={new Date()}
                                 selectsRange
                                 monthsShown={2}
                                 showPopperArrow={false}

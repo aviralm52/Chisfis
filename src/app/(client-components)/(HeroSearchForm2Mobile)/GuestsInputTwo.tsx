@@ -12,6 +12,12 @@ export interface GuestsInputProps {
   setChildren: (value: number | undefined) => void;
 }
 
+interface GuestState{
+  adults?: number;
+  children?: number;
+  infants?: number;
+}
+
 const GuestsInput: FC<GuestsInputProps> = ({
   defaultValue,
   onChange,
@@ -20,8 +26,8 @@ const GuestsInput: FC<GuestsInputProps> = ({
   setChildren
 }) => {
 
-  const [guests, setGuests] = useState<GuestsObject>(() => {
-    const savedGuests = localStorage.getItem('guests');
+  const [guests, setGuests] = useState<GuestState>(() => {
+    const savedGuests = localStorage.getItem('guestsState');
     if (!savedGuests) {
       return {};
     }
@@ -52,11 +58,11 @@ const GuestsInput: FC<GuestsInputProps> = ({
   const handleChangeData = (value: number, type: keyof GuestsObject) => {
     let newValue = {
       // guestAdults: guestAdultsInputValue,
-      guestAdults: guests.guestAdults,
+      guestAdults: guests.adults,
       // guestChildren: guestChildrenInputValue,
-      guestChildren: guests.guestChildren,
+      guestChildren: guests.children,
       // guestInfants: guestInfantsInputValue,
-      guestInfants: guests.guestInfants,
+      guestInfants: guests.infants,
     };
     if (type === "guestAdults") {
       setGuestAdultsInputValue(value);
@@ -73,14 +79,10 @@ const GuestsInput: FC<GuestsInputProps> = ({
       newValue.guestInfants = value;
     }
     onChange && onChange(newValue);
-    localStorage.setItem('guests', JSON.stringify(newValue));
+    // localStorage.setItem('guestsState', JSON.stringify(newValue));
   };
 
 
-  useEffect(() => {
-    setGuests(guests);
-    localStorage.setItem('guests', JSON.stringify(guests));
-  }, [guests])
 
   return (
     <div className={`flex flex-col relative p-5 ${className}`}>
@@ -90,7 +92,7 @@ const GuestsInput: FC<GuestsInputProps> = ({
       <NcInputNumber
         className="w-full"
         // defaultValue={guestAdultsInputValue}
-        defaultValue={guests.guestAdults || 0}
+        defaultValue={guests.adults || 0}
         onChange={(value) => handleChangeData(value, "guestAdults")}
         max={20}
         label="Adults"
@@ -99,7 +101,7 @@ const GuestsInput: FC<GuestsInputProps> = ({
       <NcInputNumber
         className="w-full mt-6"
         // defaultValue={guestChildrenInputValue}
-        defaultValue={guests.guestChildren || 0}
+        defaultValue={guests.children || 0}
         onChange={(value) => handleChangeData(value, "guestChildren")}
         max={20}
         label="Children"
