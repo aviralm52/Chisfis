@@ -20,8 +20,10 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      required: false,
+      enum: ["User", "Admin", "SuperAdmin"],
+      default: "User", // Optional: you can set a default role if needed
     },
+
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,
     verifyToken: String,
