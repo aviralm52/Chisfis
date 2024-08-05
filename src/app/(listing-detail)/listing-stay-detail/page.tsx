@@ -417,7 +417,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     return (
       <div className="listingSection__wrap">
         <h2 className="text-2xl font-semibold mb-2">Stay information</h2>
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mt-0"></div> */}
         {particularProperty?.reviews[indexId]}
         <div className="relative">
           <div>
@@ -539,17 +538,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     </span>
                   </div>
                   <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
-                    {/* {Amenities_demos.filter((_, i) => i < 1212).map((item) => (
-                      <div
-                        key={item.name}
-                        className="flex items-center py-2.5 sm:py-4 lg:py-5 space-x-5 lg:space-x-8"
-                      >
-                        <i
-                          className={`text-4xl text-neutral-6000 las ${item.icon}`}
-                        ></i>
-                        <span>{item.name}</span>
-                      </div>
-                    ))} */}
+                    {/* Amenities_demos.filter */}
                     {allAmenities.map((item) => (
                       <div
                         key={item.name}
@@ -636,11 +625,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               {/* Kevin Francis  */}
               {username}
             </a>
-            {/* <div className="mt-1.5 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
-              <StartRating />
-              <span className="mx-2">·</span>
-              <span> 12 places</span>
-            </div> */}
           </div>
         </div>
 
@@ -898,80 +882,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setTotalGuests(totalGuests);
   };
 
-  // const [numberOfNightsSidebar, setNumberOfNightsSidebar] = useState<number>(0);
-  // const renderSidebar = () => {
-  //   // Define local state for number of nights if it's not managed elsewhere
-  //   const handleDatesChange = (dates: { startDate: Date | null; endDate: Date | null }) => {
-  //     const { startDate, endDate } = dates;
-  //     const nights = calculateDateDifference(startDate, endDate);
-  //     setNumberOfNights(nights);
-  //   };
-  
-  //   const calculateDateDifference = (start: Date | null, end: Date | null) => {
-  //     if (start && end) {
-  //       const timeDiff = end.getTime() - start.getTime();
-  //       return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
-  //     }
-  //     return 0;
-  //   };
-  
-  //   return (
-  //     <div className="listingSectionSidebar__wrap shadow-xl">
-  //       {/* PRICE */}
-  //       <div className="flex justify-between">
-  //         <span className="text-3xl font-semibold">
-  //           € {particularProperty?.basePrice[indexId] ?? 0}
-  //           <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-  //             /night
-  //           </span>
-  //         </span>
-  //         <StartRating />
-  //       </div>
-  
-  //       {/* FORM */}
-  //       <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">
-  //         <StayDatesRangeInput
-  //           className="flex-1 z-[11]"
-  //           onDatesChange={handleDatesChange}
-  //         />
-  //         <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-  //         <GuestsInput className="flex-1" onGuestsChange={handleGuestChange} />
-  //       </form>
-  
-  //       {/* SUM */}
-  //       <div className="flex flex-col space-y-4">
-  //         {/* Price per night and subtotal */}
-  //         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-  //           <span>
-  //             € {particularProperty?.basePrice[indexId] ?? 0} * {numberOfNights} nights
-  //           </span>
-  //           <span>€ {particularProperty?.basePrice[indexId] ? particularProperty.basePrice[indexId] * numberOfNights : 0}</span>
-  //         </div>
-  
-  //         {/* Fixed service charge */}
-  //         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-  //           <span>Service charge</span>
-  //           <span>€ 6</span>
-  //         </div>
-  
-  //         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
-  
-  //         {/* Total price calculation */}
-  //         <div className="flex justify-between font-semibold">
-  //           <span>Total</span>
-  //           <span>
-  //             € {particularProperty?.basePrice[indexId] ? (particularProperty.basePrice[indexId] * numberOfNights) + 6 : 6}
-  //           </span>
-  //         </div>
-  //       </div>
-  
-  //       {/* SUBMIT */}
-  //       <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary>
-  //     </div>
-  //   );
-  // };
-
-
   const [minNightStay, setMinNightStay] = useState<number | undefined>(undefined);
   const renderSidebar = () => {
     const handleDatesChange = (dates: {
@@ -1046,7 +956,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </div>
 
 
-        {/* <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary> */}
         <Link
           href={{
             pathname: "/checkout",

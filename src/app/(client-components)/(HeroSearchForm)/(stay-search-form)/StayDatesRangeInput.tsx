@@ -92,6 +92,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
                   onChange={onChangeDate}
                   startDate={startDate}
                   endDate={endDate}
+                  minDate={new Date()}
                   selectsRange
                   monthsShown={2}
                   showPopperArrow={false}

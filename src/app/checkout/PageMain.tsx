@@ -137,8 +137,26 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return new Date(date.endDate);
   });
 
+  const [guests, setGuests] = useState<GuestsObject>(() => {
+    const savedGuests = localStorage.getItem("guests");
+    if (!savedGuests) {
+      return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
+    }
+    const gsts = JSON.parse(savedGuests);
+    return {
+      guestAdults: gsts.guestAdults,
+      guestChildren: gsts.guestChildren,
+      guestInfants: gsts.guestInfants,
+    };
+  });
+
   const [startone , setStartOne] = useState<Date | null>(null);
   const [endone , setEndOne] = useState<Date | null>(null);
+
+
+  const [guestAdult, setGuestAdult] = useState<number | undefined>();
+  const [guestChildren, setGuestChildren] = useState<number | undefined>();
+  const [guestInfants, setGuestInfants] = useState<number | undefined>();
 
 
   const [dateDiff, setDateDiff] = useState<number>(3);
@@ -157,10 +175,19 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 
   useEffect(()=>{
       if(!startone){
-        setStartOne(startDate)
+        setStartOne(startDate);
       }
       if(!endone){
-        setEndOne(endDate)
+        setEndOne(endDate);
+      }
+      if(!guestAdult){
+        setGuestAdult(guests.guestAdults);
+      }
+      if(!guestChildren){
+        setGuestChildren(guests.guestChildren);
+      }
+      if(!guestInfants){
+        setGuestInfants(guests.guestInfants);
       }
   },[])
 
@@ -168,6 +195,18 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     const diff = calculateDifferenceBetweenDates(startDate, endDate);
     setDateDiff(diff);
   }, [startDate, endDate]);
+
+  useEffect(() => {
+
+    const updatedGuests: GuestsObject = {
+      guestAdults: guestAdult,
+      guestChildren: guestChildren,
+      guestInfants: guestInfants,
+    };
+    
+    setGuests(updatedGuests);
+
+  }, [guestAdult, guestChildren, guestInfants]);
 
   useEffect(() => {
     const savedDates = JSON.stringify({
@@ -182,19 +221,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   //   guestChildren: 0,
   //   guestInfants: 0,
   // });
-
-  const [guests, setGuests] = useState<GuestsObject>(() => {
-    const savedGuests = localStorage.getItem("guests");
-    if (!savedGuests) {
-      return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
-    }
-    const gsts = JSON.parse(savedGuests);
-    return {
-      guestAdults: gsts.guestAdults,
-      guestChildren: gsts.guestChildren,
-      guestInfants: gsts.guestInfants,
-    };
-  });
 
 
   const handleLocalStorageChange = () => {
@@ -332,6 +358,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             />
 
             <ModalSelectGuests
+              setAdults={(value) => setGuestAdult(value)}
+              setChildren={(value) => setGuestAdult(value)}
               renderChildren={({ openModal }) => (
                 <button
                   type="button"
