@@ -4,6 +4,9 @@ import React, { useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import Link from "next/link";
 
+
+
+
 export default function VerifyEmailPage() {
   const [isVerified, setIsVerified] = React.useState(false);
   const [token, setToken] = React.useState("");
@@ -20,6 +23,7 @@ export default function VerifyEmailPage() {
       console.log(error.response.data, "error");
     }
   };
+
 
   useEffect(() => {
     setError(false);

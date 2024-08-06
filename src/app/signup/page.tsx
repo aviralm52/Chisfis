@@ -1,6 +1,7 @@
 "use client";
 import React, { FC, useState, FormEvent } from "react";
 import { CgSpinner } from "react-icons/cg";
+
 import Input from "@/shared/Input";
 import { Toaster, toast } from "sonner";
 import ButtonPrimary from "@/shared/ButtonPrimary";
@@ -13,6 +14,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
@@ -24,6 +26,10 @@ const PageSignUp: FC<PageSignUpProps> = () => {
     }
     if (!gmailRegex.test(email)) {
       toast.error("Please enter a valid Gmail address");
+      return false;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       return false;
     }
     return true;
@@ -43,11 +49,14 @@ const PageSignUp: FC<PageSignUpProps> = () => {
         password,
       });
       console.log("Signup successful:", response.data);
-      toast.success("Signup successful! Please log in.");
+      toast.success(
+        "Signup successful! Please verify your email address via link that has been sent to your email address."
+      );
       // Redirection: Redirect to login page
       setName("");
       setEmail("");
       setPassword("");
+      setConfirmPassword("");
     } catch (error) {
       console.error("Signup failed:", error);
       toast.error("Signup failed. Please try again.");
@@ -104,10 +113,19 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <span className="text-xs text-neutral-500 mt-1">
-                  Must be at least 6 characters long, contain one uppercase
-                  letter, one lowercase letter, and one special character.
+              </label>
+              <label className="block">
+                <span className="flex justify-between items-center text-neutral-800 dark:text-neutral-200">
+                  Confirm Password
                 </span>
+                <Input
+                  type="password"
+                  placeholder="********"
+                  className="mt-1"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
               </label>
               <ButtonPrimary type="submit" disabled={loading}>
                 {loading ? (

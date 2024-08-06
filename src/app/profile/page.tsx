@@ -1,10 +1,10 @@
 "use client";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import axios from "axios";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
+
 export interface ProfileProps {}
 
 interface UserData {
@@ -30,6 +30,8 @@ const formatDate = (dateString: string) => {
 
 const ProfilePage: FC<ProfileProps> = ({}) => {
   const [userData, setUserData] = useState<UserData | null>(null);
+
+  const [logoutloading, setLogoutLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [logout, setLogout] = useState(false);
   const router = useRouter();
@@ -49,11 +51,14 @@ const ProfilePage: FC<ProfileProps> = ({}) => {
 
   const handleLogout = async () => {
     try {
+      setLogoutLoading(true);
       await axios.get("/api/user/logout");
       setLogout(true);
       router.push("/login");
+      setLogoutLoading(false);
     } catch (error) {
       console.log(error);
+      setLogoutLoading(false);
     }
   };
 

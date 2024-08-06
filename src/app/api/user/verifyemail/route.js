@@ -22,9 +22,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
     console.log(user);
-
     user.isVerified = true;
     user.verifyToken = undefined;
     user.verifyTokenExpiry = undefined;
