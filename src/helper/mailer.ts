@@ -7,7 +7,6 @@ interface SendEmailOptions {
   emailType: string;
   userId: string;
 }
-
 export const sendEmail = async ({
   email,
   emailType,
@@ -15,7 +14,6 @@ export const sendEmail = async ({
 }: SendEmailOptions) => {
   try {
     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
-
     if (emailType === "VERIFY") {
       await User.findByIdAndUpdate(userId, {
         $set: {
@@ -40,7 +38,6 @@ export const sendEmail = async ({
         pass: "ff6f8c56bd3348", // TODO: MOVE THIS TO .ENV
       },
     });
-
     const mailOption = {
       from: "amantrivedi597@gmail.com",
       to: email,
