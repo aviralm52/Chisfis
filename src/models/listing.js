@@ -15,6 +15,10 @@ const PropertySchema = new mongoose.Schema(
       type: String,
       default: () => generateVSID(7),
     },
+    email:{
+      type:String,
+      required:true,
+    },
     rentalType: {
       type: String,
       default: "Short Term",

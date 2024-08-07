@@ -221,12 +221,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center">
           <div className="flex-shrink-0 w-full sm:w-40">
             <div className=" aspect-w-4 aspect-h-3 sm:aspect-h-4 rounded-2xl overflow-hidden">
-              {/* <Image
-                alt=""
-                fill
-                sizes="200px"
-                src="https://images.pexels.com/photos/6373478/pexels-photo-6373478.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-              /> */}
               <img
                 src={particularProperty?.propertyCoverFileUrl}
                 alt="coverImage"
@@ -258,10 +252,12 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
               € {particularProperty?.basePrice[0]} x{" "}
-              {calculateDifferenceBetweenDates(startDate, endDate)} day
+              {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
+              {startone && endone && calculateDifferenceBetweenDates(startone, endone)} days
             </span>
             <span>
-              € {(particularProperty?.basePrice[0] || 100) * dateDiff}
+              {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}
+              € {(particularProperty?.basePrice[0] || 100) * calculateDifferenceBetweenDates(startone, endone)}
             </span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
@@ -273,7 +269,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between font-semibold">
             <span>Total</span>
             <span>
-              $ {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}{" "}
+              {/* € {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}
+              {" "} */}
+              € {calculateDifferenceBetweenDates(startone, endone) * (particularProperty?.basePrice[0] || 100) + 6}{" "}
             </span>
           </div>
         </div>
@@ -442,7 +440,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               </Tab.Panels>
             </Tab.Group> */}
         <div className="pt-8 flex justify-between">
-          <ButtonPrimary href={"/pay-done"}>Confirm and pay</ButtonPrimary>
+          <ButtonPrimary href={"/pay-done"}>Confirm and Request</ButtonPrimary>
           <ButtonPrimary href={"/pay-done"}>Any Queries?</ButtonPrimary>
         </div>
       </div>
