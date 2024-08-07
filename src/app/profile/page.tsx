@@ -75,7 +75,7 @@ const ProfilePage: FC<ProfileProps> = ({}) => {
         <h2>
           {userData ? (
             <p className="text-2xl">
-              <span className="text-primary-6000 pl-2">{userData.name}'s</span>
+              <span className="text-primary-6000 pl-2">{userData.name}</span>
               Details
             </p>
           ) : (
