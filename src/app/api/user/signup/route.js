@@ -9,7 +9,7 @@ await connectDb();
 export async function POST(request) {
   try {
     const reqBody = await request.json();
-    const { name, email, password , role } = reqBody;
+    const { name, email, password, role } = reqBody;
 
     console.log(reqBody);
     // TODO: VALIDATION WILL GO HERE
@@ -29,7 +29,7 @@ export async function POST(request) {
       name,
       email,
       password: hashedPassword,
-      role
+      role,
     });
 
     const savedUser = await newUser.save();
