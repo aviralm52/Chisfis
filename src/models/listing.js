@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { customAlphabet } from "nanoid";
 
+
+
+
 const generateVSID = (length) => {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
