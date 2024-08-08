@@ -7,7 +7,8 @@ import Input from "@/shared/Input";
 import { useRouter } from "next/navigation";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
-import Cookies from 'js-cookie';
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import Cookies from "js-cookie";
 import { parseCookies } from "nookies";
 
 export interface PageLoginProps {}
@@ -16,14 +17,14 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const token = Cookies.get('token');
+  const token = Cookies.get("token");
 
   useEffect(() => {
     const { token } = parseCookies();
-    console.log("token", token);
     if (token) {
-      router.push("/"); 
+      router.push("/");
     }
   }, []);
 
@@ -37,7 +38,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       });
       if (response.status === 200) {
         toast.success("Login successful");
-        Cookies.set('token', response.data.token, { expires: 1 });
+        Cookies.set("token", response.data.token, { expires: 1 });
         router.push("/");
       }
     } catch (err) {
@@ -46,7 +47,6 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       } else {
         toast.error("Login failed. Please check your credentials.");
       }
-      console.error("Login error", err);
     } finally {
       setIsLoggingIn(false);
     }
@@ -61,7 +61,10 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
             Welcome Back
           </h2>
           <div className="max-w-md mx-auto space-y-6">
-            <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit}>
+            <form
+              className="grid grid-cols-1 gap-6 relative"
+              onSubmit={handleSubmit}
+            >
               <label className="block">
                 <span className="text-neutral-800 dark:text-neutral-200">
                   Email address
@@ -75,21 +78,33 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
                   required
                 />
               </label>
-              <label className="block">
+              <label className="block relative">
                 <span className="flex justify-between items-center text-neutral-800 dark:text-neutral-200">
                   Password
-                  <Link href="/forgotpassword" className="font-semibold underline">
+                  <Link
+                    href="/forgotpassword"
+                    className="font-semibold underline"
+                  >
                     Forgot Password
                   </Link>
                 </span>
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="********"
-                  className="mt-1"
+                  className="mt-1 pr-10" // Add padding to the right to avoid overlap with the icon
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <span className="absolute inset-y-0 right-3 top-9 cursor-pointer text-xl text-neutral-800 dark:text-neutral-200">
+                  {showPassword ? (
+                    <AiFillEyeInvisible
+                      onClick={() => setShowPassword(!showPassword)}
+                    />
+                  ) : (
+                    <AiFillEye onClick={() => setShowPassword(!showPassword)} />
+                  )}
+                </span>
               </label>
               <ButtonPrimary type="submit" disabled={isLoggingIn}>
                 {isLoggingIn ? (
