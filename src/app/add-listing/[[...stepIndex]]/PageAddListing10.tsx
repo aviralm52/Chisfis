@@ -270,6 +270,9 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
     }
   };
 
+
+  const placeholderImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVfDzHO5T-1AIUN90MPnN3ARV-PISlz8EAdQ&s';
+
   return (
     <div className=" flex flex-col gap-12">
       <div>
@@ -288,34 +291,45 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           />
         </div> */}
 
-        <div className="card w-72 border border-gray-600 rounded-xl pb-2">
-          <div className=" h-72 flex justify-center items-center overflow-hidden">
-            {propertyCoverFileUrl ? (
-              <img
-                src={propertyCoverFileUrl}
-                alt="coverImage"
-                className="card-img-top rounded-xl object-cover"
-              />
-            ) : (
-              <FaHouseUser className=" w-3/4 h-3/4" />
-            )}
-          </div>
-          <div className="card-body mt-2 ml-2">
-            <h1 className="mt-2">{page3?.portionName?.[0]}</h1>
-          </div>
-          <div className="flex gap-2 ml-2 mt-2 items-center">
-            {page2?.country && (
+        <Link href={"/listing-stay-detail"} >
+          <div
+            className="card"
+            style={{
+              width: "15rem",
+              border: "1px solid gray",
+              borderRadius: "10px",
+              height: "22rem",
+            }}
+          >
+            {/* <img
+              src={propertyCoverFileUrl}
+              className="card-img-top h-56 w-96 rounded-xl"
+              alt="..."
+            /> */}
+            {/* <Image
+              src={propertyCoverFileUrl}
+              className="card-img-top h-56 w-96 rounded-xl"
+              alt="..."
+              width={200}
+              height={300}
+              layout="responsive"
+            /> */}
+            <img src={propertyCoverFileUrl} alt="coverImage" className="card-img-top h-56 w-96 rounded-xl" />
+            <div className="card-body mt-2 ml-2">
+              <h1 className="mt-2">{page3.portionName[0]}</h1>
+            </div>
+            <div className="flex gap-2 ml-2 mt-2 items-center">
+              <FaLocationDot />
               <h6>
                 {page2?.city}, {page2?.country}
               </h6>
-            )}
           </div>
           <hr className=" w-16 border-gray-600 boder-2 my-2" />
           <div className=" mt-1 font-medium text-xl ml-2">
             {basePrice>0 && <div>€ {basePrice} /night</div>}
           </div>
         </div>
-
+          </Link>
         <div className="flex mt-8 w-2/5 justify-around items-center">
           <ButtonSecondary
             href={"/add-listing/1" as Route}

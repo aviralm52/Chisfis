@@ -5,6 +5,7 @@ import SwitchDarkMode2 from "@/shared/SwitchDarkMode2";
 import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { RxAvatar } from "react-icons/rx";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
   className?: string;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function AvatarDropdown({ className = "" }: Props) {
 
+  const { isLoggedIn, user, logout } = useAuth();
   const { signOut } = useClerk();
 
   return (
@@ -308,7 +310,7 @@ export default function AvatarDropdown({ className = "" }: Props) {
                         </svg>
                       </div>
                       <div className="ml-4">
-                        <p className="text-sm font-medium ">{"Log out"}</p>
+                        <p onClick={logout} className="text-sm font-medium ">{"Log out"}</p>
                       </div>
                     </Link>
                   </div>
