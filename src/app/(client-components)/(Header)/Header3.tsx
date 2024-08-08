@@ -42,10 +42,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-
-
-
-
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
     // setCurrentTab("Stays");
@@ -72,12 +68,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     window.requestAnimationFrame(handleHideSearchForm);
   };
 
-
-
-
-
-
-
   const handleHideSearchForm = () => {
     if (!document.querySelector("#nc-Header-3-anchor")) {
       return;
@@ -97,13 +87,11 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
 
   const { isLoggedIn, user, logout } = useAuth();
 
-
-  useEffect(()=>{
-    if(isLoggedIn){
-      setIsSignedIn(true)
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsSignedIn(true);
     }
-  },[isLoggedIn])
-
+  }, [isLoggedIn]);
 
   //
   const renderHeroSearch = () => {
@@ -221,17 +209,17 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                 </Link>
 
                 <nav>
-                  {/* {isLoggedIn ? (
+                  {isLoggedIn ? (
                     <>
-                      <span>Welcome, {user?.name}</span>
-                      <button onClick={logout}>Logout</button>
+                      <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
                     </>
                   ) : (
-                    <Link href="/login">Login</Link>
-                  )} */}
-                  {!isSignedIn ? <Link href="/login">Login</Link> : <AvatarDropdown/>}
+                    <ButtonPrimary>
+                      {" "}
+                      <Link href="/login">Login</Link>
+                    </ButtonPrimary>
+                  )}
                 </nav>
-
                 <MenuBar />
               </div>
             </div>

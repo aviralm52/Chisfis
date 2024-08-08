@@ -23,6 +23,7 @@ export const useAuth = () => {
       setLoading(true);
       const response = await axios.post("/api/user/profile");
       setUser(response.data.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching user details:", error);
       setUser(null);

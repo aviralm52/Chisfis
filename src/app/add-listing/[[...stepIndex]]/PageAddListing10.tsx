@@ -6,15 +6,14 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonSecondary from "@/shared/ButtonSecondary";
 import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Route } from "@/routers/types";
-import { FaLocationDot } from "react-icons/fa6";
+
 import Link from "next/link";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import { useUser } from "@clerk/clerk-react";
-import Image from "next/image";
-import { nanoid } from "nanoid";
-import crypto from "crypto";
+
+
 import { FaHouseUser } from "react-icons/fa";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface PageAddListing10Props {}
 
@@ -95,7 +94,7 @@ interface checkBoxState {
 }
 
 const PageAddListing10: FC<PageAddListing10Props> = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
 
   const clearLocalStorage = () => {
     localStorage.removeItem("page1");
@@ -187,7 +186,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
         propertyPictureUrls,
         portionCoverFileUrls,
         portionPictureUrls,
-        userId: user?.id,
+        userId: user?._id,
       };
       setCombinedData(combinedData);
       return combinedData;
@@ -202,8 +201,8 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
 
   const handleGoLive = async () => {
     const data = {
-      userId: user?.id,
-
+      userId: user?._id,
+      email:user?.email,
       propertyType: combinedData?.propertyType,
       placeName: combinedData?.placeName,
       rentalForm: combinedData?.rentalForm,
@@ -258,20 +257,20 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       const response = await axios.post("/api/users", data);
       if (data?.userId) {
         toast.success("Property is successfully live!");
+        console.log(response.data)
         clearLocalStorage();
       } else {
         toast.error("User must be logged in to go live");
       }
       setPropertyId(response.data._id);
+      console.log(response.data.VSID);
       setPropertyVSID(response.data.VSID);
+      console.log(response.data.VSID);
     } catch (error) {
       toast.error("User must be logged in to go live");
       throw error;
     }
   };
-
-
-  const placeholderImage = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVfDzHO5T-1AIUN90MPnN3ARV-PISlz8EAdQ&s';
 
   return (
     <div className=" flex flex-col gap-12">
@@ -283,7 +282,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
         </span>
       </div>
       <div className="">
-        {/* <h3 className="text-lg font-semibold mb-4">This is your listing</h3> */}
+        {/* {/ <h3 className="text-lg font-semibold mb-4">This is your listing</h3> /} */}
         {/* <div className="max-w-xs">
           <StayCard
             className="mt-8"
@@ -291,45 +290,34 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           />
         </div> */}
 
-        <Link href={"/listing-stay-detail"} >
-          <div
-            className="card"
-            style={{
-              width: "15rem",
-              border: "1px solid gray",
-              borderRadius: "10px",
-              height: "22rem",
-            }}
-          >
-            {/* <img
-              src={propertyCoverFileUrl}
-              className="card-img-top h-56 w-96 rounded-xl"
-              alt="..."
-            /> */}
-            {/* <Image
-              src={propertyCoverFileUrl}
-              className="card-img-top h-56 w-96 rounded-xl"
-              alt="..."
-              width={200}
-              height={300}
-              layout="responsive"
-            /> */}
-            <img src={propertyCoverFileUrl} alt="coverImage" className="card-img-top h-56 w-96 rounded-xl" />
-            <div className="card-body mt-2 ml-2">
-              <h1 className="mt-2">{page3.portionName[0]}</h1>
-            </div>
-            <div className="flex gap-2 ml-2 mt-2 items-center">
-              <FaLocationDot />
+        <div className="card w-72 border border-gray-600 rounded-xl pb-2">
+          <div className=" h-72 flex justify-center items-center overflow-hidden">
+            {propertyCoverFileUrl ? (
+              <img
+                src={propertyCoverFileUrl}
+                alt="coverImage"
+                className="card-img-top rounded-xl object-cover"
+              />
+            ) : (
+              <FaHouseUser className=" w-3/4 h-3/4" />
+            )}
+          </div>
+          <div className="card-body mt-2 ml-2">
+            <h1 className="mt-2">{page3?.portionName?.[0]}</h1>
+          </div>
+          <div className="flex gap-2 ml-2 mt-2 items-center">
+            {page2?.country && (
               <h6>
                 {page2?.city}, {page2?.country}
               </h6>
+            )}
           </div>
           <hr className=" w-16 border-gray-600 boder-2 my-2" />
           <div className=" mt-1 font-medium text-xl ml-2">
             {basePrice>0 && <div>€ {basePrice} /night</div>}
           </div>
         </div>
-          </Link>
+
         <div className="flex mt-8 w-2/5 justify-around items-center">
           <ButtonSecondary
             href={"/add-listing/1" as Route}
@@ -375,7 +363,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
         )}
       </div>
       <ToastContainer className=" w-20 h-20 absolute right-16 top-28" />
-      {/*  */}
+  
     </div>
   );
 };
