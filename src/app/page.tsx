@@ -151,58 +151,58 @@ const DEMO_CATS_2: TaxonomyType[] = [
   },
 ];
 
-interface Properties {
-  _id: ObjectId;
-  userId: string;
+export interface Properties {
+  _id?: string;
+  userId?: string;
 
-  propertyType: string;
-  placeName: string;
-  rentalForm: string;
-  numberOfPortions: number;
+  propertyType?: string;
+  placeName?: string;
+  rentalForm?: string;
+  numberOfPortions?: number;
 
-  street: string;
-  postalCode: string;
-  city: string;
-  state: string;
-  country: string;
-  center: object;
+  street?: string;
+  postalCode?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  center?: object;
 
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-  childrenAge: number[];
+  portionName?: string[];
+  portionSize?: number[];
+  guests?: number[];
+  bedrooms?: number[];
+  beds?: number[];
+  bathroom?: number[];
+  kitchen?: number[];
+  childrenAge?: number[];
 
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
-  currency: string;
+  basePrice?: number[];
+  weekendPrice?: number[];
+  monthlyDiscount?: number[];
+  currency?: string;
 
-  generalAmenities: object;
-  otherAmenities: object;
-  safeAmenities: object;
+  generalAmenities?: object;
+  otherAmenities?: object;
+  safeAmenities?: object;
 
-  smoking: string;
-  pet: string;
-  party: string;
-  cooking: string;
-  additionalRules: string[];
+  smoking?: string;
+  pet?: string;
+  party?: string;
+  cooking?: string;
+  additionalRules?: string[];
 
-  reviews: string[];
+  reviews?: string[];
 
-  propertyCoverFileUrl: string;
-  propertyPictureUrls: string[];
-  portionCoverFileUrls: string[];
-  portionPictureUrls: string[][];
+  propertyCoverFileUrl?: string;
+  propertyPictureUrls?: string[];
+  portionCoverFileUrls?: string[];
+  portionPictureUrls?: string[][];
 
-  night: number[];
-  time: number[];
-  datesPerPortion: number[][];
+  night?: number[];
+  time?: number[];
+  datesPerPortion?: number[][];
 
-  isLive: boolean;
+  isLive?: boolean;
 }
 
 function PageHome() {
@@ -211,14 +211,11 @@ function PageHome() {
   const [GreeceProperties, setGreeceProperties] = useState<Properties[]>();
 
   const fetchProperties = async () => {
-    // console.log("fetching properties....");
     const response = await axios.get("/api/allproperties");
-    // console.log("Properties in Greece: ", response);
     setGreeceProperties(response?.data);
   };
 
   useEffect(() => {
-    // console.log("called useEffect");
     fetchProperties();
   }, []);
 
