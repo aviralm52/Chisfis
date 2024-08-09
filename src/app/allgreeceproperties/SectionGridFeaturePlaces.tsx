@@ -14,7 +14,7 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonThird from "@/shared/ButtonThird";
 
 interface Properties {
-  _id: ObjectId;
+  _id: string;
   userId: string;
   VSID: string;
 
