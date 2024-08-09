@@ -8,10 +8,21 @@ interface UserData {
   email: string;
   isVerified: boolean;
   name: string;
+  profilePic:string,
   role: string;
   createdAt: string;
   updatedAt: string;
+  address: string;
+  bankDetails: string;
+  declinedRequests: any[]; 
+  gender: string;
+  spokenLanguage:string;
+  nationality: string;
+  phone: string | null;
+  myRequests: any[]; 
+  myUpcommingRequests: any[]; 
 }
+
 
 export const useAuth = () => {
   const [user, setUser] = useState<UserData | null>(null);

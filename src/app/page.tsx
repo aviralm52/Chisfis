@@ -211,14 +211,11 @@ function PageHome() {
   const [GreeceProperties, setGreeceProperties] = useState<Properties[]>();
 
   const fetchProperties = async () => {
-    // console.log("fetching properties....");
     const response = await axios.get("/api/allproperties");
-    // console.log("Properties in Greece: ", response);
     setGreeceProperties(response?.data);
   };
 
   useEffect(() => {
-    // console.log("called useEffect");
     fetchProperties();
   }, []);
 

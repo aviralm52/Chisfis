@@ -10,26 +10,30 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "PLease Enter  your email"],
     },
+    profilePic:{
+      type:String,
+      default:""
+    },
     nationality:{
       type:String,
-      required:false
+      default:""
     },
     gender:{
       type:String,
       enum: ["Male", "Female", "Other"],
-      required:false
+      default:"Male"
     },
     spokenLanguage:{
       type:String,
-      required:false
+      default:"English"
     },
     bankDetails :{
       type: Object,
-      required:false
+      default:""
     },
     phone:{
       type:Number,
-      required:false
+      default:""
     },
     myRequests:{
       type:[String],
@@ -45,7 +49,7 @@ const userSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: false,
+      default:""
     },
    
     password: {

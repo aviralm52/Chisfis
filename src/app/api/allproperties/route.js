@@ -6,7 +6,7 @@ connectDb();
 
 export async function GET() {
     try {
-        const allProperties = await Property.find();
+        const allProperties = await Property.find().limit(4);
 
         return NextResponse.json(allProperties);
     } catch (error) {
@@ -17,3 +17,6 @@ export async function GET() {
         });
     }
 }
+
+
+
