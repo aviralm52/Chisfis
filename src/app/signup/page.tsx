@@ -17,7 +17,8 @@ const PageSignUp: FC<PageSignUpProps> = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  // const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const validateForm = () => {
     if (!name) {

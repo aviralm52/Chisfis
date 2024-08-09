@@ -12,61 +12,63 @@ import FilterCard from "./FilterCard";
 import TabFilters from "../(stay-listings)/TabFiltersTwo"
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonThird from "@/shared/ButtonThird";
+import PropertyCard from "@/components/PropertyCard";
 
-interface Properties {
-  _id: string;
-  userId: string;
-  VSID: string;
+// interface Properties {
+//   _id: string;
+//   userId: string;
+//   VSID: string;
 
-  propertyType: string;
-  placeName: string;
-  rentalForm: string;
-  numberOfPortions: number;
+//   propertyType: string;
+//   placeName: string;
+//   rentalForm: string;
+//   numberOfPortions: number;
 
-  street: string;
-  postalCode: string;
-  city: string;
-  state: string;
-  country: string;
-  center: object;
+//   street: string;
+//   postalCode: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   center: object;
 
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-  childrenAge: number[];
+//   portionName: string[];
+//   portionSize: number[];
+//   guests: number[];
+//   bedrooms: number[];
+//   beds: number[];
+//   bathroom: number[];
+//   kitchen: number[];
+//   childrenAge: number[];
 
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
-  currency: string;
+//   basePrice: number[];
+//   weekendPrice: number[];
+//   monthlyDiscount: number[];
+//   currency: string;
 
-  generalAmenities: object;
-  otherAmenities: object;
-  safeAmenities: object;
+//   generalAmenities: object;
+//   otherAmenities: object;
+//   safeAmenities: object;
 
-  smoking: string;
-  pet: string;
-  party: string;
-  cooking: string;
-  additionalRules: string[];
+//   smoking: string;
+//   pet: string;
+//   party: string;
+//   cooking: string;
+//   additionalRules: string[];
 
-  reviews: string[];
+//   reviews: string[];
 
-  propertyCoverFileUrl: string;
-  propertyPictureUrls: string[];
-  portionCoverFileUrls: string[];
-  portionPictureUrls: string[][];
+//   propertyCoverFileUrl: string;
+//   propertyPictureUrls: string[];
+//   portionCoverFileUrls: string[];
+//   portionPictureUrls: string[][];
 
-  night: number[];
-  time: number[];
-  datesPerPortion: number[][];
+//   night: number[];
+//   time: number[];
+//   datesPerPortion: number[][];
 
-  isLive: boolean;
-}
+//   isLive: boolean;
+// }
+import { Properties } from "../page";
 
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
@@ -112,7 +114,11 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
     setLoading(true);
     try {
       const response = await axios.get(
-        `/api/countryspecificproperties/${country}`
+        `/api/countryspecificproperties/${country}`, {
+          params:{
+            limit: 28
+          }
+        }
       );
       setDataLength(response.data.length);
       setData(response.data);
@@ -232,7 +238,8 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         </div>
       ) : (
         data.map((item, index) => (
-          <FilterCard key={index} propertyData={item} id={String(item._id)} />
+          // <FilterCard key={index} propertyData={item} id={String(item._id)} />
+          <PropertyCard key={index} data={item} />
         ))
       )}
     </div>

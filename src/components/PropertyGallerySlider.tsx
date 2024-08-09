@@ -8,6 +8,7 @@ import { useSwipeable } from "react-swipeable";
 import { variants } from "@/utils/animationVariants";
 import Link from "next/link";
 import { Route } from "@/routers/types";
+import { BsExclamationCircleFill } from "react-icons/bs";
 
 export interface GallerySliderProps {
   className?: string;
@@ -19,6 +20,7 @@ export interface GallerySliderProps {
   galleryClass?: string;
   navigation?: boolean;
   propertyPictureUrls?: string[];
+  id?: string;
 }
 
 export default function GallerySlider({
@@ -31,6 +33,7 @@ export default function GallerySlider({
   href = "/listing-stay-detail",
   navigation = true,
   propertyPictureUrls = [],
+  id = "",
 }: GallerySliderProps) {
   const [loaded, setLoaded] = useState(false);
   const [index, setIndex] = useState(0);
@@ -99,12 +102,32 @@ export default function GallerySlider({
                   onLoad={() => setLoaded(true)}
                   sizes="(max-width: 1025px) 100vw, 300px"
                 /> */}
-                <img
-                  src={currentImage || "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"}
-                  alt="listing-card-gallery"
-                  className={`object-cover w-full h-full ${imageClass}`}
-                  onLoad={() => setLoaded(true)}
-                />
+                <Link
+                  href={{
+                    pathname: "/listing-stay-detail",
+                    query: { id: id },
+                  }}
+                  key={index}
+                >
+                  {currentImage ? (
+                    <img
+                      src={
+                        currentImage ||
+                        "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                      }
+                      alt="listing-card-gallery"
+                      className={`object-cover w-full h-full ${imageClass}`}
+                      onLoad={() => setLoaded(true)}
+                    />
+                  ) : (
+                    <div className=" w-full h-full flex flex-col justify-center items-center">
+                      <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                      <span className=" text-neutral-600 font-medium">
+                        Image not found
+                      </span>
+                    </div>
+                  )}
+                </Link>
               </motion.div>
             </AnimatePresence>
           </Link>

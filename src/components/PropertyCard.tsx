@@ -16,7 +16,7 @@ import { Properties } from "@/app/page";
 const DEMO_DATA = DEMO_STAY_LISTINGS[0];
 
 interface propertiesCardProps {
-  key?: string;
+  key?: string | number;
   size?: string;
   className?: string;
   data?: PropertyDataType;
@@ -66,13 +66,13 @@ const PropertyCard: FC<propertiesCardProps> = ({
 
   const renderSliderGallery = () => {
     return (
-      <Link
-        href={{
-          pathname: "/listing-stay-detail",
-          query: { id: _id },
-        }}
-        key={index}
-      >
+      // <Link
+      //   href={{
+      //     pathname: "/listing-stay-detail",
+      //     query: { id: _id },
+      //   }}
+      //   key={index}
+      // >
         <div className="relative w-full">
           <PropertyGallerySlider
             uniqueID={`StayCard2_${_id}`}
@@ -82,6 +82,7 @@ const PropertyCard: FC<propertiesCardProps> = ({
             // href={href}
             href={`/listing-stay-detail?id=${_id}`}
             propertyPictureUrls={cardImages ? cardImages : propertyPictureUrls}
+            id={_id}
           />
           <BtnLikeIcon
             isLiked={false}
@@ -95,7 +96,7 @@ const PropertyCard: FC<propertiesCardProps> = ({
           />
         )} */}
         </div>
-      </Link>
+      // </Link>
     );
   };
 
