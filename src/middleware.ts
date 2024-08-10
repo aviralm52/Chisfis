@@ -47,5 +47,5 @@ export function middleware(request: NextRequest) {
 
 // Middleware will run on these routes
 export const config = {
-  matcher: ["/", "/login", "/signup", "/verifyemail", "/profile" , "/author" ],
+  matcher: ["/", "/login", "/signup", "/verifyemail", "/profile" , ],
 };

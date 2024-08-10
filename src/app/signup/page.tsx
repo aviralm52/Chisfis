@@ -360,7 +360,8 @@ const PageSignUp: FC<PageSignUpProps> = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  // const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const router = useRouter();
 
