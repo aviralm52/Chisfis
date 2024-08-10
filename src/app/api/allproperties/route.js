@@ -12,9 +12,10 @@ export async function GET(req) {
   const queryLimit = limit ? parseInt(limit, 10) : undefined;
 
   try {
-    const allProperties = await Property.aggregate([
-      { $sample: { size: queryLimit || 0 } },
-    ]); // 0 means no limit
+    const allProperties = await Property.find().limit(queryLimit || 0);
+    // const allProperties = await Property.aggregate([
+    //   { $sample: { size: queryLimit || 0 } },
+    // ]); 
 
     return NextResponse.json(allProperties);
   } catch (error) {

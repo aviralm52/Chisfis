@@ -10,8 +10,8 @@ export async function POST(request) {
   try {
     // Parse the request body to get the userId
     const reqBody = await request.json();
-    // const { userId } = reqBody;
-    const userId = "66b359ce265892831a5fe767";
+    const { userId } = reqBody;
+    // const userId = "66b359ce265892831a5fe767";
     console.log('call in request', userId, request.body);
 
     if (!userId) {
