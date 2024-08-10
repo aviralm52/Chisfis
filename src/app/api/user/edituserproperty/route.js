@@ -9,25 +9,18 @@ export async function POST(request) {
     const reqBody = await request.json();
     const { propertyId, updatedData, userId } = reqBody;
 
-    if (!propertyId || !updatedData || !userId) {
+    console.log(propertyId, updatedData, userId);
+
+    if (!propertyId || !updatedData || !userId ) {
       return new Response(
         JSON.stringify({ error: "Property ID, updated data, and user ID are required" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    // Optionally check if the user is the owner of the property
-    // This part can be added if needed to ensure the user has permissions
-    // const property = await Property.findOne({ _id: new ObjectId(propertyId) });
-    // if (property?.userId !== userId) {
-    //   return new Response(
-    //     JSON.stringify({ error: 'Unauthorized' }),
-    //     { status: 403, headers: { "Content-Type": "application/json" } }
-    //   );
-    // }
-
+    const pId= new ObjectId(propertyId);
     const property = await Property.findOneAndUpdate(
-      { _id: new ObjectId(propertyId) },
+      { _id:  pId},
       { $set: updatedData },
       { new: true }
     );
