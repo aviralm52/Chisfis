@@ -4,9 +4,7 @@ import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/shared/Input";
-
 import { Properties } from "../page";
-import Heading from "@/shared/Heading";
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
