@@ -8,8 +8,8 @@ export async function POST(request) {
   try {
     const reqBody = await request.json();
     const { propertyId, updatedData, userId } = reqBody;
-
-    console.log(propertyId, updatedData, userId);
+    
+    delete updatedData.VSID;
 
     if (!propertyId || !updatedData || !userId) {
       return new Response(
