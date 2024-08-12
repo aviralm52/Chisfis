@@ -1,5 +1,5 @@
 "use client";
-
+import { useAuth } from "@/hooks/useAuth";
 import React, { FC, useEffect, useRef, useState } from "react";
 import Logo from "@/shared/Logo";
 import useOutsideAlerter from "@/hooks/useOutsideAlerter";
@@ -21,6 +21,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import ButtonPrimary from "@/shared/ButtonPrimary";
 
 interface Header3Props {
   className?: string;
@@ -39,8 +40,8 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   //
   // const [currentTab, setCurrentTab] = useState<SearchTab>("Stays");
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
-  //
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
     // setCurrentTab("Stays");
@@ -83,6 +84,14 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     }
     WIN_PREV_POSITION = currentScrollPos;
   };
+
+  const { isLoggedIn, user, logout } = useAuth();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsSignedIn(true);
+    }
+  }, [isLoggedIn]);
 
   //
   const renderHeroSearch = () => {
@@ -151,15 +160,13 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     );
   };
 
+  // const { isSignedIn } = useUser();
+  // const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
+  // useEffect(() => {
+  //   setIsLoggedIn(isSignedIn);
+  // }, [isSignedIn]);
 
-  const { isSignedIn } = useUser();
-  const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
-  useEffect(() => {
-    setIsLoggedIn(isSignedIn);
-  }, [isSignedIn]);
-
-  const { user } = useUser();
-
+  // const { user } = useUser();
 
   return (
     <>
@@ -201,15 +208,18 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                   List your property
                 </Link>
 
-                {user?.id ? <NotifyDropdown /> : <div></div>}
-                {/* <AvatarDropdown /> */}
-                {user?.id ? (
-                  <AvatarDropdown />
-                ) : (
-                  <div className="flex items-center text-lg h-10 px-2 rounded-3xl text-white bg-primary-6000 hover:bg-primary-700 ">
-                    <SignInButton />
-                  </div>
-                )}
+                <nav>
+                  {isLoggedIn ? (
+                    <>
+                      <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+                    </>
+                  ) : (
+                    <ButtonPrimary>
+                      {" "}
+                      <Link href="/login">Login</Link>
+                    </ButtonPrimary>
+                  )}
+                </nav>
                 <MenuBar />
               </div>
             </div>

@@ -11,7 +11,7 @@ import Textarea from "@/shared/Textarea";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import StartRating from "@/components/StartRating";
 import NcModal from "@/shared/NcModal";
-import ModalSelectDate from "@/components/ModalSelectDate";
+import ModalSelectDate from "@/components/ModalSelectDateTwo";
 import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalSelectGuests from "@/components/ModalSelectGuests";
 import Image from "next/image";
@@ -25,6 +25,8 @@ import { start } from "repl";
 export interface CheckOutPagePageMainProps {
   className?: string;
 }
+
+
 
 interface Properties {
   _id: ObjectId;
@@ -135,6 +137,28 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return new Date(date.endDate);
   });
 
+  const [guests, setGuests] = useState<GuestsObject>(() => {
+    const savedGuests = localStorage.getItem("guestsState");
+    if (!savedGuests) {
+      return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
+    }
+    const gsts = JSON.parse(savedGuests);
+    return {
+      guestAdults: gsts.adults,
+      guestChildren: gsts.children,
+      guestInfants: gsts.infants,
+    };
+  });
+
+  const [startone , setStartOne] = useState<Date | null>(null);
+  const [endone , setEndOne] = useState<Date | null>(null);
+
+
+  const [guestAdult, setGuestAdult] = useState<number | undefined>();
+  const [guestChildren, setGuestChildren] = useState<number | undefined>();
+  const [guestInfants, setGuestInfants] = useState<number | undefined>();
+
+
   const [dateDiff, setDateDiff] = useState<number>(3);
   const calculateDifferenceBetweenDates = (
     startDate: Date | null,
@@ -148,64 +172,48 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return 3;
   };
 
+
+  useEffect(()=>{
+      if(!startone){
+        setStartOne(startDate);
+      }
+      if(!endone){
+        setEndOne(endDate);
+      }
+      if(!guestAdult){
+        setGuestAdult(guests.guestAdults);
+      }
+      if(!guestChildren){
+        setGuestChildren(guests.guestChildren);
+      }
+      if(!guestInfants){
+        setGuestInfants(guests.guestInfants);
+      }
+  },[])
+
   useEffect(() => {
-    console.log('called use effect for diff');
     const diff = calculateDifferenceBetweenDates(startDate, endDate);
     setDateDiff(diff);
   }, [startDate, endDate]);
 
+
   useEffect(() => {
-    console.log('called use effect for date');
+    const updatedGuests: GuestsObject = {
+      guestAdults: guestAdult,
+      guestChildren: guestChildren,
+      guestInfants: guestInfants,
+    };
+    setGuests(updatedGuests);
+  }, [guestAdult, guestChildren, guestInfants]);
+
+  useEffect(() => {
     const savedDates = JSON.stringify({
       startDate: startDate,
       endDate: endDate,
     });
-    setStartDate(startDate);
-    setEndDate(endDate);
     localStorage.setItem("dates", savedDates);
   }, [startDate, endDate]);
 
-  // const [guests, setGuests] = useState<GuestsObject>({
-  //   guestAdults: 3,
-  //   guestChildren: 0,
-  //   guestInfants: 0,
-  // });
-
-  const [guests, setGuests] = useState<GuestsObject>(() => {
-    const savedGuests = localStorage.getItem("guestsState");
-    if (!savedGuests) {
-      return { guestAdults: 3, guestChildren: 0, guestInfants: 0 };
-    }
-    const gsts = JSON.parse(savedGuests);
-    return {
-      guestAdults: gsts.adutls,
-      guestChildren: gsts.childen,
-      guestInfants: gsts.infants,
-    };
-  });
-
-
-  const handleLocalStorageChange = () => {
-    const savedDates = localStorage.getItem("dates");
-    if (!savedDates) {
-      return startDate;
-    }
-    const dates = JSON.parse(savedDates);
-    setStartDate(new Date(dates.startDate));
-    setEndDate(new Date(dates.endDate));
-
-    const savedGuests = localStorage.getItem("guests");
-    if (!savedGuests) {
-      return guests;
-    }
-    const gsts = JSON.parse(savedGuests);
-    setGuests({
-      guestAdults: gsts.guestAdults,
-      guestChildren: gsts.guestChildren,
-      guestInfants: gsts.guestInfants,
-    });
-  };
-  window.addEventListener("storage", handleLocalStorageChange);
 
   const renderSidebar = () => {
     return (
@@ -213,12 +221,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center">
           <div className="flex-shrink-0 w-full sm:w-40">
             <div className=" aspect-w-4 aspect-h-3 sm:aspect-h-4 rounded-2xl overflow-hidden">
-              {/* <Image
-                alt=""
-                fill
-                sizes="200px"
-                src="https://images.pexels.com/photos/6373478/pexels-photo-6373478.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-              /> */}
               <img
                 src={particularProperty?.propertyCoverFileUrl}
                 alt="coverImage"
@@ -250,10 +252,12 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
               € {particularProperty?.basePrice[0]} x{" "}
-              {calculateDifferenceBetweenDates(startDate, endDate)} day
+              {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
+              {startone && endone && calculateDifferenceBetweenDates(startone, endone)} days
             </span>
             <span>
-              € {(particularProperty?.basePrice[0] || 100) * dateDiff}
+              {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}
+              € {(particularProperty?.basePrice[0] || 100) * calculateDifferenceBetweenDates(startone, endone)}
             </span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
@@ -265,7 +269,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between font-semibold">
             <span>Total</span>
             <span>
-              € {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}{" "}
+              {/* € {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}
+              {" "} */}
+              € {calculateDifferenceBetweenDates(startone, endone) * (particularProperty?.basePrice[0] || 100) + 6}{" "}
             </span>
           </div>
         </div>
@@ -277,7 +283,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return (
       <div className="w-full flex flex-col sm:rounded-2xl sm:border border-neutral-200 dark:border-neutral-700 space-y-8 px-0 sm:p-6 xl:p-8">
         <h2 className="text-3xl lg:text-4xl font-semibold">
-          Confirm and payment
+          Confirm and Request
         </h2>
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
         <div>
@@ -298,6 +304,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           </div>
           <div className="mt-6 border border-neutral-200 dark:border-neutral-700 rounded-3xl flex flex-col sm:flex-row divide-y sm:divide-x sm:divide-y-0 divide-neutral-200 dark:divide-neutral-700 overflow-hidden z-10">
             <ModalSelectDate
+              setStartOne={(value) => setStartOne(value)}
+              setEndOne={(value) => setEndOne(value)}
               renderChildren={({ openModal }) => (
                 <button
                   onClick={openModal}
@@ -307,7 +315,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                   <div className="flex flex-col">
                     <span className="text-sm text-neutral-400">Date</span>
                     <span className="mt-1.5 text-lg font-semibold">
-                      {converSelectedDateToString([startDate, endDate])}
+                      {/* {converSelectedDateToString([startDate, endDate])} */}
+                      {converSelectedDateToString([startone, endone])}
                     </span>
                   </div>
                   <PencilSquareIcon className="w-6 h-6 text-neutral-6000 dark:text-neutral-400" />
@@ -316,6 +325,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             />
 
             <ModalSelectGuests
+              setAdults={(value) => setGuestAdult(value)}
+              setChildren={(value) => setGuestChildren(value)}
               renderChildren={({ openModal }) => (
                 <button
                   type="button"
@@ -326,10 +337,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                     <span className="text-sm text-neutral-400">Guests</span>
                     <span className="mt-1.5 text-lg font-semibold">
                       <span className="line-clamp-1">
-                        {/* {`${
-                          (guests.guestAdults || 0) +
-                          (guests.guestChildren || 0)
-                        } Guests, ${guests.guestInfants || 0} Infants`} */}
                         {`${
                           (guests.guestAdults || 0) +
                           (guests.guestChildren || 0)
@@ -433,7 +440,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               </Tab.Panels>
             </Tab.Group> */}
         <div className="pt-8 flex justify-between">
-          <ButtonPrimary href={"/pay-done"}>Confirm and pay</ButtonPrimary>
+          <ButtonPrimary href={"/pay-done"}>Confirm and Request</ButtonPrimary>
           <ButtonPrimary href={"/pay-done"}>Any Queries?</ButtonPrimary>
         </div>
       </div>

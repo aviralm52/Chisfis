@@ -6,14 +6,14 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonSecondary from "@/shared/ButtonSecondary";
 import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Route } from "@/routers/types";
-import { FaLocationDot } from "react-icons/fa6";
+
 import Link from "next/link";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import { useUser } from "@clerk/clerk-react";
-import Image from "next/image";
-import { nanoid } from "nanoid";
-import crypto from "crypto";
+
+
+import { FaHouseUser } from "react-icons/fa";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface PageAddListing10Props {}
 
@@ -94,7 +94,7 @@ interface checkBoxState {
 }
 
 const PageAddListing10: FC<PageAddListing10Props> = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
 
   const clearLocalStorage = () => {
     localStorage.removeItem("page1");
@@ -160,9 +160,6 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       // const page7 = JSON.parse(localStorage.getItem('page7') || '{}');
       const page8 = JSON.parse(localStorage.getItem("page8") || "{}");
       const page9 = JSON.parse(localStorage.getItem("page9") || "{}");
-      const AmenitiesToRetrieve = JSON.parse(
-        localStorage.getItem("AmenitiesToRetrieve") || "{}"
-      );
 
       const propertyPictureUrls = JSON.parse(
         localStorage.getItem("propertyPictureUrls") || "[]"
@@ -189,12 +186,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
         propertyPictureUrls,
         portionCoverFileUrls,
         portionPictureUrls,
-        // generalAmenities: {
-        //   ...AmenitiesToRetrieve["generalAmenities"],
-        // },
-        // otherAmenities: { ...AmenitiesToRetrieve["otherAmenities"] },
-        // safeAmenities: { ...AmenitiesToRetrieve["safeAmenities"] },
-        userId: user?.id,
+        userId: user?._id,
       };
       setCombinedData(combinedData);
       return combinedData;
@@ -204,17 +196,13 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
     // console.log("fetched data: ", data);
   }, [user, propertyCoverFileUrl]);
 
-
   const [propertyId, setPropertyId] = useState<string>();
   const [propertyVSID, setPropertyVSID] = useState<string>();
 
   const handleGoLive = async () => {
-    // console.log('clicked go live', combinedData);
-    // console.log("user id before request: ", user?.id);
     const data = {
-
-      userId: user?.id,
-
+      userId: user?._id,
+      email:user?.email,
       propertyType: combinedData?.propertyType,
       placeName: combinedData?.placeName,
       rentalForm: combinedData?.rentalForm,
@@ -265,23 +253,20 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       isLive: true,
     };
 
-    // console.log("data: ", data);
-
     try {
-      // console.log("data in try: ", data);
       const response = await axios.post("/api/users", data);
-      // console.log("id: ", data?.userId, typeof data?.userId);
       if (data?.userId) {
         toast.success("Property is successfully live!");
+        console.log(response.data)
         clearLocalStorage();
       } else {
         toast.error("User must be logged in to go live");
       }
-      // console.log("response: ", response);
       setPropertyId(response.data._id);
+      console.log(response.data.VSID);
       setPropertyVSID(response.data.VSID);
+      console.log(response.data.VSID);
     } catch (error) {
-      // console.log("error");
       toast.error("User must be logged in to go live");
       throw error;
     }
@@ -296,10 +281,8 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           be reviewed for publication
         </span>
       </div>
-      <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
-      {/* FORM */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">This is your listing</h3>
+      <div className="">
+        {/* {/ <h3 className="text-lg font-semibold mb-4">This is your listing</h3> /} */}
         {/* <div className="max-w-xs">
           <StayCard
             className="mt-8"
@@ -307,89 +290,82 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           />
         </div> */}
 
-        <Link href={"/listing-stay-detail"}>
-          <div
-            className="card"
-            style={{
-              width: "15rem",
-              border: "1px solid gray",
-              borderRadius: "10px",
-              height: "22rem",
-            }}
-          >
-            {/* <img
-              src={propertyCoverFileUrl}
-              className="card-img-top h-56 w-96 rounded-xl"
-              alt="..."
-            /> */}
-            {/* <Image
-              src={propertyCoverFileUrl}
-              className="card-img-top h-56 w-96 rounded-xl"
-              alt="..."
-              width={200}
-              height={300}
-              layout="responsive"
-            /> */}
-            <img src={propertyCoverFileUrl} alt="coverImage" className="card-img-top h-56 w-96 rounded-xl" />
-            <div className="card-body mt-2 ml-2">
-              <h1 className="mt-2">{page3.portionName[0]}</h1>
-            </div>
-            <div className="flex gap-2 ml-2 mt-2 items-center">
-              <FaLocationDot />
-              <h6>
-                {page2.city}, {page2.country}
-              </h6>
-            </div>
-            <hr className=" w-16 border-gray-600 boder-2 my-2" />
-            <div className=" mt-1 font-medium text-xl ml-2">
-              € {basePrice ? basePrice : "--/--"} /night
-            </div>
+        <div className="card w-72 border border-gray-600 rounded-xl pb-2">
+          <div className=" h-72 flex justify-center items-center overflow-hidden">
+            {propertyCoverFileUrl ? (
+              <img
+                src={propertyCoverFileUrl}
+                alt="coverImage"
+                className="card-img-top rounded-xl object-cover"
+              />
+            ) : (
+              <FaHouseUser className=" w-3/4 h-3/4" />
+            )}
           </div>
-        </Link>
+          <div className="card-body mt-2 ml-2">
+            <h1 className="mt-2">{page3?.portionName?.[0]}</h1>
+          </div>
+          <div className="flex gap-2 ml-2 mt-2 items-center">
+            {page2?.country && (
+              <h6>
+                {page2?.city}, {page2?.country}
+              </h6>
+            )}
+          </div>
+          <hr className=" w-16 border-gray-600 boder-2 my-2" />
+          <div className=" mt-1 font-medium text-xl ml-2">
+            {basePrice>0 && <div>€ {basePrice} /night</div>}
+          </div>
+        </div>
 
-        <div className="flex items-center space-x-2 mt-8">
+        <div className="flex mt-8 w-2/5 justify-around items-center">
           <ButtonSecondary
             href={"/add-listing/1" as Route}
-            className=" -ml-1 -p-8"
+            className=" dark:bg-slate-700 bg-slate-700 text-white"
           >
-            <PencilSquareIcon className="h-3 w-3 -ml-4" />
+            <PencilSquareIcon className="h-3 w-3" />
             <span className="ml-3 text-sm">Edit</span>
           </ButtonSecondary>
 
-          <Link href={"/listing-stay-detail"}>
-            <ButtonPrimary className="-p-4">
-              <EyeIcon className="h-3 w-3 -ml-4" />
-              <span className="ml-3 text-sm -p-2   -mr-2">Preview</span>
-            </ButtonPrimary>
-          </Link>
+          <div>
+            {propertyVSID && (
+              <Link href={{
+                pathname: "/listing-stay-detail",
+                query: {
+                  id: propertyId,
+                }
+              }}>
+                <ButtonPrimary className="-p-4">
+                  <span className="text-sm ">Preview</span>
+                </ButtonPrimary>
+              </Link>
+            )}
+          </div>
 
-          {/* <Link href={"/listing-stay-detail"}> */}
-          <ButtonSecondary className="-p-4" onClick={handleGoLive}>
-            {/* <img
-              src="https://img.icons8.com/?size=100&id=fJXFbcW0WrW9&format=png&color=000000"
-              alt=""
-              className="bg-green-400 w-4 h-4 -ml-4 ronded-xl"
-            /> */}
-            {/* <Image src="https://img.icons8.com/?size=100&id=fJXFbcW0WrW9&format=png&color=000000" alt="" className="bg-green-400 w-4 h-4 -ml-4 ronded-xl" width={100} height={100}/> */}
-            <span className="ml-3 text-sm -p-2 -mr-4">Go Live</span>
-          </ButtonSecondary>
-          {/* </Link> */}
-
+          <div>
+            <ButtonSecondary
+              className=" dark:bg-primary-6000 dark:text-white text-slate-700 bg-orange-400"
+              onClick={handleGoLive}
+            >
+              <span className="text-sm">Go Live</span>
+            </ButtonSecondary>
+          </div>
         </div>
       </div>
 
       <div className=" flex flex-col">
-        <div>Your VSID:     {propertyVSID}</div>
-        <div className="">
-          Your Property Link:{" "}
-          {`https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`}
-        </div>
+        {propertyVSID && <div>Your VSID: {propertyVSID}</div>}
+        {propertyId && (
+          <div className="">
+            Your Property Link:{" "}
+            {`https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`}
+          </div>
+        )}
       </div>
       <ToastContainer className=" w-20 h-20 absolute right-16 top-28" />
-      {/*  */}
+  
     </div>
   );
 };
 
 export default PageAddListing10;
-

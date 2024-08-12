@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { customAlphabet } from "nanoid";
 
+
+
+
 const generateVSID = (length) => {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -14,6 +17,10 @@ const PropertySchema = new mongoose.Schema(
     VSID: {
       type: String,
       default: () => generateVSID(7),
+    },
+    email:{
+      type:String,
+      required:true,
     },
     rentalType: {
       type: String,

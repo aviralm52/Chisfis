@@ -91,57 +91,59 @@ export interface StayDataType {
 }
 
 export interface PropertyDataType{
-  id: string;
-  userId: string;
+  _id?: string;
+  id?: string;
+  userId?: string;
+  VSID?: string;
 
-  propertyType: string;
-  placeName: string;
-  rentalForm: string;
-  numberOfPortions: number;
+  propertyType?: string;
+  placeName?: string;
+  rentalForm?: string;
+  numberOfPortions?: number;
 
-  street: string;
-  postalCode: string;
-  city: string;
-  state: string;
-  country: string;
-  center: object;
+  street?: string;
+  postalCode?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  center?: object;
 
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-  childrenAge: number[];
+  portionName?: string[];
+  portionSize?: number[];
+  guests?: number[];
+  bedrooms?: number[];
+  beds?: number[];
+  bathroom?: number[];
+  kitchen?: number[];
+  childrenAge?: number[];
 
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
-  currency: string;
+  basePrice?: number[];
+  weekendPrice?: number[];
+  monthlyDiscount?: number[];
+  currency?: string;
 
-  generalAmenities: object;
-  otherAmenities: object;
-  safeAmenities: object;
+  generalAmenities?: object;
+  otherAmenities?: object;
+  safeAmenities?: object;
 
-  smoking: string;
-  pet: string;
-  party: string;
-  cooking: string;
-  additionalRules: string[];
+  smoking?: string;
+  pet?: string;
+  party?: string;
+  cooking?: string;
+  additionalRules?: string[];
 
-  reviews: string[];
+  reviews?: string[];
 
-  propertyCoverFileUrl: string;
-  propertyPictureUrls: string[];
-  portionCoverFileUrls: string[];
-  portionPictureUrls: string[][];
+  propertyCoverFileUrl?: string;
+  propertyPictureUrls?: string[];
+  portionCoverFileUrls?: string[];
+  portionPictureUrls?: string[][];
 
-  night: number[];
-  time: number[];
-  datesPerPortion: number[][];
+  night?: number[];
+  time?: number[];
+  datesPerPortion?: number[][];
 
-  isLive: boolean;
+  isLive?: boolean;
 }
 
 //

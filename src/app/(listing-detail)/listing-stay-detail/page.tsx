@@ -36,9 +36,7 @@ import { FaHeart } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import { useAuth, useSignIn } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
-// import ProtectedRoute from "@/components/ProtectedRoute";
 import { Property } from "@/models/listing";
 import { ObjectId } from "mongodb";
 import axios from "axios";
@@ -48,6 +46,8 @@ import { FaRegClock } from "react-icons/fa";
 import { IoLanguageOutline } from "react-icons/io5";
 import { FaRegCheckSquare } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
+import { useAuth } from "@/hooks/useAuth";
+import { BsExclamationCircleFill } from "react-icons/bs";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -137,44 +137,39 @@ interface Properties {
 
 // const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({card}) => {
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
-  const { userId } = useAuth();
+  const { user } = useAuth();
+
   const router = useRouter();
   const { isSignedIn } = useUser();
 
   const thisPathname = usePathname();
   const searchParams = useSearchParams();
 
-  // const param = searchParams.get("id") || 0;
   const param: string = searchParams.get("id") || "0";
-  // const indexId: number = parseInt(param, 10);
   const paramInt: number = parseInt(param, 10);
-  console.log('paramInt: ', paramInt);
-  // const indexId: number = 0;
-  const indexId: number = (paramInt>=0 && paramInt<=10) ? paramInt : 0;
+  const indexId: number = paramInt >= 0 && paramInt <= 10 ? paramInt : 0;
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
 
-  const [propertyId, setPropertyId] = useState<string> ("");
-  const [user, setUser] = useState<any>({});
+  const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
-  const [userIdOfPorperty, setUserIdOfProperty] = useState<string> ("");
-  const [language, setLanguage] = useState<string> ("");
+  const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
+  const [language, setLanguage] = useState<string>("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
 
   useEffect(() => {
-    // console.log("called useEffect");
     const getProperties = async () => {
-      // console.log("getProperties");
       const response = await axios.get(`/api/particular/${indexId}`);
-      // console.log("response: ", response?.data);
       if (response.data) {
         setParticualarProperty(response?.data);
         setUserIdOfProperty(response.data.userId);
         setPropertyId(response.data._id);
       }
 
-      const languageResponse = await axios.get(`https://restcountries.com/v3.1/name/${response?.data?.country}`);
+      const languageResponse = await axios.get(
+        `https://restcountries.com/v3.1/name/${response?.data?.country}`
+      );
       const languageKey = Object.keys(languageResponse?.data[0]?.languages)[0];
       const lang = languageResponse?.data[0]?.languages[languageKey];
       setLanguage(lang);
@@ -186,19 +181,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       allAmen.push(...general, ...safe, ...other);
       const filteredAllAmen = allAmen.filter((item, index) => item[1] === true);
       setAllAmenities(filteredAllAmen);
-
     };
     getProperties();
   }, []);
 
   useEffect(() => {
-    const user_id = particularProperty?.userId;
     const getUsername = async () => {
-      const response = await axios.get(`/api/getUsername/${user_id}`);
+      const response = await axios.get(`/api/getUsername/${userIdOfPorperty}`);
       if (response.data) {
-        setUsername(response.data.username);
+        const tempName = response.data.name;
+        const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
+        setUsername(name);
       }
-    }
+    };
     getUsername();
   }, [userIdOfPorperty]);
 
@@ -275,7 +270,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       setNumberOfNights(newMinNights);
     }
   }, [savedDates, particularProperty?.night]);
-
 
   const [portionCoverFileUrls, setPortionCoverFileUrls] = useState<string[]>(
     Array(checkPortion).fill("")
@@ -354,7 +348,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="flex items-center">
           {/* <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" /> */}
           {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
-          <img src={"https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"} alt="user" className=" rounded-full w-8" />
+          <img
+            src={
+              "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
+            }
+            alt="user"
+            className=" rounded-full w-8"
+          />
           <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
             Hosted by{" "}
             <span className="text-neutral-900 dark:text-neutral-200 font-medium">
@@ -417,7 +417,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     return (
       <div className="listingSection__wrap">
         <h2 className="text-2xl font-semibold mb-2">Stay information</h2>
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mt-0"></div> */}
         {particularProperty?.reviews[indexId]}
         <div className="relative">
           <div>
@@ -465,15 +464,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         {/* 6 */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 text-sm text-neutral-700 dark:text-neutral-300 ">
-          {allAmenities.filter((_, i) => i < 12).map((item, index) => (
-            <div key={index} className="flex items-center space-x-3">
-              {/* <i className={`text-3xl las ${item.icon}`}></i> */}
-              <FaCheck  className=" text-2xl"/>
-              {/* <span className=" ">{item.name}</span> */}
-              <span>{item[0]}</span>
-            </div>
-          ))}
-
+          {allAmenities
+            .filter((_, i) => i < 12)
+            .map((item, index) => (
+              <div key={index} className="flex items-center space-x-3">
+                {/* <i className={`text-3xl las ${item.icon}`}></i> */}
+                <FaCheck className=" text-2xl" />
+                {/* <span className=" ">{item.name}</span> */}
+                <span>{item[0]}</span>
+              </div>
+            ))}
         </div>
 
         {/* ----- */}
@@ -539,27 +539,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     </span>
                   </div>
                   <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
-                    {/* {Amenities_demos.filter((_, i) => i < 1212).map((item) => (
-                      <div
-                        key={item.name}
-                        className="flex items-center py-2.5 sm:py-4 lg:py-5 space-x-5 lg:space-x-8"
-                      >
-                        <i
-                          className={`text-4xl text-neutral-6000 las ${item.icon}`}
-                        ></i>
-                        <span>{item.name}</span>
-                      </div>
-                    ))} */}
+                    {/* Amenities_demos.filter */}
                     {allAmenities.map((item) => (
                       <div
                         key={item.name}
                         className="flex items-center py-2.5 sm:py-4 lg:py-5 space-x-5 lg:space-x-8"
                       >
-                        <FaCheck  className=" text-2xl"/>
+                        <FaCheck className=" text-2xl" />
                         <span>{item[0]}</span>
                       </div>
-                      ))
-                    }
+                    ))}
                   </div>
                 </div>
               </div>
@@ -630,17 +619,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             radius="rounded-full"
           /> */}
           {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
-          <img src={"https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"} alt="user" className=" rounded-full w-8" />
+          <img
+            src={
+              "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
+            }
+            alt="user"
+            className=" rounded-full w-8"
+          />
           <div>
             <a className="block text-xl font-medium" href="##">
               {/* Kevin Francis  */}
               {username}
             </a>
-            {/* <div className="mt-1.5 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
-              <StartRating />
-              <span className="mx-2">·</span>
-              <span> 12 places</span>
-            </div> */}
           </div>
         </div>
 
@@ -898,81 +888,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setTotalGuests(totalGuests);
   };
 
-  // const [numberOfNightsSidebar, setNumberOfNightsSidebar] = useState<number>(0);
-  // const renderSidebar = () => {
-  //   // Define local state for number of nights if it's not managed elsewhere
-  //   const handleDatesChange = (dates: { startDate: Date | null; endDate: Date | null }) => {
-  //     const { startDate, endDate } = dates;
-  //     const nights = calculateDateDifference(startDate, endDate);
-  //     setNumberOfNights(nights);
-  //   };
-  
-  //   const calculateDateDifference = (start: Date | null, end: Date | null) => {
-  //     if (start && end) {
-  //       const timeDiff = end.getTime() - start.getTime();
-  //       return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
-  //     }
-  //     return 0;
-  //   };
-  
-  //   return (
-  //     <div className="listingSectionSidebar__wrap shadow-xl">
-  //       {/* PRICE */}
-  //       <div className="flex justify-between">
-  //         <span className="text-3xl font-semibold">
-  //           € {particularProperty?.basePrice[indexId] ?? 0}
-  //           <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-  //             /night
-  //           </span>
-  //         </span>
-  //         <StartRating />
-  //       </div>
-  
-  //       {/* FORM */}
-  //       <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">
-  //         <StayDatesRangeInput
-  //           className="flex-1 z-[11]"
-  //           onDatesChange={handleDatesChange}
-  //         />
-  //         <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-  //         <GuestsInput className="flex-1" onGuestsChange={handleGuestChange} />
-  //       </form>
-  
-  //       {/* SUM */}
-  //       <div className="flex flex-col space-y-4">
-  //         {/* Price per night and subtotal */}
-  //         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-  //           <span>
-  //             € {particularProperty?.basePrice[indexId] ?? 0} * {numberOfNights} nights
-  //           </span>
-  //           <span>€ {particularProperty?.basePrice[indexId] ? particularProperty.basePrice[indexId] * numberOfNights : 0}</span>
-  //         </div>
-  
-  //         {/* Fixed service charge */}
-  //         <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-  //           <span>Service charge</span>
-  //           <span>€ 6</span>
-  //         </div>
-  
-  //         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
-  
-  //         {/* Total price calculation */}
-  //         <div className="flex justify-between font-semibold">
-  //           <span>Total</span>
-  //           <span>
-  //             € {particularProperty?.basePrice[indexId] ? (particularProperty.basePrice[indexId] * numberOfNights) + 6 : 6}
-  //           </span>
-  //         </div>
-  //       </div>
-  
-  //       {/* SUBMIT */}
-  //       <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary>
-  //     </div>
-  //   );
-  // };
-
-
-  const [minNightStay, setMinNightStay] = useState<number | undefined>(undefined);
+  const [minNightStay, setMinNightStay] = useState<number | undefined>(
+    undefined
+  );
   const renderSidebar = () => {
     const handleDatesChange = (dates: {
       startDate: Date | null;
@@ -981,14 +899,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       const { startDate, endDate } = dates;
       const nights = calculateDateDifference(startDate, endDate);
       // setTempNight(nights);
-      setMinNightStay(nights)
+      setMinNightStay(nights);
       setNumberOfNights(Math.max(nights, minNights));
     };
 
     const calculateDateDifference = (start: Date | null, end: Date | null) => {
       if (start && end) {
         const timeDiff = end.getTime() - start.getTime();
-        return Math.ceil(timeDiff / (1000*3600*24)); // Adding 1 to include both start and end dates
+        return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
       }
       return 0;
     };
@@ -1016,15 +934,21 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             minNights={minNights}
           />
           <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-          <GuestsInput className="flex-1" onGuestsChange={handleGuestChange} totalNumberOfGuests={particularProperty?.guests[0]}/>
+          <GuestsInput
+            className="flex-1"
+            onGuestsChange={handleGuestChange}
+            totalNumberOfGuests={particularProperty?.guests[0]}
+          />
         </form>
 
-
         <div className="flex flex-col space-y-4">
-
           <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
             <span>
-              € {basePrice} * {minNightStay===undefined ? particularProperty?.night[0] : minNightStay} nights
+              € {basePrice} *{" "}
+              {minNightStay === undefined
+                ? particularProperty?.night[0]
+                : minNightStay}{" "}
+              nights
             </span>
             <span>€ {totalPrice}</span>
           </div>
@@ -1038,15 +962,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
           <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>
-              € {totalPrice + 6}{" "}
-
-            </span>
+            <span>€ {totalPrice + 6} </span>
           </div>
         </div>
 
-
-        {/* <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary> */}
         <Link
           href={{
             pathname: "/checkout",
@@ -1060,7 +979,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       </div>
     );
   };
-
 
   let sliderSettings = {
     dots: true,
@@ -1093,8 +1011,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               {/* {page8?.monthlyDiscount ? ( */}
               {particularProperty?.monthlyDiscount[index] ? (
                 <div className=" absolute bg-red-600 text-white font-medium rounded-xl mx-4 my-2 text-xs p-1 left-1">
-                  {/* -{page8.monthlyDiscount[index]}% today */}
-                  -{particularProperty?.monthlyDiscount[index]}% today
+                  {/* -{page8.monthlyDiscount[index]}% today */}-
+                  {particularProperty?.monthlyDiscount[index]}% today
                 </div>
               ) : (
                 <div></div>
@@ -1185,8 +1103,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               <h2 className="text-xl font-bold ml-4 mt-4">
                 {" "}
                 {/* € {page8.basePrice[index]} /night */}
-                {/* € {particularProperty} */}
-                € {particularProperty?.basePrice[index]} /night
+                {/* € {particularProperty} */}€{" "}
+                {particularProperty?.basePrice[index]} /night
               </h2>
             </div>
           </div>
@@ -1203,7 +1121,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           .filter((_, i) => i >= 1)
           .map((item, index) => (
             <div key={index}>
-              <img src={item} alt="Carousel Image" className="w-16 h-80 rounded-xl" />
+              <img
+                src={item}
+                alt="Carousel Image"
+                className="w-16 h-80 rounded-xl"
+              />
               {/* <Image
                 src={item}
                 alt=""
@@ -1289,7 +1211,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                           <div className="rounded-xl border border-slate-700">
                             <a href={item} target="_blank">
                               <img
-                                src={item}
+                                src={
+                                  item ||
+                                  "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                                }
                                 alt=""
                                 className="w-64 h-64 rounded-xl lg:w-72 lg:h-72"
                               />
@@ -1314,15 +1239,22 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     );
   };
 
-  const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>([]);
-  useEffect(()=>{
-    if (particularProperty?.propertyPictureUrls){
-      setPropertyPicturesTemp(particularProperty?.propertyPictureUrls)
+  const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>(
+    []
+  );
+  useEffect(() => {
+    if (particularProperty?.propertyPictureUrls) {
+      setPropertyPicturesTemp(particularProperty?.propertyPictureUrls);
     }
-  }, [particularProperty?.propertyPictureUrls])
+  }, [particularProperty?.propertyPictureUrls]);
 
   useEffect(() => {
-    if (particularProperty?.propertyCoverFileUrl && particularProperty?.propertyPictureUrls && particularProperty?.portionCoverFileUrls && particularProperty?.portionPictureUrls ) {
+    if (
+      particularProperty?.propertyCoverFileUrl &&
+      particularProperty?.propertyPictureUrls &&
+      particularProperty?.portionCoverFileUrls &&
+      particularProperty?.portionPictureUrls
+    ) {
       const allImagesArray = [
         particularProperty?.portionCoverFileUrls,
         particularProperty?.propertyPictureUrls,
@@ -1335,89 +1267,108 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
       setAllImages(arr);
     }
-    },[particularProperty?.propertyCoverFileUrl, particularProperty?.propertyPictureUrls, particularProperty?.portionCoverFileUrls, particularProperty?.portionPictureUrls])
-
+  }, [
+    particularProperty?.propertyCoverFileUrl,
+    particularProperty?.propertyPictureUrls,
+    particularProperty?.portionCoverFileUrls,
+    particularProperty?.portionPictureUrls,
+  ]);
 
   return (
     // <ProtectedRoute>
-      <div
-        className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
-      >
-        {/*  HEADER */}
+    <div
+      className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
+    >
+      {/*  HEADER */}
 
-        <header className="rounded-md sm:rounded-xl h-[60%]">
-          <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 ">
-            <div className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+      <header className="rounded-md sm:rounded-xl h-[60%]">
+        <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 ">
+          <div className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+            {particularProperty?.propertyCoverFileUrl ? (
               <img
-                src={particularProperty?.propertyCoverFileUrl}
+                src={
+                  particularProperty?.propertyCoverFileUrl ||
+                  "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                }
                 alt="Cover Image"
                 className=" object-cover w-full h-full"
               />
-              {/* <Image
+            ) : (
+              <div className=" w-full h-full flex flex-col justify-center items-center">
+                <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                <span className=" text-neutral-600 font-medium">
+                  Image not found
+                </span>
+              </div>
+            )}
+            {/* <Image
                 src={allImages[0]}
                 alt=""
                 className=" object-cover w-full h-full"
                 width={300}
                 height={300}
               /> */}
-            </div>
-            {propertyPicturesTemp
-              .filter((_, i) => i >= 1 && i < 5)
-              .map((item, index) => (
-                <div
-                  className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
-                  key={index}
-                >
-                  <img
-                    src={propertyPicturesTemp[index]}
-                    alt="Property Picture"
-                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44 "
-                  />
-                  {/* <Image
+          </div>
+          {propertyPicturesTemp
+            .filter((_, i) => i >= 1 && i < 5)
+            .map((item, index) => (
+              <div
+                className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
+                key={index}
+              >
+                <img
+                  src={
+                    propertyPicturesTemp[index] ||
+                    "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                  }
+                  alt="Property Picture"
+                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44 "
+                />
+                {/* <Image
                     src={allImages[index]}
                     alt=""
                     className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
                     width={300}
                     height={300}
                   /> */}
-                </div>
-              ))}
-            <button
-              className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
-              onClick={() => setModalIsOpen(true)}
-            >
-              <Squares2X2Icon className="w-5 h-5" />
-              <span className="ml-2 text-neutral-800 text-sm font-medium">
-                Show all photos
-              </span>
-            </button>
-          </div>
-        </header>
+              </div>
+            ))}
+          <button
+            className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            onClick={() => setModalIsOpen(true)}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+            <span className="ml-2 text-neutral-800 text-sm font-medium">
+              Show all photos
+            </span>
+          </button>
+        </div>
+      </header>
 
-        {modalIsOpen ? modalImages() : ""}
+      {modalIsOpen ? modalImages() : ""}
 
-        {/* MAIN */}
-        <main className=" relative z-10 mt-11 flex flex-col lg:flex-row ">
-          {/* CONTENT */}
-          <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pr-10">
-            {renderSection1()}
-            {renderSection2()}
-            {renderSection3()}
-            {renderSection4()}
-            <SectionDateRange />
-            {checkPortion > 0 && renderPortionCards()}
-            {renderSection5()}
-            {/* {renderSection6()} */}
-            {/* {renderSection7()} */}
-            {renderSection8()}
-          </div>
+      {/* MAIN */}
+      <main className=" relative z-10 mt-11 flex flex-col lg:flex-row ">
+        {/* CONTENT */}
+        <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pr-10">
+          {renderSection1()}
+          {renderSection2()}
+          {renderSection3()}
+          {renderSection4()}
+          <SectionDateRange />
+          {checkPortion > 0 && renderPortionCards()}
+          {renderSection5()}
+          {/* {renderSection6()} */}
+          {/* {renderSection7()} */}
+          {renderSection8()}
+        </div>
 
-          {/* SIDEBAR */}
-          <div className="hidden lg:block flex-grow mt-14 lg:mt-0">
-            <div className="sticky top-28">{renderSidebar()}</div>
-          </div>
-        </main>
-      </div>
+        {/* SIDEBAR */}
+        <div className="hidden lg:block flex-grow mt-14 lg:mt-0">
+          <div className="sticky top-28">{renderSidebar()}</div>
+        </div>
+      </main>
+    </div>
     // </ProtectedRoute>
   );
 };

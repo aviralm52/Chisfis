@@ -18,9 +18,9 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   fieldClassName = "[ nc-hero-field-padding ]",
 }) => {
   const [startDate, setStartDate] = useState<Date | null>(
-    new Date("2023/09/13")
+    new Date("2024/09/13")
   );
-  const [endDate, setEndDate] = useState<Date | null>(new Date("2023/09/17"));
+  const [endDate, setEndDate] = useState<Date | null>(new Date("2024/09/17"));
   //
 
   const onChangeDate = (dates: [Date | null, Date | null]) => {
@@ -92,6 +92,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
                   onChange={onChangeDate}
                   startDate={startDate}
                   endDate={endDate}
+                  minDate={new Date()}
                   selectsRange
                   monthsShown={2}
                   showPopperArrow={false}

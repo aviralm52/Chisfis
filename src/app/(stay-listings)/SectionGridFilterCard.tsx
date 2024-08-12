@@ -84,6 +84,7 @@ const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
 
   const [countrySpecificProperties, setCountrySpecificProperties] = useState<Properties[]>();
   const [placeSpecificCount, setPlaceSpecificCount] = useState<number> (0);
+  const [tabfilterValue , setTabfilterValue] = useState("");
 
   useEffect(() => {
     const getProperties = async () => {
@@ -94,27 +95,29 @@ const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
         setPlaceSpecificCount(response.data.length);
       }
     };
-
     getProperties();
-
   }, [])
+
+  useEffect(() => {
+    console.log('tabfilterValue: ', tabfilterValue);
+  }, [tabfilterValue])
 
   return (
     <div
       className={`nc-SectionGridFilterCard ${className}`}
-      data-nc-id="SectionGridFilterCard"
-    >
+      data-nc-id="SectionGridFilterCard" >
       <Heading2 heading={`Stays in ${country}`} countryPropertyCount={placeSpecificCount} />
       
       <div className="mb-8 lg:mb-11">
-        <TabFilters />
+        {/* <TabFilters  rentalType={(value:string) => setTabfilterValue(value)}  /> */}
+        {/* <TabFilters/> */}
       </div>
       {/* <div className="grid grid-cols-1 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data.map((stay) => (
           <StayCard2 key={stay.id} data={stay} />
         ))}
       </div> */}
-      <SectionGridFeaturePlaces/>
+      <SectionGridFeaturePlaces value ={tabfilterValue} />
       {/* <div className="flex mt-16 justify-center items-center">
         <Pagination />
       </div> */}

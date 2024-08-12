@@ -7,6 +7,7 @@ connectDb();
 export async function POST(request) {
     const {
 		userId,
+        email,
         propertyType,
         placeName,
         rentalForm,
@@ -50,6 +51,7 @@ export async function POST(request) {
 
     const property = new Property({
         userId,
+        email,
         propertyType,
         placeName,
         rentalForm,

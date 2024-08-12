@@ -5,8 +5,6 @@ import { DEMO_STAY_LISTINGS } from "@/data/listings";
 import { StayDataType, PropertyDataType } from "@/data/types";
 import StartRating from "@/components/StartRating";
 import BtnLikeIcon from "@/components/BtnLikeIcon";
-import SaleOffBadge from "@/components/SaleOffBadge";
-import Badge from "@/shared/Badge";
 import Link from "next/link";
 import axios from "axios";
 import CustomGallerySlider from "@/components/CustomGallerySlider";
@@ -138,41 +136,37 @@ const StayCard2: FC<StayCard2Props> = ({
     time,
     datesPerPortion,
     basePrice,
-    // } = GreeceProperties[index === 4 ? 5: index] || {};
   } = GreeceProperties[index] || {};
 
   const customHref = `/listing-stay-detail/${_id}`;
-  const customRoute = { pathname: "/listing-stay-detail/[id]", query: { id: _id } };
-
+  const customRoute = {
+    pathname: "/listing-stay-detail/[id]",
+    query: { id: _id },
+  };
 
   const renderSliderGallery = () => {
     return (
       <Link
-      href={{
-        pathname: "/listing-stay-detail",
-        query: { id: _id },
-      }}
-      key={index}
-    >
-      <div className="relative w-full">
-        <CustomGallerySlider
-          uniqueID={`StayCard2_${id}`}
-          ratioClass="aspect-w-12 aspect-h-11"
-          galleryImgs={galleryImgs}
-          imageClass="rounded-lg"
-          // href={href}
-          href={`/listing-stay-detail?id=${_id}`}
-          propertyPictureUrls={propertyPictureUrls}
-        />
-        <BtnLikeIcon isLiked={like} className="absolute right-3 top-3 z-[1]" />
-        {/* {saleOff && <SaleOffBadge className="absolute left-3 top-3" />} */}
-        {/* {monthlyDiscount?.length && (
-          <SaleOffBadge
-            className="absolute left-3 top-3"
-            discount={monthlyDiscount[0]}
+        href={{
+          pathname: "/listing-stay-detail",
+          query: { id: _id },
+        }}
+        key={index}
+      >
+        <div className="relative w-full">
+          <CustomGallerySlider
+            uniqueID={`StayCard2_${id}`}
+            ratioClass="aspect-w-12 aspect-h-11"
+            galleryImgs={galleryImgs}
+            imageClass="rounded-lg"
+            href={`/listing-stay-detail?id=${_id}`}
+            propertyPictureUrls={propertyPictureUrls}
           />
-        )} */}
-      </div>
+          <BtnLikeIcon
+            isLiked={like}
+            className="absolute right-3 top-3 z-[1]"
+          />
+        </div>
       </Link>
     );
   };
@@ -195,7 +189,7 @@ const StayCard2: FC<StayCard2Props> = ({
               {listingCategory.name} · {beds?.length && beds[0]} beds
             </span>
             <div className="flex items-center space-x-2">
-{/*               {isAds && <Badge name="ADS" color="green" />} */}
+              {/*               {isAds && <Badge name="ADS" color="green" />} */}
               <h2
                 className={`font-semibold capitalize text-neutral-900 dark:text-white ${
                   size === "default" ? "text-base" : "text-base"
@@ -203,7 +197,7 @@ const StayCard2: FC<StayCard2Props> = ({
               >
                 {/* <span className="line-clamp-1">{title}</span> */}
                 <span className="line-clamp-1">
-{/*                   {placeName}, {propertyType} */}
+                  {/*                   {placeName}, {propertyType} */}
                   VS ID - {VSID}, {propertyType}
                 </span>
               </h2>

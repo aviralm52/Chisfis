@@ -43,14 +43,14 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
-    // console.log('date changed: ', start, end);
+    console.log('date changed: ', start, end);
   };
 
 
-  // useEffect(() => {
-  //   const dates = {startDate: startDate, endDate: endDate};
-  //   localStorage.setItem('dates', JSON.stringify(dates));
-  // }, [startDate, endDate])
+  useEffect(() => {
+    const dates = {startDate: startDate, endDate: endDate};
+    localStorage.setItem('dates', JSON.stringify(dates));
+  }, [startDate, endDate])
 
   // FOR RESET ALL DATA WHEN CLICK CLEAR BUTTON
   //
@@ -116,6 +116,7 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
                                 onChange={onChangeDate}
                                 startDate={startDate}
                                 endDate={endDate}
+                                minDate={new Date()}
                                 selectsRange
                                 monthsShown={2}
                                 showPopperArrow={false}

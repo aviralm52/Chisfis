@@ -4,13 +4,20 @@ import React, { FC, Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import ButtonPrimary from "@/shared/ButtonPrimary";
-import GuestsInput from "@/app/(client-components)/(HeroSearchForm2Mobile)/GuestsInput";
+// import GuestsInput from "@/app/(client-components)/(HeroSearchForm2Mobile)/GuestsInput";
+import GuestsInput from "@/app/(client-components)/(HeroSearchForm2Mobile)/GuestsInputTwo";
 
 interface ModalSelectGuestsProps {
   renderChildren?: (p: { openModal: () => void }) => React.ReactNode;
+  setAdults: (adults: number | undefined) => void;
+  setChildren: (children: number | undefined) => void;
 }
 
-const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren }) => {
+const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({
+  renderChildren,
+  setAdults,
+  setChildren,
+}) => {
   const [showModal, setShowModal] = useState(false);
 
   // FOR RESET ALL DATA WHEN CLICK CLEAR BUTTON
@@ -68,7 +75,10 @@ const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren }) => {
                           <div
                             className={`flex-1 relative flex z-10 overflow-hidden`}
                           >
-                            <GuestsInput />
+                            <GuestsInput
+                              setAdults={(value) => setAdults(value)}
+                              setChildren={(value) => setChildren(value)}
+                            />
                           </div>
                         </div>
                       </div>
@@ -81,13 +91,7 @@ const ModalSelectGuests: FC<ModalSelectGuestsProps> = ({ renderChildren }) => {
                       >
                         Clear data
                       </button>
-                      <ButtonPrimary
-                        sizeClass="px-6 py-3 !rounded-xl"
-                        onClick={() => {
-                          window.location.reload();
-                          closeModal();
-                        }}
-                      >
+                      <ButtonPrimary sizeClass="px-6 py-3 !rounded-xl" onClick={closeModal}>
                         Save
                       </ButtonPrimary>
                     </div>
