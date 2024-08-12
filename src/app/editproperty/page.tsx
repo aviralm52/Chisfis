@@ -38,9 +38,11 @@ const EditPropertyPage: React.FC = () => {
           const response = await axios.post("/api/user/fetchpropertybyuserid", {
             userId: user._id,
           });
+          console.log(response.data);
           const fetchedProperty = response.data.properties.find(
             (prop: Properties) => prop._id === id
           );
+
           setProperty(fetchedProperty || null);
         } catch (error) {
           console.error("Error fetching property:", error);
