@@ -114,6 +114,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
             ))
           : allProperties?.map((stay, index) => renderCard(stay, index))}
       </div>
+    
       <div className="flex mt-16 justify-center items-center">
         <Link href="/allproperties">
           <ButtonPrimary>Show me more</ButtonPrimary>

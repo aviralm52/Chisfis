@@ -233,9 +233,8 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                           </div>
                         </>
                       ))
-                    : filteredProperties.map((item) => (
-                        <div>
-                         
+                    : filteredProperties.map((item , index) => (
+                        <div key={index}>
                           <Link
                             className="  absolute text-primary-6000 "
                             href={{
