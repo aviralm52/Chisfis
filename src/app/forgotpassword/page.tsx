@@ -9,8 +9,7 @@ import { Toaster, toast } from "sonner";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
+  const [error, setError] = useState(""); 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,9 +18,6 @@ export default function ForgotPasswordPage() {
       setError("Email is required");                                 
       return;
     }               
-
-    
-
     setIsSubmitting(true);
     try {
       const response = await axios.post("/api/user/forgot", { email });

@@ -157,14 +157,14 @@ export const NAVIGATION_DEMO: NavItemType[] = [
   },
   {
     id: ncNanoId(),
-    href: "/signup",
+    href: "/",
     name: "Owner sign in/sign up",
     type: "megaMenu",
     megaMenu: megaMenuDemo,
   },
   {
     id: ncNanoId(),
-    href: "/signup",
+    href: "/",
     name: "Traveller sign in/ sign up",
     // type: "dropdown",
     // children: demoChildMenus,
