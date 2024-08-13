@@ -51,7 +51,6 @@ const Pagination: FC<PaginationProps> = ({ className = "" }) => {
       </Link>
     );
   };
-
   return (
     <nav
       className={`nc-Pagination inline-flex space-x-1 text-base font-medium ${className}`}

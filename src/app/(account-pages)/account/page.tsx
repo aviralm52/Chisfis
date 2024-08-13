@@ -4,7 +4,6 @@ import Label from "@/components/Label";
 import { useAuth } from "@/hooks/useAuth";
 import Avatar from "@/shared/Avatar";
 import ButtonPrimary from "@/shared/ButtonPrimary";
-import { BiLoaderAlt } from "react-icons/bi";
 import Input from "@/shared/Input";
 import Select from "@/shared/Select";
 import Textarea from "@/shared/Textarea";
@@ -14,7 +13,7 @@ import { Toaster, toast } from "sonner";
 const AccountPage = () => {
   const { user, loading } = useAuth();
   const [name, setName] = useState("");
-  const [gender, setGender] = useState("");
+  const [gender, setGender] = useState<string>("");
   const [language, setLanguage] = useState("");
   const [nationality, setNationality] = useState("");
   const [email, setEmail] = useState("");
@@ -86,7 +85,7 @@ const AccountPage = () => {
                   className="w-full"
                   value={user?.name || ""}
                   onChange={(e) => setName(e.target.value)}
-                  disabled 
+                  disabled
                 />
               </div>
             </div>
@@ -95,7 +94,9 @@ const AccountPage = () => {
               <Select
                 className="mt-1.5"
                 value={gender}
-                onChange={(e) => setGender(e.target.value)}>
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  setGender(e.target.value)
+                }>
                 <option value=""></option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>

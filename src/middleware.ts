@@ -6,12 +6,7 @@
 //   matcher: [ '/((?!.*\\..*|_next).*)', '/', '/(api|trpc/)(.*)'],
 // };
 
-
-
 // NEXTAUTH: --> Authentication Middleware goes here
-
-
-
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -33,7 +28,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-
   if (isPublicPath && token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -47,5 +41,29 @@ export function middleware(request: NextRequest) {
 
 // Middleware will run on these routes
 export const config = {
-  matcher: ["/", "/login", "/signup", "/verifyemail", "/profile" , ],
+  matcher: [
+    "/",
+    "/login",
+    "/signup",
+    "/verifyemail",
+    "/profile",
+    "/author",
+    "/editproperty",
+    "/account",
+    "/account-password",
+    "/account-billing",
+    "/account-password",
+    "/account-savelists",
+    "/editproperty",
+  ],
 };
+
+
+
+
+
+
+
+
+
+

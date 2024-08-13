@@ -5,35 +5,37 @@ import { HiPencilSquare } from "react-icons/hi2";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { IoHomeOutline } from "react-icons/io5";
 import { format } from "date-fns";
+import { BsPencilSquare } from "react-icons/bs";
+
 import CarCard from "@/components/CarCard";
 import ExperiencesCard from "@/components/ExperiencesCard";
 import StartRating from "@/components/StartRating";
-import StayCard from "@/components/StayCard2";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  DEMO_CAR_LISTINGS,
-  DEMO_EXPERIENCES_LISTINGS,
-  DEMO_STAY_LISTINGS,
-} from "@/data/listings";
+import { Properties } from "../page";
+import { DEMO_CAR_LISTINGS, DEMO_EXPERIENCES_LISTINGS } from "@/data/listings";
 import React, { FC, Fragment, useEffect, useState } from "react";
 import ButtonSecondary from "@/shared/ButtonSecondary";
 import axios from "axios";
-import { PencilIcon } from "@heroicons/react/24/solid";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
+import PropertyCard from "@/components/PropertyCard";
 
 export interface AuthorPageProps {}
 
 const AuthorPage: FC<AuthorPageProps> = ({}) => {
-  let [categories] = useState(["Stays", "Experiences", "Car for rent"]);
+  let [categories] = useState(["Short Term", "Long Term"]);
   const { user } = useAuth();
   const imgUrl =
     "https://i.pinimg.com/736x/70/78/6e/70786e80f3eb04dc3f42f6504797be3c.jpg";
 
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Properties[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [selectedRentalType, setSelectedRentalType] =
+    useState<string>("Short Term");
+
   useEffect(() => {
+    console.log("user._id: ", user?._id);
     const fetchProperties = async () => {
       if (user?._id) {
         setLoading(true);
@@ -41,8 +43,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
           const response = await axios.post("/api/user/fetchpropertybyuserid", {
             userId: user._id,
           });
-          console.log("response", response.data);
-          setProperties(response.data);
+          setProperties(response.data.properties);
         } catch (error) {
           console.error("Error fetching properties:", error);
         } finally {
@@ -53,12 +54,20 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
     fetchProperties();
   }, [user?._id]);
 
+  // console.log(properties.length);
+  console.log(properties);
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Just Created";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Invalid Date";
     return format(date, "yyyy");
   };
+
+  const filteredProperties = properties.filter(
+    (property) => property?.rentalType === selectedRentalType
+  );
+
   const renderSidebar = () => {
     return (
       <>
@@ -149,10 +158,12 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
 
         <div>
-          <Tab.Group>
+          <Tab.Group
+            onChange={(index) => setSelectedRentalType(categories[index])}
+          >
             <Tab.List className="flex space-x-1 overflow-x-auto">
-              {categories.map((item) => (
-                <Tab key={item} as={Fragment}>
+              {categories.map((item, index) => (
+                <Tab key={index} as={Fragment}>
                   {({ selected }) => (
                     <button
                       className={`flex-shrink-0 block !leading-none font-medium px-5 py-2.5 text-sm sm:text-base sm:px-6 sm:py-3 capitalize rounded-full focus:outline-none ${
@@ -168,36 +179,73 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
               ))}
             </Tab.List>
             <Tab.Panels>
+              {/* First Tab Panel: Short Term */}
               <Tab.Panel className="">
                 <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
-                  {DEMO_STAY_LISTINGS.filter((_, i) => i < 4).map((stay) => (
-                    <StayCard key={stay.id} data={stay} />
-                  ))}
-                </div>
-                <div className="flex mt-11 justify-center items-center">
-                  <ButtonSecondary>Show me more</ButtonSecondary>
+                  {loading
+                    ? [0, 1, 2, 3].map((n) => (
+                        <>
+                          <div className="flex flex-col gap-y-2">
+                            <div
+                              key={n}
+                              className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
+                            ></div>
+                            <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                            <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                            <div className="flex items-center justify-between">
+                              <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                            </div>
+                          </div>
+                        </>
+                      ))
+                    : filteredProperties.map((item) => (
+                        <>
+                          <Link
+                            className="    text-primary-6000 "
+                            href={{
+                              pathname: "/editproperty",
+                              query: { id: item._id },
+                            }}>
+                             <PropertyCard key={item._id} data={item} />
+                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg"  />
+                          </Link>
+                        </>
+                      ))}
                 </div>
               </Tab.Panel>
               <Tab.Panel className="">
                 <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
-                  {DEMO_EXPERIENCES_LISTINGS.filter((_, i) => i < 4).map(
-                    (stay) => (
-                      <ExperiencesCard key={stay.id} data={stay} />
-                    )
-                  )}
-                </div>
-                <div className="flex mt-11 justify-center items-center">
-                  <ButtonSecondary>Show me more</ButtonSecondary>
-                </div>
-              </Tab.Panel>
-              <Tab.Panel className="">
-                <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
-                  {DEMO_CAR_LISTINGS.filter((_, i) => i < 4).map((stay) => (
-                    <CarCard key={stay.id} data={stay} />
-                  ))}
-                </div>
-                <div className="flex mt-11 justify-center items-center">
-                  <ButtonSecondary>Show me more</ButtonSecondary>
+                  {loading
+                    ? [0, 1, 2, 3].map((n) => (
+                        <>
+                          <div className="flex flex-col gap-y-2">
+                            <div
+                              key={n}
+                              className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
+                            ></div>
+                            <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                            <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                            <div className="flex items-center justify-between">
+                              <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                            </div>
+                          </div>
+                        </>
+                      ))
+                    : filteredProperties.map((item , index) => (
+                        <div key={index}>
+                          <Link
+                            className="  absolute text-primary-6000 "
+                            href={{
+                              pathname: "/editproperty",
+                              query: { id: item._id },
+                            }} >
+                            <BsPencilSquare />
+                            <PropertyCard key={item._id} data={item} />
+                          </Link>
+                        </div>
+                      ))}
                 </div>
               </Tab.Panel>
             </Tab.Panels>
@@ -215,7 +263,6 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
         </div>
         <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pl-10 flex-shrink-0">
           {renderSection1()}
-          {/* {renderSection2()} */}
         </div>
       </main>
     </div>

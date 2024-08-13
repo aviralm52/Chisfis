@@ -155,6 +155,8 @@ export interface Properties {
   _id?: string;
   userId?: string;
 
+  VSID?:string;
+  rentalType?:string;
   propertyType?: string;
   placeName?: string;
   rentalForm?: string;
@@ -167,6 +169,7 @@ export interface Properties {
   country?: string;
   center?: object;
 
+  
   portionName?: string[];
   portionSize?: number[];
   guests?: number[];

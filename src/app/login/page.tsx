@@ -19,7 +19,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const token = Cookies.get("token");
+  // const token = Cookies.get("token");
 
   useEffect(() => {
     const { token } = parseCookies();
@@ -27,7 +27,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       router.push("/");
     }
   }, []);
-
+   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoggingIn(true);

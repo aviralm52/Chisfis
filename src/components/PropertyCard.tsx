@@ -31,7 +31,6 @@ const PropertyCard: FC<propertiesCardProps> = ({
 }) => {
   const {
     _id,
-    // id,
     userId,
     VSID,
     propertyType,
