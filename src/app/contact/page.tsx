@@ -23,7 +23,11 @@ const info = [
   },
   {
     title: "For Sales Support",
-    desc: "+91 920851166"
+    desc: "+91 9120851166"
+  },
+  {
+    title: "For Booking Support",
+    desc: "+91 8960980806"
   }
 ];
 
