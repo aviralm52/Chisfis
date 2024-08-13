@@ -17,6 +17,13 @@ const EditPropertyPage: React.FC = () => {
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
 
   useEffect(() => {
+    const canAccess = searchParams.get("canAccess");
+    if (!canAccess) {
+      router.push("/");
+    }
+  }, [])
+
+  useEffect(() => {
     if (id && user?._id) {
       const fetchProperty = async () => {
         try {
@@ -140,11 +147,13 @@ const EditPropertyPage: React.FC = () => {
   // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
+    const trimmedValue = value.trim();
     setFormData((prevState) => ({
       ...prevState,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : trimmedValue,
     }));
   };
+
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -335,31 +344,49 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
+            <h1 className="text-xl dark:text-white font-medium">
               Rental Form
+            </h1>
               <Input
                 type="text"
                 name="rentalForm"
                 value={formData?.rentalForm || ""}
                 onChange={handleChange}
+                disabled
               />
             </label>
           </div>
 
           <div>
-            <label>
-              Rental Type:
-              <Input
-                type="text"
-                name="rentalType"
-                value={formData?.rentalType || ""}
-                onChange={handleChange}
-              />
-            </label>
+            <h1 className="text-xl dark:text-white font-medium">
+              Property Type
+            </h1>
+            <select
+              name="rentalType"
+              id="rentalType"
+              value={formData.rentalType}
+              className=" dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-lg p-2 w-full"
+            >
+              <option
+                value="Short Term"
+                className=" text-black dark:text-white dark:bg-neutral-800"
+              >
+                Short Term
+              </option>
+              <option
+                value="Long Term"
+                className=" text-black dark:text-white dark:bg-neutral-800"
+              >
+                Long Term
+              </option>
+            </select>
           </div>
 
           <div>
             <label>
-              Postal Code:
+            <h1 className="text-xl dark:text-white font-medium">
+              Postal Code
+            </h1>
               <Input
                 type="text"
                 name="postalCode"
@@ -371,7 +398,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              City:
+            <h1 className="text-xl dark:text-white font-medium">
+              City
+            </h1>
               <Input
                 type="text"
                 name="city"
@@ -383,7 +412,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              State:
+            <h1 className="text-xl dark:text-white font-medium">
+              State
+            </h1>
               <Input
                 type="text"
                 name="state"
@@ -395,7 +426,7 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Country:
+              Country
               <Input
                 type="text"
                 name="country"
@@ -407,7 +438,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Street:
+            <h1 className="text-xl dark:text-white font-medium">
+              Street
+            </h1>
               <Input
                 type="text"
                 name="street"
@@ -419,7 +452,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Pet Friendly:
+            <h1 className="text-xl dark:text-white font-medium">
+              Pet Friendly
+            </h1>
               <Input
                 type="text"
                 name="pet"
@@ -431,7 +466,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Party Friendly:
+            <h1 className="text-xl dark:text-white font-medium">
+              Party Friendly
+            </h1>
               <Input
                 type="text"
                 name="party"
@@ -443,7 +480,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Cooking Allowed:
+            <h1 className="text-xl dark:text-white font-medium">
+              Cooking 
+            </h1>
               <Input
                 type="text"
                 name="cooking"
@@ -455,7 +494,9 @@ const EditPropertyPage: React.FC = () => {
 
           <div>
             <label>
-              Smoking Allowed:
+            <h1 className="text-xl dark:text-white font-medium">
+              Smoking
+            </h1>
               <Input
                 type="text"
                 name="smoking"
@@ -466,14 +507,16 @@ const EditPropertyPage: React.FC = () => {
           </div>
 
           <div>
-            <label className=" text-xl">
-              Is Live:
+            <label className=" text-xl flex items-center">
+            <h1 className="text-xl dark:text-white font-medium">
+              Is Live
+            </h1>
               <input
                 type="checkbox"
                 name="isLive"
                 checked={formData.isLive || false}
                 onChange={handleChange}
-                className="p-4 rounded-md mx-2 cursor-pointer"
+                className="p-2 rounded-md mx-2 cursor-pointer"
               />
             </label>
           </div>
@@ -493,7 +536,12 @@ const EditPropertyPage: React.FC = () => {
                     })
                   }
                 >
-                  Portion {index + 1} {isPortionOpen[index] ? <MdArrowDropDown />: <MdArrowRight  />}
+                  Portion {index + 1}{" "}
+                  {isPortionOpen[index] ? (
+                    <MdArrowDropDown />
+                  ) : (
+                    <MdArrowRight />
+                  )}
                 </h1>
 
                 {isPortionOpen[index] && (
