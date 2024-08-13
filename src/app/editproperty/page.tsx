@@ -483,7 +483,7 @@ const EditPropertyPage: React.FC = () => {
 
           {Array.from({
             length: numberOfPortions > 1 ? numberOfPortions : 0,
-          }).map((_, index) => {
+          }).map((item, index) => {
             return (
               <div key={index} className=" flex flex-col  space-y-4 my-4">
                 <h1
