@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/shared/Input";
 import { Properties } from "../page";
-import ButtonPrimary from "@/shared/ButtonPrimary";
 import { MdArrowDropDown, MdArrowDropUp, MdArrowRight } from "react-icons/md";
 
 const EditPropertyPage: React.FC = () => {
