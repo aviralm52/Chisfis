@@ -8,7 +8,6 @@ export async function GET(req) {
   const limit = parseInt(searchParams.get("limit") || "12", 10);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const skip = (page - 1) * limit;
-
   try {
     const allProperties = await Property.find().skip(skip).limit(limit);
     return NextResponse.json(allProperties);

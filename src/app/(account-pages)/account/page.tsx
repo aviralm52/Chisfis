@@ -39,6 +39,7 @@ const AccountPage = () => {
     try {
       const updateData = {
         _id: user?._id,
+        name,
         gender,
         spokenLanguage: language,
         address,
@@ -83,9 +84,8 @@ const AccountPage = () => {
               <div className="">
                 <Input
                   className="w-full"
-                  value={user?.name || ""}
+                  value={name || ""}
                   onChange={(e) => setName(e.target.value)}
-                  disabled
                 />
               </div>
             </div>

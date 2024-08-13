@@ -7,14 +7,11 @@ import { IoHomeOutline } from "react-icons/io5";
 import { format } from "date-fns";
 import { BsPencilSquare } from "react-icons/bs";
 
-import CarCard from "@/components/CarCard";
-import ExperiencesCard from "@/components/ExperiencesCard";
+
 import StartRating from "@/components/StartRating";
 import { useAuth } from "@/hooks/useAuth";
 import { Properties } from "../page";
-import { DEMO_CAR_LISTINGS, DEMO_EXPERIENCES_LISTINGS } from "@/data/listings";
 import React, { FC, Fragment, useEffect, useState } from "react";
-import ButtonSecondary from "@/shared/ButtonSecondary";
 import axios from "axios";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
@@ -206,9 +203,10 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                             href={{
                               pathname: "/editproperty",
                               query: { id: item._id },
-                            }}>
-                             <PropertyCard key={item._id} data={item} />
-                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg"  />
+                            }}
+                          >
+                            <PropertyCard key={item._id} data={item} />
+                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
                           </Link>
                         </>
                       ))}
@@ -233,18 +231,19 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                           </div>
                         </>
                       ))
-                    : filteredProperties.map((item , index) => (
-                        <div key={index}>
+                    : filteredProperties.map((item) => (
+                        <>
                           <Link
-                            className="  absolute text-primary-6000 "
+                            className="    text-primary-6000 "
                             href={{
                               pathname: "/editproperty",
                               query: { id: item._id },
-                            }} >
-                            <BsPencilSquare />
+                            }}
+                          >
                             <PropertyCard key={item._id} data={item} />
+                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
                           </Link>
-                        </div>
+                        </>
                       ))}
                 </div>
               </Tab.Panel>

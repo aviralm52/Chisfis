@@ -5,13 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/shared/Input";
 import { Properties } from "../page";
-import ButtonPrimary from "@/shared/ButtonPrimary";
-import { MdArrowDropDown, MdArrowDropUp, MdArrowRight } from "react-icons/md";
+import { MdArrowDropDown, MdArrowRight } from "react-icons/md";
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get("id"); // Get the property ID from the URL
+  const id = searchParams.get("id"); 
   const { user } = useAuth();
   const [property, setProperty] = useState<Properties | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,7 +27,6 @@ const EditPropertyPage: React.FC = () => {
           const fetchedProperty = response.data.properties.find(
             (prop: Properties) => prop._id === id
           );
-
           setProperty(fetchedProperty || null);
           setNumberOfPortions(fetchedProperty?.numberOfPortions || 1);
         } catch (error) {
@@ -162,7 +160,7 @@ const EditPropertyPage: React.FC = () => {
         userId: user._id,
       });
       alert("Property updated successfully");
-      router.push("/author"); // Redirect to the Author page or wherever you want
+      // router.push("/author"); 
     } catch (error) {
       console.error("Error updating property:", error);
     }
@@ -190,7 +188,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div className=" text-black">
             <h1 className="text-xl dark:text-white font-medium">
               Property Type
@@ -323,7 +320,6 @@ const EditPropertyPage: React.FC = () => {
               </option>
             </select>
           </div>
-
           <div>
             <label className=" text-xl dark:text-white font-medium">
               Place Name
@@ -335,7 +331,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Rental Form
@@ -347,7 +342,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Rental Type:
@@ -359,7 +353,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Postal Code:
@@ -371,7 +364,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               City:
@@ -383,7 +375,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               State:
@@ -395,7 +386,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Country:
@@ -407,7 +397,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Street:
@@ -419,7 +408,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Pet Friendly:
@@ -431,7 +419,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Party Friendly:
@@ -443,7 +430,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Cooking Allowed:
@@ -455,7 +441,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label>
               Smoking Allowed:
@@ -467,7 +452,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           <div>
             <label className=" text-xl">
               Is Live:
@@ -480,7 +464,6 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-
           {Array.from({
             length: numberOfPortions > 1 ? numberOfPortions : 0,
           }).map((item, index) => {
@@ -496,9 +479,13 @@ const EditPropertyPage: React.FC = () => {
                     })
                   }
                 >
-                  Portion {index + 1} {isPortionOpen[index] ? <MdArrowDropDown />: <MdArrowRight  />}
+                  Portion {index + 1}{" "}
+                  {isPortionOpen[index] ? (
+                    <MdArrowDropDown />
+                  ) : (
+                    <MdArrowRight />
+                  )}
                 </h1>
-
                 {isPortionOpen[index] && (
                   <div className=" flex flex-col space-y-4">
                     <div>
@@ -510,7 +497,6 @@ const EditPropertyPage: React.FC = () => {
                           value={formData?.portionName?.at(index) || ""}
                           onChange={(e) => {
                             const newFormData = { ...formData };
-                            // newFormData?.portionName?[index] = e.target.value;
                             newFormData?.portionName?.splice(
                               index,
                               1,
@@ -692,7 +678,6 @@ const EditPropertyPage: React.FC = () => {
                           />
                         </label>
                       </div>
-
                       <div>
                         <label htmlFor="weekendPrice">
                           Weekend Price Of Portion {index + 1}
