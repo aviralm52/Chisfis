@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/shared/Input";
 import { Properties } from "../page";
 import { MdArrowDropDown, MdArrowDropUp, MdArrowRight } from "react-icons/md";
+import toast, { Toaster } from 'react-hot-toast';
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
@@ -167,8 +168,11 @@ const EditPropertyPage: React.FC = () => {
         updatedData: formData,
         userId: user._id,
       });
-      alert("Property updated successfully");
-      router.push("/author"); // Redirect to the Author page or wherever you want
+      // alert("Property updated successfully");
+      toast.success('Property updated successfully');
+      setTimeout(() => {
+        router.push("/author"); // Redirect to the Author page or wherever you want
+      }, 2000);
     } catch (error) {
       console.error("Error updating property:", error);
     }
@@ -182,6 +186,7 @@ const EditPropertyPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto ">
+      <Toaster/>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-x-2 gap-y-4 mt-4">
           <div className="text-xl dark:text-white font-medium">
