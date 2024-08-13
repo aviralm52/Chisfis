@@ -9,8 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.2.5",
-    "@clerk/nextjs": "^5.1.6",
     "@cloudinary/url-gen": "^1.19.0",
     "@googlemaps/extended-component-library": "^0.6.11",
     "@googlemaps/js-api-loader": "^1.16.6",
