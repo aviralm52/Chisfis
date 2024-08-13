@@ -8,13 +8,6 @@ import "rc-slider/assets/index.css";
 import Footer from "@/components/Footer";
 import FooterNav from "@/components/FooterNav";
 import { Metadata } from "next";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 import { MyProvider } from "@/context/propertyContext";
 
 const poppins = Poppins({
@@ -40,7 +33,6 @@ export default function RootLayout({
 }) {
   return (
     <MyProvider>
-      <ClerkProvider>
         <html lang="en" className={poppins.className}>
           <body className="bg-white text-base dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200">
             {/* <SignedOut>
@@ -56,7 +48,6 @@ export default function RootLayout({
             <Footer />
           </body>
         </html>
-      </ClerkProvider>
     </MyProvider>
   );
 }

@@ -12,13 +12,6 @@ import Header from "./Header";
 import Header3 from "./Header3";
 import { usePathname } from "next/navigation";
 import { useThemeMode } from "@/utils/useThemeMode";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 
 export type SiteHeaders = "Header 1" | "Header 2" | "Header 3";
 

@@ -9,28 +9,16 @@ import HeroSearchForm2MobileFactory from "../(HeroSearchForm2Mobile)/HeroSearchF
 import Link from "next/link";
 import TemplatesDropdown from "./TemplatesDropdown";
 import { Route } from "@/routers/types";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import { useUser } from "@clerk/clerk-react";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface MainNav2Props {
   className?: string;
 }
 
 const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
-  const { isSignedIn } = useUser();
-  const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
-  useEffect(() => {
-    setIsLoggedIn(isSignedIn);
-  }, [isSignedIn]);
 
-  const { user } = useUser();
+  const {user} = useAuth();
 
   return (
     <div className={`MainNav2 relative z-10 ${className}`}>
@@ -68,11 +56,11 @@ const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
             </Link>
 
             <NotifyDropdown />
-            {user?.id ? (
+            {user?._id ? (
               <AvatarDropdown />
             ) : (
               <div className="flex items-center text-2xl text-blue-400 ">
-                <SignInButton />
+                Sign In 
               </div>
             )}
           </div>

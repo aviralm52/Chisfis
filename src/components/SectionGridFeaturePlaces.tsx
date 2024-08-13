@@ -66,6 +66,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
       });
       if (response.data) {
         setLoading(false);
+        console.log(response)
         setAllProperties(response.data);
       }
     };

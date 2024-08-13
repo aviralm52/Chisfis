@@ -12,11 +12,11 @@ export async function GET(req) {
   const queryLimit = limit ? parseInt(limit, 10) : undefined;
 
   try {
-    const allProperties = await Property.find().limit(queryLimit || 0);
     // const allProperties = await Property.aggregate([
     //   { $sample: { size: queryLimit || 0 } },
     // ]); 
-
+    const allProperties = await Property.find({}).limit(queryLimit || 8);
+    console.log('allProperties: ', allProperties);
     return NextResponse.json(allProperties);
   } catch (error) {
     console.error("Error fetching properties: ", error);

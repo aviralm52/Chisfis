@@ -36,7 +36,6 @@ import { FaHeart } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import { useUser } from "@clerk/nextjs";
 import { Property } from "@/models/listing";
 import { ObjectId } from "mongodb";
 import axios from "axios";
@@ -140,7 +139,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const { user } = useAuth();
 
   const router = useRouter();
-  const { isSignedIn } = useUser();
 
   const thisPathname = usePathname();
   const searchParams = useSearchParams();
