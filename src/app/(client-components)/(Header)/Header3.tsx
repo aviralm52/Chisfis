@@ -3,11 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import React, { FC, useEffect, useRef, useState } from "react";
 import Logo from "@/shared/Logo";
 import useOutsideAlerter from "@/hooks/useOutsideAlerter";
-import NotifyDropdown from "./NotifyDropdown";
-import AvatarDropdown from "./AvatarDropdown";
 import MenuBar from "@/shared/MenuBar";
 import { SearchTab } from "../(HeroSearchForm)/HeroSearchForm";
-import HeroSearchForm2MobileFactory from "../(HeroSearchForm2Mobile)/HeroSearchForm2MobileFactory";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
@@ -39,7 +36,7 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     setShowHeroSearch(null);
     // setCurrentTab("Stays");
     setCurrentTab("Short Term Rentals");
-  });
+  });  
 
   let pathname = usePathname();
   //
@@ -152,15 +149,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
       </div>
     );
   };
-
-  // const { isSignedIn } = useUser();
-  // const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
-  // useEffect(() => {
-  //   setIsLoggedIn(isSignedIn);
-  // }, [isSignedIn]);
-
-  // const { user } = useUser();
-
   return (
     <>
       <div
@@ -180,17 +168,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
             <div className="relative z-10 hidden md:flex flex-1 items-center">
               <Logo />
             </div>
-
-            {/* <div className="flex flex-[2] lg:flex-none mx-auto">
-              <div className="flex-1 hidden lg:flex self-center">
-                {renderButtonOpenHeroSearch()}
-              </div>
-              <div className="self-center flex-1 lg:hidden w-full max-w-lg mx-auto">
-                <HeroSearchForm2MobileFactory />
-              </div>
-              {renderHeroSearch()}
-            </div> */}
-
             {/* NAV */}
             <div className="hidden md:flex relative z-10 flex-1 justify-end text-neutral-700 dark:text-neutral-100">
               <div className=" flex space-x-1 items-center">
