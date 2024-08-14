@@ -9,6 +9,7 @@ import HeroSearchForm2MobileFactory from "../(HeroSearchForm2Mobile)/HeroSearchF
 import Link from "next/link";
 import TemplatesDropdown from "./TemplatesDropdown";
 import { Route } from "@/routers/types";
+
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -25,15 +26,15 @@ const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
       <div className="px-4 h-20 lg:container flex justify-between">
         <div className="hidden md:flex justify-start flex-1 space-x-3 sm:space-x-8 lg:space-x-10">
           {/* <Logo className="w-24 self-center" /> */}
-{/*           <Link href={"/" as Route<string>}> */}
-{/*             <Image
+          {/*           <Link href={"/" as Route<string>}> */}
+          {/*             <Image
               src={logo1}
               alt="logo"
               width={65}
               height={40}
               className="my-2"
             /> */}
-{/*           </Link> */}
+          {/*           </Link> */}
           <div className="hidden lg:block self-center h-10 border-l border-neutral-300 dark:border-neutral-500"></div>
           <div className="hidden lg:flex ">
             <DropdownTravelers />

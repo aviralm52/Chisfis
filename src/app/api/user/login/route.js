@@ -60,6 +60,7 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
+   
     return response;
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

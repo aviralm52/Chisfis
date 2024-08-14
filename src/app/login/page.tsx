@@ -27,7 +27,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       router.push("/");
     }
   }, []);
-
+   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoggingIn(true);
@@ -39,6 +39,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       if (response.status === 200) {
         toast.success("Login successful");
         Cookies.set("token", response.data.token, { expires: 1 });
+        localStorage.setItem("token", response.data.token)
         router.push("/");
       }
     } catch (err) {

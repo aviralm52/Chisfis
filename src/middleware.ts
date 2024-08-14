@@ -47,6 +47,16 @@ export const config = {
     "/account-billing",
     "/account-password",
     "/account-savelists",
-    "/editproperty"
+    "/editproperty",
   ],
 };
+
+
+
+
+
+
+
+
+
+

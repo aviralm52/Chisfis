@@ -45,11 +45,9 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
       case "card2":
         CardName = PropertyCard;
         break;
-
       default:
         CardName = PropertyCard;
     }
-
     return <CardName key={stay.id} data={stay} index={index} />;
   };
 
@@ -98,7 +96,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         )} */}
         {loading
           ? [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-              <>
+              <div key={n}>
                 <div className="flex flex-col gap-y-2">
                   <div
                     key={n}
@@ -106,16 +104,16 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
                   ></div>
                   <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
                   <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                 <div className="flex items-center justify-between">
-                   <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                   <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                 </div>
+                  <div className="flex items-center justify-between">
+                    <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                    <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  </div>
                 </div>
-              </>
+              </div>
             ))
           : allProperties?.map((stay, index) => renderCard(stay, index))}
       </div>
-    
+
       <div className="flex mt-16 justify-center items-center">
         <Link href="/allproperties">
           <ButtonPrimary>Show me more</ButtonPrimary>
