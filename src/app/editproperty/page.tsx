@@ -6,12 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/shared/Input";
 import { Properties } from "../page";
 import { MdArrowDropDown, MdArrowDropUp, MdArrowRight } from "react-icons/md";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const id = searchParams.get("id"); 
+  const id = searchParams.get("id");
   const { user } = useAuth();
   const [property, setProperty] = useState<Properties | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,7 +22,7 @@ const EditPropertyPage: React.FC = () => {
     if (!canAccess) {
       router.push("/");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (id && user?._id) {
@@ -156,7 +156,6 @@ const EditPropertyPage: React.FC = () => {
     }));
   };
 
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
@@ -169,10 +168,9 @@ const EditPropertyPage: React.FC = () => {
         updatedData: formData,
         userId: user._id,
       });
-      alert("Property updated successfully");
-      // router.push("/author"); 
+      // router.push("/author");
       // alert("Property updated successfully");
-      toast.success('Property updated successfully');
+      toast.success("Property updated successfully");
       setTimeout(() => {
         router.push("/author"); // Redirect to the Author page or wherever you want
       }, 2000);
@@ -181,15 +179,13 @@ const EditPropertyPage: React.FC = () => {
     }
   };
 
-  // if (loading) return <div>Loading...</div>;
-
   const [isPortionOpen, setIsPortionOpen] = useState<boolean[]>(() =>
     Array.from({ length: numberOfPortions }, () => false)
   );
 
   return (
     <div className="max-w-6xl mx-auto ">
-      <Toaster/>
+      <Toaster />
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-x-2 gap-y-4 mt-4">
           <div className="text-xl dark:text-white font-medium">
@@ -349,9 +345,9 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Rental Form
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">
+                Rental Form
+              </h1>
               <Input
                 type="text"
                 name="rentalForm"
@@ -387,9 +383,9 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Postal Code
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">
+                Postal Code
+              </h1>
               <Input
                 type="text"
                 name="postalCode"
@@ -400,9 +396,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              City
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">City</h1>
               <Input
                 type="text"
                 name="city"
@@ -413,9 +407,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              State
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">State</h1>
               <Input
                 type="text"
                 name="state"
@@ -437,9 +429,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Street
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">Street</h1>
               <Input
                 type="text"
                 name="street"
@@ -450,9 +440,9 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Pet Friendly
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">
+                Pet Friendly
+              </h1>
               <Input
                 type="text"
                 name="pet"
@@ -463,9 +453,9 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Party Friendly
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">
+                Party Friendly
+              </h1>
               <Input
                 type="text"
                 name="party"
@@ -476,9 +466,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Cooking 
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">Cooking</h1>
               <Input
                 type="text"
                 name="cooking"
@@ -489,9 +477,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label>
-            <h1 className="text-xl dark:text-white font-medium">
-              Smoking
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">Smoking</h1>
               <Input
                 type="text"
                 name="smoking"
@@ -502,9 +488,7 @@ const EditPropertyPage: React.FC = () => {
           </div>
           <div>
             <label className=" text-xl flex items-center">
-            <h1 className="text-xl dark:text-white font-medium">
-              Is Live
-            </h1>
+              <h1 className="text-xl dark:text-white font-medium">Is Live</h1>
               <input
                 type="checkbox"
                 name="isLive"
@@ -518,7 +502,6 @@ const EditPropertyPage: React.FC = () => {
             length: numberOfPortions > 1 ? numberOfPortions : 0,
           }).map((item, index) => {
             return (
-              <div key={index} className=" flex flex-col  space-y-4 my-4">
               <div className=" flex flex-col space-y-4 my-4" key={index}>
                 <h1
                   className=" text-2xl font-medium dark:text-white text-black cursor-pointer inline-flex items-center space-x-2"
@@ -530,12 +513,6 @@ const EditPropertyPage: React.FC = () => {
                     })
                   }
                 >
-                  Portion {index + 1}{" "}
-                  {isPortionOpen[index] ? (
-                    <MdArrowDropDown />
-                  ) : (
-                    <MdArrowRight />
-                  )}
                   Portion {index + 1}{" "}
                   {isPortionOpen[index] ? (
                     <MdArrowDropDown />
@@ -779,7 +756,6 @@ const EditPropertyPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-              </div>
               </div>
             );
           })}

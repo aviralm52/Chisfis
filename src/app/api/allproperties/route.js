@@ -11,7 +11,6 @@ export async function GET(req) {
 
   try {
     const allProperties = await Property.find().skip(skip).limit(limit);
-    const allProperties = await Property.find().skip(skip).limit(limit);
     return NextResponse.json(allProperties);
   } catch (error) {
     console.error("Error fetching properties: ", error);
