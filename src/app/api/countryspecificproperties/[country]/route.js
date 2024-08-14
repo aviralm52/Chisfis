@@ -28,7 +28,7 @@ export async function GET(req) {
             },
             { "guests.0": { $gte: guestsCount } } // Adjust this according to how you store guests in your schema
         ]
-    }).limit(12);
+    }).limit();
 
     try {
         console.log('inside try in specific country')
