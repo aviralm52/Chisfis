@@ -35,16 +35,7 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  // const token = localStorage.getItem("token") || "";
-  // const [token, setToken] = useState<string>(() => {
-  //   const savedToken = localStorage.getItem('token');
-  //   if (!savedToken){
-  //     return "";
-  //   }
-  //   return savedToken;
-  // })
-  // const token = "dfadsfa";
-  const [token, setToken] = useLocalStorage("token", "");
+  const token = localStorage.getItem("token") || "";
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
