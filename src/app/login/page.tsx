@@ -39,7 +39,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       if (response.status === 200) {
         toast.success("Login successful");
         Cookies.set("token", response.data.token, { expires: 1 });
-        localStorage.setItem("token", response.data.token);
+        sessionStorage.setItem("token", response.data.token);
         router.push("/");
       }
     } catch (err) {

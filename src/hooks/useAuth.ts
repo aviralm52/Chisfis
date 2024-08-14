@@ -64,7 +64,8 @@ export const useAuth = () => {
     try {
       await axios.get("/api/user/logout");
       setUser(null);
-      localStorage.removeItem("token");
+      // localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
