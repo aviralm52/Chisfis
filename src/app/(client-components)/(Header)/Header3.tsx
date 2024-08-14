@@ -14,6 +14,7 @@ import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
 import { StaySearchFormFields } from "../type";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ButtonPrimary from "@/shared/ButtonPrimary";
+import { useLocalStorage, useReadLocalStorage } from 'usehooks-ts'
 
 interface Header3Props {
   className?: string;
@@ -42,7 +43,8 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   //   }
   //   return savedToken;
   // })
-  const token = "dfadsfa";
+  // const token = "dfadsfa";
+  const [token, setToken] = useLocalStorage("token", "");
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
