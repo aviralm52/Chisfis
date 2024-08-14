@@ -23,21 +23,12 @@ const info = [
   },
   {
     title: "For Sales Support",
-<<<<<<< .merge_file_cSs6e6
-    desc: "+91 9120851166"
-  },
-  {
-    title: "For Booking Support",
-    desc: "+91 8960980806"
-  }
-=======
     desc: "+91 9120851166",
   },
   {
     title: "For Booking Support",
     desc: "+91 8960980806",
-  },
->>>>>>> .merge_file_QY3z39
+  }
 ];
 
 const PageContact: FC<PageContactProps> = ({}) => {
