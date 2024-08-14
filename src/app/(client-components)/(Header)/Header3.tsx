@@ -35,13 +35,14 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   // const token = localStorage.getItem("token") || "";
-  const [token, setToken] = useState<string>(() => {
-    const savedToken = localStorage.getItem('token');
-    if (!savedToken){
-      return "";
-    }
-    return savedToken;
-  })
+  // const [token, setToken] = useState<string>(() => {
+  //   const savedToken = localStorage.getItem('token');
+  //   if (!savedToken){
+  //     return "";
+  //   }
+  //   return savedToken;
+  // })
+  const token = "dfadsfa"
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
