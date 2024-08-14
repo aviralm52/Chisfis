@@ -86,15 +86,15 @@ interface Properties {
 const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   className = "",
 }) => {
-  const [reservedDates, setReservedDates] = useState<Date[]>(() => {
-    const savedDates =
-      localStorage.getItem("dates") || JSON.stringify(Date.now());
-    if (!savedDates) {
-      return [Date.now(), Date.now()];
-    }
-    const dates = JSON.parse(savedDates);
-    return [dates.startDate, dates.endDate];
-  });
+  // const [reservedDates, setReservedDates] = useState<Date[]>(() => {
+  //   const savedDates =
+  //     localStorage.getItem("dates") || JSON.stringify(Date.now());
+  //   if (!savedDates) {
+  //     return [Date.now(), Date.now()];
+  //   }
+  //   const dates = JSON.parse(savedDates);
+  //   return [dates.startDate, dates.endDate];
+  // });
 
   const searchParams = useSearchParams();
   const param: string = searchParams.get("id") || "0";
