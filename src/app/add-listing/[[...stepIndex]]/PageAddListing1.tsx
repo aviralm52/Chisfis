@@ -14,6 +14,7 @@ interface Page1State {
   rentalForm: string;
   numberOfPortions: number;
   showPortionsInput: boolean;
+  rentalType: string;
 }
 
 const PageAddListing1: FC<PageAddListing1Props> = () => {
@@ -62,19 +63,29 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
     return value ? JSON.parse(value) : false;
   });
 
+  const [rentalType, setRentalType] = useState<string>(() => {
+    const savedRentalType = localStorage.getItem("page1") || "";
+    if (!savedRentalType){
+      return false;
+    }
+    const value = JSON.parse(savedRentalType)["rentalType"];
+    return value || false;
+  })
+
   const [page1, setPage1] = useState<Page1State>({
     propertyType: propertyType,
     placeName: placeName,
     rentalForm: rentalForm,
     numberOfPortions: numberOfPortions,
     showPortionsInput: showPortionsInput,
+    rentalType: rentalType
   });
 
   const handlePropertyTypeChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const selectedPropertyType = e.target.value;
-    console.log('selected Property Type: ', selectedPropertyType)
+    console.log("selected Property Type: ", selectedPropertyType);
     setPropertyType(selectedPropertyType);
   };
 
@@ -149,6 +160,7 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
       rentalForm: rentalForm,
       numberOfPortions: numberOfPortions,
       showPortionsInput: showPortionsInput,
+      rentalType: rentalType,
     };
     setPage1(newPage1);
     localStorage.setItem("page1", JSON.stringify(newPage1));
@@ -167,6 +179,20 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
       {/* FORM */}
       <div className="space-y-8">
         {/* ITEM */}
+        <div className=" mt-2 flex justify-around">
+          <div>
+            <label htmlFor="Short Term" id="Short Term">
+              Short Term
+            </label>
+            <input type="radio" name="rentalType" className=" mx-2 p-2"/>
+          </div>
+          <div>
+            <label htmlFor="Long Term" id="Long Term">
+              Long Term
+            </label>
+            <input type="radio" name="rentalType" className=" mx-2 p-2"/>
+          </div>
+        </div>
         <FormItem
           label="Choose a property type"
           desc="Hotel: Professional hospitality businesses that usually have a unique style or theme defining their brand and decor"
