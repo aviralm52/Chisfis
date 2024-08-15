@@ -14,7 +14,6 @@ import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
 import { StaySearchFormFields } from "../type";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ButtonPrimary from "@/shared/ButtonPrimary";
-import { useLocalStorage, useReadLocalStorage } from 'usehooks-ts'
 
 interface Header3Props {
   className?: string;
@@ -34,14 +33,12 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  // const [token, setToken] = useState(() => {
-  //   const savedPage = localStorage.getItem("token") || "";
-  //   if (savedPage) {
-  //     return JSON.parse(savedPage);
-  //   }
-  //   return "";
-  // });
-  const token = "hfhdjat";
+  let token = "";
+  const IsServer = typeof window === "undefined";
+  if (!IsServer) {
+    token = window.localStorage.getItem("token") || "";
+  }
+
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
