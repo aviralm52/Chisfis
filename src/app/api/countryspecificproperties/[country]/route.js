@@ -26,12 +26,12 @@ export async function GET(req) {
                     {state: searchRegex}
                 ]
             },
-            { "guests.0": { $gte: guestsCount } } // Adjust this according to how you store guests in your schema
+            { "guests.0": { $gte: guestsCount } } 
         ]
-    }).limit(12);
+    });
 
     try {
-        console.log('inside try in specific country')
+       
         return NextResponse.json(searchedProperties);
     } catch (error) {
         console.log("error: ", error);

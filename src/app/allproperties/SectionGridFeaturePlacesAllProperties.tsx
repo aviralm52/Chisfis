@@ -92,16 +92,16 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
   const renderCard = (stay: PropertyDataType, index: number) => (
     <PropertyCard key={stay._id} data={stay} index={index} />
   );
-
   return (
-    <div className="nc-SectionGridFeaturePlaces p-4 relative">
+    <div className="max-w-7xl mx-auto w-full p-4">
+    <div className="nc-SectionGridFeaturePlaces relative">
       <HeaderFilter
         tabActive={"New York"}
         subHeading={subHeading}
         tabs={tabs}
         heading={heading}
       />
-      <div className="top-4 absolute right-8  ">
+      <div className="top-4 absolute  right-0  ">
         <button
           onClick={handleToggle}
           className={` text-4xl flex items-center justify-center gap-x-2  text-primary-6000 ${
@@ -149,6 +149,7 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
             ))}
         </div>
       )}
+    </div>
     </div>
   );
 };

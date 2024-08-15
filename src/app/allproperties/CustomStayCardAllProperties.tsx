@@ -230,7 +230,6 @@ const StayCard2: FC<StayCard2Props> = ({
   };
 
   return (
-
     <div className={`nc-StayCard2 group relative ${className}`}>
       {renderSliderGallery()}
       <Link href={href}>{renderContent()}</Link>
