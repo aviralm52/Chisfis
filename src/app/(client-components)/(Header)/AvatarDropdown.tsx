@@ -1,9 +1,7 @@
 import { Popover, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import Avatar from "@/shared/Avatar";
 import SwitchDarkMode2 from "@/shared/SwitchDarkMode2";
 import Link from "next/link";
-import { RxAvatar } from "react-icons/rx";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
@@ -11,7 +9,6 @@ interface Props {
 }
 
 export default function AvatarDropdown({ className = "" }: Props) {
-
   const { isLoggedIn, user, logout } = useAuth();
 
   return (
@@ -24,7 +21,13 @@ export default function AvatarDropdown({ className = "" }: Props) {
             >
               {/* <Avatar sizeClass="w-8 h-8 sm:w-9 sm:h-9" /> */}
               {/* <RxAvatar /> */}
-              <img src={"https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"} alt="user" className=" rounded-full w-8" />
+              <img
+                src={
+                  "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
+                }
+                alt="user"
+                className=" rounded-full w-8"
+              />
             </Popover.Button>
             <Transition
               as={Fragment}
@@ -40,7 +43,13 @@ export default function AvatarDropdown({ className = "" }: Props) {
                   <div className="relative grid grid-cols-1 gap-6 bg-white dark:bg-neutral-800 py-7 px-6">
                     <div className="flex items-center space-x-3">
                       {/* <Avatar sizeClass="w-12 h-12" /> */}
-                      <img src={"https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"} alt="user" className=" rounded-full w-8" />
+                      <img
+                        src={
+                          "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
+                        }
+                        alt="user"
+                        className=" rounded-full w-8"
+                      />
 
                       <div className="flex-grow">
                         <h4 className="font-semibold">Eden Smith</h4>
@@ -307,7 +316,9 @@ export default function AvatarDropdown({ className = "" }: Props) {
                         </svg>
                       </div>
                       <div className="ml-4">
-                        <p onClick={logout} className="text-sm font-medium ">{"Log out"}</p>
+                        <p onClick={logout} className="text-sm font-medium ">
+                          {"Log out"}
+                        </p>
                       </div>
                     </Link>
                   </div>

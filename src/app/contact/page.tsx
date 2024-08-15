@@ -19,16 +19,16 @@ const info = [
   },
   {
     title: "For Support",
-    desc: "support@vacationsaga.com"
+    desc: "support@vacationsaga.com",
   },
   {
     title: "For Sales Support",
-    desc: "+91 9120851166"
+    desc: "+91 9120851166",
   },
   {
     title: "For Booking Support",
-    desc: "+91 8960980806"
-  }
+    desc: "+91 8960980806",
+  },
 ];
 
 const PageContact: FC<PageContactProps> = ({}) => {
@@ -62,7 +62,6 @@ const PageContact: FC<PageContactProps> = ({}) => {
               <form className="grid grid-cols-1 gap-6" action="#" method="post">
                 <label className="block">
                   <Label>Full name</Label>
-
                   <Input
                     placeholder="Example Doe"
                     type="text"

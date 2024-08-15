@@ -1,14 +1,12 @@
-
 "use client";
-
-import React, { FC, ReactNode, useState, useEffect } from "react";
+import React, { FC, ReactNode, useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { StayDataType } from "@/data/types";
-import ButtonPrimary from "@/shared/ButtonPrimary";
+import { PropertyDataType, StayDataType } from "@/data/types";
 import HeaderFilter from "@/components/HeaderFilter";
-import StayCard from "@/components/StayCard";
-import StayCard2 from "@/components/StayCard2";
-import CustomStayCard from "./CustomStayCardAllProperties";
+import PropertyCard from "@/components/PropertyCard";
+import { useInView } from "react-intersection-observer";
+import { FaToggleOn } from "react-icons/fa";
+import { FaToggleOff } from "react-icons/fa";
 
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
@@ -29,134 +27,130 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
   tabs = ["Greece", "Italy", "Romania", "Spain"],
   cardType = "card2",
 }) => {
-  const [dataLength, setDataLength] = useState(0);
-  const [fetchedData, setFetchedData] = useState<StayDataType[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordPerPage = 20;
+  const [fetchedData, setFetchedData] = useState<PropertyDataType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [rentalType, setRentalType] = useState<string | null>("Short Term"); // null represents "All Properties"
+  const { ref, inView } = useInView({ threshold: 1, triggerOnce: false });
+  const filterChanged = useRef(false);
+
+  const fetchProperties = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `/api/allproperties?limit=12&page=${page}${rentalType ? `&rentalType=${rentalType}` : ""}`
+      );
+      console.log(response.data.length , " I am here find me")
+      if (response.data.length === 0) {
+        setHasMore(false);
+
+      } else {
+        setFetchedData((prevData) =>
+          page === 1 ? response.data : [...prevData, ...response.data]
+        );
+        setHasMore(true);
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await axios.get<StayDataType[]>("/api/allproperties");
-        setDataLength(response.data.length);
-        setFetchedData(response.data);
-        console.log("Complete data from /api/properties:", response.data);
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-      }
-    };
-
-    fetchProperties();
+    if (initialLoad) {
+      window.scrollTo(0, 0);
+      setInitialLoad(false);
+    }
   }, []);
 
-  const lastIndex = currentPage * recordPerPage;
-  const firstIndex = lastIndex - recordPerPage;
-  const records = fetchedData.slice(firstIndex, lastIndex);
-  const npage = Math.ceil(dataLength / recordPerPage);
-
-
-  const getPaginationNumbers = () => {
-    const maxVisiblePages = 5;
-    const startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
-    const endPage = Math.min(startPage + maxVisiblePages - 1, npage);
-    const pages = [];
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+  useEffect(() => {
+    if (filterChanged.current) {
+      setPage(1);
+      setHasMore(true);
+      filterChanged.current = false;
     }
-    return pages;
-  };
+    fetchProperties();
+  }, [page, rentalType]);
 
-  const renderCard = (stay: StayDataType, index: number) => {
-    let CardName = CustomStayCard;
-    switch (cardType) {
-      case "card1":
-        CardName = StayCard;
-        break;
-      case "card2":
-        CardName = CustomStayCard;
-        break;
-      default:
-        CardName = StayCard;
+  useEffect(() => {
+    if (inView && !loading && hasMore && !initialLoad) {
+      setPage((prevPage) => prevPage + 1);
     }
+  }, [inView, loading, hasMore, initialLoad]);
 
-    return <CardName key={stay.id} data={stay} index={index} />;
+  const handleToggle = () => {
+    const newRentalType = rentalType === "Long Term" ? "Short Term" : "Long Term";
+    setRentalType(newRentalType);
+    setPage(1);
+    setFetchedData([]);
+    filterChanged.current = true;
   };
 
-  const prePage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const changeCpage = (id: number) => {
-    setCurrentPage(id);
-  };
-
-  const nextPage = () => {
-    if (currentPage < npage) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  const renderCard = (stay: PropertyDataType, index: number) => (
+    <PropertyCard key={stay._id} data={stay} index={index} />
+  );
 
   return (
-    <div className="nc-SectionGridFeaturePlaces  relative">
-      <HeaderFilter 
+    <div className="nc-SectionGridFeaturePlaces p-4 relative">
+      <HeaderFilter
         tabActive={"New York"}
         subHeading={subHeading}
         tabs={tabs}
         heading={heading}
       />
-      <div
-        className={`grid p-12 mb-3 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
-      >
-        {records.map((stay, index) => renderCard(stay, firstIndex + index))}
+      <div className="top-4 absolute right-8  ">
+        <button
+          onClick={handleToggle}
+          className={` text-4xl flex items-center justify-center gap-x-2  text-primary-6000 ${
+            rentalType === "Long Term" ? "" : ""
+          }`}
+        > <span className="text-xl hidden sm:block">Tap to Longterm</span>
+          {rentalType === "Long Term" ?  <FaToggleOn/> :  <FaToggleOff/>}
+        </button>
       </div>
-      <nav className="flex justify-center mt-8">
-        <ul className="pagination flex space-x-2">
-          <li
-            className={`page-item ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <button 
-              className="px-3 py-1 mt-1 bg-orange-500 text-white rounded-2xl"
-              onClick={prePage}
-            >
-              Prev
-            </button>
-          </li>
-          {getPaginationNumbers().map((n) => (
-            <li
-              key={n}
-              className={`page-item ${
-                currentPage === n ? "bg-orange-500 rounded-full text-white" : ""
-              }`}
-            >
-              <button
-                className="px-3 py-1 h-10 w-10 rounded-full"
-                onClick={() => changeCpage(n)}
-              >
-                {n}
-              </button>
-            </li>
-          ))}
-          <li
-            className={`page-item h-4 w-4 ${
-              currentPage === npage ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            <button
-              className="px-3 py-1 mt-1 bg-orange-500 text-white rounded-2xl"
-              onClick={nextPage}
-            >
-              Next
-            </button>
-          </li>
-        </ul>
-      </nav>
+
+      <div
+        className={`grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
+      >
+        {loading && fetchedData.length === 0
+          ? [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="flex flex-col gap-y-2">
+                <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
+                <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                <div className="flex items-center justify-between">
+                  <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                </div>
+              </div>
+            ))
+          : fetchedData.map((stay, index) => renderCard(stay, index))}
+      </div>
+
+      {hasMore && (
+        <div
+          ref={ref}
+          className={`grid gap-6 md:gap-8 mt-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
+        >
+          {loading &&
+            [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="flex flex-col gap-y-2">
+                <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
+                <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                <div className="flex items-center justify-between">
+                  <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };
 
 export default SectionGridFeaturePlacesAllProperties;
-

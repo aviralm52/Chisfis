@@ -8,6 +8,7 @@ import "rc-slider/assets/index.css";
 import Footer from "@/components/Footer";
 import FooterNav from "@/components/FooterNav";
 import { Metadata } from "next";
+
 import { MyProvider } from "@/context/propertyContext";
 
 const poppins = Poppins({

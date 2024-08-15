@@ -1,4 +1,5 @@
 
+
 // NEXTAUTH: --> Authentication Middleware goes here
 
 import { NextResponse } from "next/server";
@@ -47,6 +48,16 @@ export const config = {
     "/account-billing",
     "/account-password",
     "/account-savelists",
-    "/editproperty"
+    "/editproperty",
   ],
 };
+
+
+
+
+
+
+
+
+
+

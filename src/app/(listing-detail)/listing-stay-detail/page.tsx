@@ -26,7 +26,6 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
 import page from "@/app/checkout/page";
-import { IndexKind, isConstructorDeclaration } from "typescript";
 import { useSearchParams } from "next/navigation";
 import { FaUser } from "react-icons/fa";
 import { IoIosBed } from "react-icons/io";
@@ -171,7 +170,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       const languageKey = Object.keys(languageResponse?.data[0]?.languages)[0];
       const lang = languageResponse?.data[0]?.languages[languageKey];
       setLanguage(lang);
-
       const allAmen = [];
       const general = Object.entries(response?.data?.generalAmenities);
       const safe = Object.entries(response?.data?.safeAmenities);

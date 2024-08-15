@@ -13,6 +13,7 @@ import Header3 from "./Header3";
 import { usePathname } from "next/navigation";
 import { useThemeMode } from "@/utils/useThemeMode";
 
+
 export type SiteHeaders = "Header 1" | "Header 2" | "Header 3";
 
 interface HomePageItem {
