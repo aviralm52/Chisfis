@@ -36,7 +36,11 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const token = window.localStorage.getItem("token") || "";
+  let token = "";
+  const IsServer = typeof window === "undefined";
+  if (!IsServer) {
+    token = window.localStorage.getItem("token") || "";
+  }
 
 
   useOutsideAlerter(headerInnerRef, () => {
