@@ -242,7 +242,6 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                           >
                             <PropertyCard key={item._id} data={item} />
                             <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
-                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
                           </Link>
                         </>
                       ))}
