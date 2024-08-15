@@ -35,13 +35,14 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const [token, setToken] = useState(() => {
-    const savedPage = localStorage.getItem("token") || "";
-    if (savedPage) {
-      return JSON.parse(savedPage);
-    }
-    return "";
-  });
+  // const [token, setToken] = useState(() => {
+  //   const savedPage = localStorage.getItem("token") || "";
+  //   if (savedPage) {
+  //     return JSON.parse(savedPage);
+  //   }
+  //   return "";
+  // });
+  const token = "hfhdjat";
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
