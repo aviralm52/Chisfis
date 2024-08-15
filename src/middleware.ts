@@ -1,5 +1,4 @@
 
-
 // NEXTAUTH: --> Authentication Middleware goes here
 
 import { NextResponse } from "next/server";

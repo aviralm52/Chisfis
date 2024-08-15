@@ -55,21 +55,22 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("loading: ", loading);
+    // console.log("loading: ", loading);
     const getAllProperties = async () => {
-      const response = await axios.get("/api/allproperties", {
+      const response = await axios.get("/api/homePageProperties", {
         params: {
           limit: 8,
         },
       });
       if (response.data) {
         setLoading(false);
+        // console.log(response)
         setAllProperties(response.data);
       }
     };
 
     getAllProperties();
-    console.log("loading: ", loading);
+    // console.log("loading: ", loading);
   }, []);
 
   return (
