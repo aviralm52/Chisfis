@@ -66,10 +66,10 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
   const [rentalType, setRentalType] = useState<string>(() => {
     const savedRentalType = localStorage.getItem("page1") || "";
     if (!savedRentalType){
-      return false;
+      return "Short Term";
     }
     const value = JSON.parse(savedRentalType)["rentalType"];
-    return value || false;
+    return value || "Short Term";
   })
 
   const [page1, setPage1] = useState<Page1State>({
@@ -109,6 +109,11 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
     }
     setRentalForm(e.target.value);
   };
+
+  const handleRentalTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.id);
+    setRentalType(e.target.id);
+  }
 
   const handlePortionsInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -154,6 +159,14 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
   }, [rentalForm]);
 
   useEffect(() => {
+    setPage1((prev) => {
+      const newObj = { ...prev };
+      newObj.rentalType = rentalType;
+      return newObj;
+    });
+  }, [rentalType]);
+
+  useEffect(() => {
     const newPage1: Page1State = {
       propertyType: propertyType,
       placeName: placeName,
@@ -170,6 +183,7 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
     rentalForm,
     numberOfPortions,
     showPortionsInput,
+    rentalType
   ]);
 
   return (
@@ -179,18 +193,24 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
       {/* FORM */}
       <div className="space-y-8">
         {/* ITEM */}
-        <div className=" mt-2 flex justify-around">
+        <div className=" mt-4 flex justify-between">
           <div>
             <label htmlFor="Short Term" id="Short Term">
               Short Term
             </label>
-            <input type="radio" name="rentalType" className=" mx-2 p-2"/>
+            <input type="radio" name="rentalType" className=" mx-2 p-2 cursor-pointer" id="Short Term" defaultChecked={rentalType === "Short Term"} onChange={handleRentalTypeChange} />
           </div>
           <div>
             <label htmlFor="Long Term" id="Long Term">
               Long Term
             </label>
-            <input type="radio" name="rentalType" className=" mx-2 p-2"/>
+            <input type="radio" name="rentalType" className=" mx-2 p-2 cursor-pointer" id="Long Term" defaultChecked={rentalType === "Long Term"} onChange={handleRentalTypeChange} />
+          </div>
+          <div>
+            <label htmlFor="Both" id="Both">
+              Both
+            </label>
+            <input type="radio" name="rentalType" className=" mx-2 p-2 cursor-pointer" id="Both" defaultChecked={rentalType === "Both"} onChange={handleRentalTypeChange} />
           </div>
         </div>
         <FormItem
