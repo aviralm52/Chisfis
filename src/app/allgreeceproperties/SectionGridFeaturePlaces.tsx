@@ -1,6 +1,5 @@
 "use client";
-
-import React, { FC,  useState, useEffect } from "react";
+import React, { FC, useState, useEffect } from "react";
 import axios from "axios";
 import { StayDataType } from "@/data/types";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +8,8 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonThird from "@/shared/ButtonThird";
 import PropertyCard from "@/components/PropertyCard";
 import { Properties } from "../page";
+import { useInView } from "react-intersection-observer";
+import Loader from "@/helper/loader";
 
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
@@ -26,132 +27,209 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [dataLength, setDataLength] = useState(0);
   const [fetchedData, setFetchedData] = useState<Properties[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [loading, setLoading] = useState(false);
-  // const [filterProperties, setFilterProperties] = useState<Properties[]>([]);
-
-  const [data, setData] = useState<Properties[]>([]);
-  const recordPerPage = 20;
-
+  const [hasMore, setHasMore] = useState(true);
+  const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: false });
   const params = useSearchParams();
   const country = params.get("place") || "Greece";
-
-  // TODO:  Api call state goes here
+  const recordPerPage = 8;
 
   const [rentalForm, setRentalForm] = useState<string>();
+  const [rentalType, setRentalType] = useState<string>();
   const [propertyType, setPropertyType] = useState<string>();
   const [beds, setBeds] = useState<number>(0);
   const [bedrooms, setBedRooms] = useState<number>(0);
   const [bathrooms, setBathrooms] = useState<number>(0);
   const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(999999999);
+  const [maxPrice, setMaxPrice] = useState<number>(999999);
+  const [houserool, setHouseRool] = useState<string>();
 
-  const fetchProperties = async () => {
-    console.log("use effect called");
+  const fetchProperties = async (page: number = 1) => {
     setLoading(true);
+    setRentalType("")
     try {
       const response = await axios.get(
         `/api/countryspecificproperties/${country}`,
         {
           params: {
-            limit: 28,
+            limit: recordPerPage,
+            page,
           },
         }
       );
+      if (page === 1) {
+        setFetchedData(response.data);
+      } else {
+        setFetchedData((prevData) => [...prevData, ...response.data]);
+      }
       setDataLength(response.data.length);
-      setData(response.data);
-      console.log("data from sectionGridFeaturePlaces: ", response?.data);
-      setLoading(false);
-      setFetchedData(response.data);
+      setHasMore(response.data.length === recordPerPage);
     } catch (error) {
       console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    fetchProperties(currentPage);
+  }, [currentPage, country]);
 
-  const lastIndex = currentPage * recordPerPage;
-  const firstIndex = lastIndex - recordPerPage;
-  const records = fetchedData.slice(firstIndex, lastIndex);
-  const npage = Math.ceil(dataLength / recordPerPage);
+  useEffect(() => {
+    if (inView && !loading && hasMore) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  }, [inView, loading, hasMore]);
 
-  const handlefilters = async () => {
+  const handleFilters = async () => {
     setLoading(true);
-    console.log(
-      "handlefilter called",
-      rentalForm,
-      propertyType,
-      beds,
-      bedrooms,
-      bathrooms,
-      minPrice,
-      maxPrice,
-      country
-    );
-    const response = await axios.post("api/filters", {
-      rentalForm,
-      propertyType,
-      beds,
-      bedrooms,
-      bathrooms,
-      minPrice,
-      maxPrice,
-      country,
-    });
-    if (response.data) {
-      setData(response.data);
-      setLoading(false);
-      console.log(response.data);
-    } else {
-      console.log("no data");
+    setCurrentPage(1);
+    try {
+      const response = await axios.post("api/filters", {
+        rentalForm,
+        propertyType,
+        beds,
+        bedrooms,
+        bathrooms,
+        minPrice,
+        maxPrice,
+        country,
+        rentalType,
+        houserool,
+      });
+      setFetchedData(response.data);
+      setDataLength(response.data.length);
+      console.log(propertyType);
+      console.log(fetchedData, "I am fetched data i am here");
+      setHasMore(response.data.length === recordPerPage);
+    } catch (error) {
+      console.error("Error applying filters:", error);
+    } finally {
       setLoading(false);
     }
   };
+
+  const handleRentalType = (type: string) => {
+    setRentalType(type);
+    console.log(rentalType);
+  };
+
   return (
-    <div className="nc-SectionGridFeaturePlaces  relative ">
-      <div className="flex items-center justify-between">
-        <div>
-          <TabFilters
-            setMinPrice={setMinPrice}
-            setMaxPrice={setMaxPrice}
-            setBathrooms={setBathrooms}
-            setBedRooms={setBedRooms}
-            setBeds={setBeds}
-            setPropertyType={setPropertyType}
-            setRentalForm={setRentalForm}
-          />
-        </div>
-
-        <div className="flex gap-x-2">
-          <ButtonPrimary onClick={handlefilters}>Apply</ButtonPrimary>
-          <ButtonThird onClick={fetchProperties}>Clear</ButtonThird>
-        </div>
-      </div>
-
-      <div
-        className={`grid mt-8 mb-3  gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
-      >
-        {loading ? (
-          [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-            <div key={n} className="flex flex-col gap-y-2">
-              <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
-              <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
-              <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-              <div className="flex items-center justify-between">
-                <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+    <div>
+      <div className="nc-SectionGridFeaturePlaces relative">
+        <div className="flex items-center mb-10 justify-between">
+          <div className="w-full">
+            <div className="flex items-center justify-between ">
+              <div>
+                <TabFilters
+                  setMinPrice={setMinPrice}
+                  setMaxPrice={setMaxPrice}
+                  setBathrooms={setBathrooms}
+                  setBedRooms={setBedRooms}
+                  setBeds={setBeds}
+                  setPropertyType={setPropertyType}
+                  setRentalForm={setRentalForm}
+                  setRentalType={setRentalType}
+                  setHouseRool={setHouseRool}
+                />
+              </div>
+              <div className="flex gap-x-2">
+                <button
+                  className="px-4 bg-primary-6000 text-sm rounded-full py-2"
+                  onClick={handleFilters}
+                >
+                  Apply
+                </button>
+                <button
+                  className="px-4 py-2 text-sm rounded-full border"
+                  onClick={() => fetchProperties(1)}
+                >
+                  Clear
+                </button>
               </div>
             </div>
-          ))
-        ) : data.length === 0 ? (
-          <div className="flex items-center justify-center w-full h-full">
-            <p className="text-2xl text-center">No data available</p>
+            <div className="flex gap-x-2 mt-8">
+              <div className="flex gap-x-2">
+                <div className="flex">
+                  <button
+                    onClick={() => handleRentalType("Long Term")}
+                    className={`px-4 text-sm py-2 rounded-l-full ${
+                      rentalType === "Long Term"
+                        ? "bg-primary-6000 text-white"
+                        : "border "
+                    }`}
+                  >
+                    Long Term
+                  </button>
+                  <button
+                    onClick={() => handleRentalType("Short Term")}
+                    className={`px-4 text-sm  py-2 rounded-r-full ${
+                      rentalType === "Short Term"
+                        ? "bg-primary-6000 text-white"
+                        : "border"
+                    }`}
+                  >
+                    Short Term
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          data.map((item, index) => <PropertyCard key={index} data={item} />)
+        </div>
+
+        {loading && (
+          <div className="flex items-center justify-center w-full h-full">
+            <p className="text-lg text-center flex items-center ">
+              Things are getting ready...
+              <Loader />
+            </p>
+          </div>
+        )}
+
+        <div
+          className={`grid mt-8 mb-3 gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
+        >
+          {loading && fetchedData.length === 0 ? (
+            [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="flex flex-col gap-y-2">
+                <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
+                <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                <div className="flex items-center justify-between">
+                  <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                </div>
+              </div>
+            ))
+          ) : fetchedData.length === 0 ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <p className="text-2xl text-center">No data available</p>
+            </div>
+          ) : (
+            fetchedData.map((item, index) => (
+              <PropertyCard key={index} data={item} />
+            ))
+          )}
+        </div>
+
+        {hasMore && (
+          <div
+            ref={ref}
+            className={`grid gap-6 md:gap-8 mt-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
+          >
+            {loading &&
+              [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <div key={n} className="flex flex-col gap-y-2">
+                  <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
+                  <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                  <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                    <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                  </div>
+                </div>
+              ))}
+          </div>
         )}
       </div>
     </div>
