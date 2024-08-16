@@ -183,7 +183,7 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
           <div className=" flex flex-wrap gap-4 mt-4">
             {MONTHS.map((month, index) => {
               return (
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center" key={index}>
                   <h1>{month}</h1>
                   <input
                     type="checkbox"
@@ -204,7 +204,7 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
         <div>
           <h1 className="text-3xl font-semibold">Short Term Pricing</h1>
           <h2 className=" flex flex-wrap gap-2">( { MONTHS.filter((m, i) => !longTermMonths.includes(m)).map((month, index) => (
-            <h2>{month }, </h2>
+            <h2 key={index}>{month }, </h2>
           )) } )</h2>
           {myArray.map((item, index) => (
             <div key={index} className="mt-8">
@@ -310,7 +310,7 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
         <div>
           <h1 className="text-3xl font-semibold">Long Term Pricing</h1>
           <h2 className=" flex gap-2">( { MONTHS.filter((m, i) => longTermMonths.includes(m)).map((month, index) => ( 
-            <h2>{month}, </h2>
+            <h2 key={index}>{month}, </h2>
           )) } )</h2>
           {myArray.map((item, index) => (
             <div key={index} className="mt-8">
