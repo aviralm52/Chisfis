@@ -29,16 +29,16 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   
   const dt = new Date();
   const edt = new Date(dt);
-  console.log("minNight default: ", minNights);
+  // console.log("minNight default: ", minNights);
   edt.setDate(dt.getDate() + minNights);
   const [startDate, setStartDate] = useState<Date | null>(dt);
   const [endDate, setEndDate] = useState<Date | null>(edt);
-  console.log('date: ', dt.getDate(), minNights)
+  // console.log('date: ', dt.getDate(), minNights)
   const dt2 = new Date(dt.getDate() + minNights)
 
 
   useEffect(() => {
-    console.log('minNights input useEffect: ', minNights)
+    // console.log('minNights input useEffect: ', minNights)
     const savedDate = localStorage.getItem("dates");
     const dt = new Date(Date.now());
     const newDate = new Date(Date.now() + minNights + 1 )
@@ -146,6 +146,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
             <Popover.Panel className="absolute left-auto xl:-right-10 right-0 z-10 mt-3 top-full w-screen max-w-sm px-4 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-3xl shadow-lg ring-1 ring-black ring-opacity-5 bg-white dark:bg-neutral-800 p-8">
                 <DatePicker
+                className=" opacity-100"
                   selected={startDate}
                   onChange={onChangeDate}
                   startDate={startDate}

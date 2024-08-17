@@ -46,6 +46,12 @@ export async function POST(request) {
 		night,
 		time,
 		datesPerPortion,	
+
+        rentalType,
+        basePriceLongTerm,
+        monthlyDiscountLongTerm,
+        longTermMonths,
+
 		isLive,
     } = await request.json();
 
@@ -90,6 +96,12 @@ export async function POST(request) {
 		night,
 		time,
 		datesPerPortion,	
+
+        rentalType,
+        basePriceLongTerm,
+        monthlyDiscountLongTerm,
+        longTermMonths,
+        
 		isLive,
     });
 

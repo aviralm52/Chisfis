@@ -4,6 +4,7 @@ import React, { FC } from "react";
 import Input from "@/shared/Input";
 import Select from "@/shared/Select";
 import FormItem from "../FormItem";
+import { MdOutlineCancel } from "react-icons/md";
 
 export interface PageAddListing8Props {}
 
@@ -16,7 +17,22 @@ interface Page8State {
   weeklyDiscount: number[];
   monthlyDiscount: number[];
   longTermMonths: string[];
+  monthState: boolean[];
 }
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 const PageAddListing8: FC<PageAddListing8Props> = () => {
   let portions = 0;
@@ -28,14 +44,14 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
     }
   }
 
-  const [rentalType, setRentalType] = useState<string> (() => {
+  const [rentalType, setRentalType] = useState<string>(() => {
     const savedRentalType = localStorage.getItem("page1");
-    if (!savedRentalType){
+    if (!savedRentalType) {
       return "Short Term";
     }
     const type = JSON.parse(savedRentalType)["rentalType"];
     return type || "Short Term";
-  })
+  });
 
   const emptyStringArrayGenerator = (size: number) => {
     const emptyStringArray = Array.from({ length: size }, () => "");
@@ -53,30 +69,21 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
 
   const [currency, setCurrency] = useState<string>("EURO");
 
-  const MONTHS = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  // const [longTermMonths, setLongTermMonths] = useState<string[]>([]);
   const [longTermMonths, setLongTermMonths] = useState<string[]>(() => {
-    const savedLongTermMonths = localStorage.getItem("page8") || "";
-    if (!savedLongTermMonths) {
-      return emptyStringArrayGenerator(portions);
+
+    if (rentalType === "Short Term") {
+      return [];
+    }else if (rentalType === "Long Term") {
+      return MONTHS;
     }
-    const value = JSON.parse(savedLongTermMonths)["longTermMonths"];
-    return value || emptyStringArrayGenerator(portions);
-  })
+
+    const savedPage = localStorage.getItem("page8") || "";
+    if (!savedPage) {
+      return [];
+    }
+    const value = JSON.parse(savedPage)["longTermMonths"];
+    return value || [];
+  });
 
   const [basePrice, setBasePrice] = useState<number[]>(() => {
     const savedPage = localStorage.getItem("page8") || "";
@@ -136,7 +143,17 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
           weeklyDiscount: emptyNumberArrayGenerator(portions),
           monthlyDiscount: emptyNumberArrayGenerator(portions),
           longTermMonths: emptyStringArrayGenerator(portions),
+          monthState: Array.from({ length: 12 }, () => false),
         };
+  });
+
+  const [monthState, setMonthState] = useState<boolean[]>(() => {
+    const savedPage = localStorage.getItem("page8") || "";
+    if (!savedPage) {
+      return Array.from({ length: 12 }, () => false);
+    }
+    const value = JSON.parse(savedPage)["monthState"];
+    return value || Array.from({ length: 12 }, () => false);
   });
 
   useEffect(() => {
@@ -149,6 +166,7 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
       weeklyDiscount: weeklyDiscount,
       monthlyDiscount: monthlyDiscount,
       longTermMonths: longTermMonths,
+      monthState: monthState,
     };
     setPage8(newPage);
     localStorage.setItem("page8", JSON.stringify(newPage));
@@ -161,15 +179,22 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
     monthlyDiscount,
     currency,
     longTermMonths,
+    monthState,
   ]);
 
-  const handleSelectedMonths = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setLongTermMonths([...longTermMonths, e.target.value]);
-    }else{
-      console.log(e.target.value);
-      const newLongTermArray = longTermMonths.filter((m) => m != e.target.value);
-      setLongTermMonths(newLongTermArray);
+  const handleSelectedMonths = (e: any, index: number) => {
+    console.log("index: ", e.target.innerText, index);
+    const newMonthState = [...monthState];
+    newMonthState[index] = !newMonthState[index];
+    setMonthState(newMonthState);
+
+    if (longTermMonths.includes(e.target.innerText)) {
+      const newLongTermMonths = longTermMonths.filter(
+        (month) => month !== e.target.innerText
+      );
+      setLongTermMonths(newLongTermMonths);
+    } else {
+      setLongTermMonths([...longTermMonths, e.target.innerText]);
     }
   };
 
@@ -184,15 +209,25 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
             {MONTHS.map((month, index) => {
               return (
                 <div className="flex gap-2 items-center" key={index}>
-                  <h1>{month}</h1>
-                  <input
+                  <p
+                    className={`flex items-center gap-1 py-1 px-2 border border-neutral-500 rounded-2xl cursor-pointer ${
+                      monthState[index] &&
+                      " bg-primary-6000 py-1 px-2 rounded-2xl cursor-pointer flex items-center gap-1 border-none"
+                    }`}
+                    // onClick={ () => setMonthState([...monthState.slice(0,index), !monthState[index], ...monthState.slice(index+1)])}
+                    onClick={(e) => handleSelectedMonths(e, index)}
+                  >
+                    {month}{" "}
+                    {monthState[index] && <MdOutlineCancel className="" />}
+                  </p>
+                  {/* <input
                     type="checkbox"
                     name="month"
                     value={month}
                     className="p-2 rounded-md cursor-pointer"
                     onChange={handleSelectedMonths}
                     defaultChecked={longTermMonths.includes(month)}
-                  />
+                  /> */}
                 </div>
               );
             })}
@@ -203,9 +238,15 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
       {rentalType && (rentalType == "Short Term" || rentalType == "Both") && (
         <div>
           <h1 className="text-3xl font-semibold">Short Term Pricing</h1>
-          <h2 className=" flex flex-wrap gap-2">( { MONTHS.filter((m, i) => !longTermMonths.includes(m)).map((month, index) => (
-            <h2 key={index}>{month }, </h2>
-          )) } )</h2>
+          <h2 className=" flex flex-wrap gap-2">
+            (
+            {MONTHS.filter((m, i) => !longTermMonths.includes(m)).map(
+              (month, index) => (
+                <h2 key={index}> {month}, </h2>
+              )
+            )}
+            )
+          </h2>
           {myArray.map((item, index) => (
             <div key={index} className="mt-8">
               <div>
@@ -227,7 +268,7 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
                     <option value="EURRO">EURO</option>
                   </Select>
                 </FormItem>
-                <FormItem label="Monthly Price">
+                <FormItem label="Base price (Monday -Thursday)">
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <span className="text-gray-500">€</span>
@@ -235,13 +276,13 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
                     <Input
                       className="!pl-8 !pr-10"
                       placeholder="0.00"
-                      value={basePriceLongTerm[index]}
+                      value={basePrice[index]}
                       onChange={(e) =>
-                        setBasePriceLongTerm((prev) => {
-                          const newBasePriceLongTermArray = [...prev];
-                          newBasePriceLongTermArray[index] =
+                        setBasePrice((prev) => {
+                          const newBasePriceArray = [...prev];
+                          newBasePriceArray[index] =
                             parseInt(e.target.value) || 0;
-                          return newBasePriceLongTermArray;
+                          return newBasePriceArray;
                         })
                       }
                     />
@@ -251,31 +292,31 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
                   </div>
                 </FormItem>
                 {/* ----- */}
-                {/* <FormItem label="Monthly Price">
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500">€</span>
-                          </div>
-                          <Input
-                            className="!pl-8 !pr-10"
-                            placeholder="0.00"
-                            value={weekendPrice[index]}
-                            onChange={(e) =>
-                              setWeekendPrice((prev) => {
-                                const newWeekendArray = [...prev];
-                                newWeekendArray[index] =
-                                  parseInt(e.target.value) || 0;
-                                return newWeekendArray;
-                              })
-                            }
-                          />
-                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500">EURO</span>
-                          </div>
-                        </div>
-                      </FormItem> */}
+                <FormItem label="Base price (Friday-Sunday)">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500">€</span>
+                    </div>
+                    <Input
+                      className="!pl-8 !pr-10"
+                      placeholder="0.00"
+                      value={weekendPrice[index]}
+                      onChange={(e) =>
+                        setWeekendPrice((prev) => {
+                          const newWeekendArray = [...prev];
+                          newWeekendArray[index] =
+                            parseInt(e.target.value) || 0;
+                          return newWeekendArray;
+                        })
+                      }
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500">EURO</span>
+                    </div>
+                  </div>
+                </FormItem>
                 {/* ----- */}
-                <FormItem label="Monthly Discounts">
+                <FormItem label="Weekly Discounts">
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <span className="text-gray-500">%</span>
@@ -283,13 +324,13 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
                     <Input
                       className="!pl-8 !pr-10"
                       placeholder="0.00"
-                      value={monthlyDiscount[index]}
+                      value={weeklyDiscount[index]}
                       onChange={(e) =>
-                        setMonthlyDiscount((prev) => {
-                          const newMonthlyArray = [...prev];
-                          newMonthlyArray[index] =
+                        setWeeklyDiscount((prev) => {
+                          const newWeekendArray = [...prev];
+                          newWeekendArray[index] =
                             parseInt(e.target.value) || 0;
-                          return newMonthlyArray;
+                          return newWeekendArray;
                         })
                       }
                     />
@@ -309,9 +350,15 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
       {rentalType && (rentalType == "Long Term" || rentalType == "Both") && (
         <div>
           <h1 className="text-3xl font-semibold">Long Term Pricing</h1>
-          <h2 className=" flex gap-2">( { MONTHS.filter((m, i) => longTermMonths.includes(m)).map((month, index) => ( 
-            <h2 key={index}>{month}, </h2>
-          )) } )</h2>
+          <h2 className=" flex gap-2">
+            ({" "}
+            {MONTHS.filter((m, i) => longTermMonths.includes(m)).map(
+              (month, index) => (
+                <h2 key={index}>{month}, </h2>
+              )
+            )}{" "}
+            )
+          </h2>
           {myArray.map((item, index) => (
             <div key={index} className="mt-8">
               <div>

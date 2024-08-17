@@ -73,7 +73,7 @@ const PageAddListing6: FC<PageAddListing6Props> = () => {
 
           <Textarea placeholder="Enter your reviews" rows={14} value={reviews[index]} onChange={(e) => setReviews((prev) => {
             const newReviews = [...prev];
-            newReviews[index] = e.target.value;
+            newReviews[index] = e.target.value.trim();
             return newReviews;
           })} />
         </div>

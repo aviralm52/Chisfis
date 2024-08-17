@@ -90,7 +90,8 @@ const PageAddListing1: FC<PageAddListing1Props> = () => {
   };
 
   const handlePlaceName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPlaceName(e.target.value);
+    const pName = e.target.value.trim();
+    setPlaceName(pName);
   };
 
   const handleRentalFormChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

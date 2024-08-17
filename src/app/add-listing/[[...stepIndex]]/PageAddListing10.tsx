@@ -62,7 +62,7 @@ interface CombinedData {
 
   basePrice?: number[];
   weekendPrice?: number[];
-  monthlyDiscount?: number[];
+  weeklyDiscount?: number[];
   currency?: string;
 
   generalAmenities?: object;
@@ -85,6 +85,11 @@ interface CombinedData {
   night: number[];
   time: number[];
   datesPerPortion: number[][];
+
+  rentalType?: string;
+  basePriceLongTerm?: number[];
+  monthlyDiscount?: number[];
+  longTermMonths?: string[];
 
   isLive?: boolean;
 }
@@ -226,7 +231,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
 
       basePrice: combinedData?.basePrice,
       weekendPrice: combinedData?.weekendPrice,
-      monthlyDiscount: combinedData?.monthlyDiscount,
+      weeklyDiscount: combinedData?.weeklyDiscount,
       currency: combinedData?.currency,
 
       generalAmenities: combinedData?.generalAmenities,
@@ -249,6 +254,11 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       night: combinedData?.night,
       time: combinedData?.time,
       datesPerPortion: combinedData?.datesPerPortion,
+
+      rentalType: combinedData?.rentalType,
+      basePriceLongTerm: combinedData?.basePriceLongTerm,
+      monthlyDiscount: combinedData?.monthlyDiscount,
+      longTermMonths: combinedData?.longTermMonths,
 
       isLive: true,
     };

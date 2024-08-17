@@ -32,6 +32,7 @@ const SectionDateRange = () => {
             selected={startDate}
             onChange={onChangeDate}
             startDate={startDate}
+            minDate={new Date()}
             endDate={endDate}
             selectsRange
             monthsShown={2}

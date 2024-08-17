@@ -160,7 +160,7 @@ const PageAddListing3: FC<PageAddListing3Props> = () => {
             onChange={(e) =>
               setPortionName((prev) => {
                 const newArray = [...prev];
-                newArray[index] = e.target.value;
+                newArray[index] = e.target.value.trim();
                 return newArray;
               })
             }

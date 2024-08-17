@@ -11,7 +11,6 @@ import Image from "next/image";
 export interface PageAddListing7Props {}
 
 const PageAddListing7: FC<PageAddListing7Props> = () => {
-
   let portions = 0;
   const data = localStorage.getItem("page1") || "";
   if (data) {
@@ -20,20 +19,15 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
       portions = parseInt(value, 10);
     }
   }
-  let checkPortion = portions > 1 ? portions : 0
-
+  let checkPortion = portions > 1 ? portions : 0;
 
   // const [myArray, setMyArray] = useState<number[]>(Array(portions).fill(1));
-  const [myArray, setMyArray] = useState<number[]> (Array(checkPortion).fill(1));
+  const [myArray, setMyArray] = useState<number[]>(Array(checkPortion).fill(1));
   // if (portions > 1) {
   //   setMyArray(Array(portions).fill(1));
   // }
 
-
-  const booleanArray = Array.from(
-    { length: portions },
-    () => false
-  );
+  const booleanArray = Array.from({ length: portions }, () => false);
   const emptyStringArrayGenerator = (size: number) => {
     const emptyStringArray = Array.from({ length: size }, () => "");
     return emptyStringArray;
@@ -43,6 +37,9 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
   const [portionCoverFileUrls, setPortionCoverFileUrls] = useState<string[]>(
     () => {
       const savedUrls = localStorage.getItem("portionCoverFileUrls");
+      if (savedUrls?.length != portions){
+        return emptyStringArrayGenerator(portions);
+      }
       return savedUrls
         ? JSON.parse(savedUrls)
         : emptyStringArrayGenerator(portions);
@@ -58,25 +55,20 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
 
   const [portionPictureUrls, setPortionPictureUrls] = useState<string[][]>(
     () => {
-      const savedUrls = localStorage.getItem("portionPictureUrls");
-      const arrayOf5 = Array(5).fill("")
-      // return savedUrls
-      //   ? JSON.parse(savedUrls)
-      //   : Array.from({ length: portions }, () =>
-      //       Array(5).fill("*")
-      //     );
-      return savedUrls
-      ? JSON.parse(savedUrls)
-      : Array(portions).fill(arrayOf5);
+      const savedUrls = localStorage.getItem("portionPictureUrls") || "";
+      const arrayOf5 = Array(5).fill("");
+
+      if (savedUrls.length != portions) {
+        return Array(portions).fill(arrayOf5);
+      }
+
+      return savedUrls ? JSON.parse(savedUrls) : Array(portions).fill(arrayOf5);
     }
   );
 
-
   const [isPortionPictures, setIsPortionPictures] = useState<boolean[]>(() => {
     const savedFlags = localStorage.getItem("isPortionPictures");
-    return savedFlags
-      ? JSON.parse(savedFlags)
-      : Array(portions).fill(false);
+    return savedFlags ? JSON.parse(savedFlags) : Array(portions).fill(false);
   });
 
   const [propertyPictureUrls, setPropertyPictureUrls] = useState<string[]>(
@@ -435,7 +427,11 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
                         className="w-48 h-48 rounded-lg"
                       /> */}
                       {/* <Image src={propertyCoverFileUrl} alt="" className="w-48 h-48 rounded-lg" width={200} height={200} /> */}
-                      <img src={propertyCoverFileUrl} alt="Cover Image" className="w-48 h-48 rounded-lg" />
+                      <img
+                        src={propertyCoverFileUrl}
+                        alt="Cover Image"
+                        className="w-48 h-48 rounded-lg"
+                      />
                     </div>
                   </div>
                 )}
@@ -520,7 +516,11 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
                             className="w-28 h-28 object-contain rounded-lg  border border-gray-500"
                           /> */}
                           {/* <Image src={propertyPictureUrls[i]} alt="No Image" className="w-28 h-28 object-contain rounded-lg  border border-gray-500" width={200} height={200}/> */}
-                          <img src={propertyPictureUrls[i]} alt="Property Pictures" className="w-28 h-28 object-contain rounded-lg  border border-gray-500"/>
+                          <img
+                            src={propertyPictureUrls[i]}
+                            alt="Property Pictures"
+                            className="w-28 h-28 object-contain rounded-lg  border border-gray-500"
+                          />
                         </div>
                       ))}
                     </div>
@@ -630,7 +630,11 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
                             className="w-408 h-48 object-contain rounded-lg"
                           /> */}
                           {/* <Image src={portionCoverFileUrls[index]} alt="No-image" className="w-408 h-48 object-contain rounded-lg" width={200} height={200}/> */}
-                          <img src={portionCoverFileUrls[index]} alt="Portion Cover Image" className="w-408 h-48 object-contain rounded-lg" />
+                          <img
+                            src={portionCoverFileUrls[index]}
+                            alt="Portion Cover Image"
+                            className="w-408 h-48 object-contain rounded-lg"
+                          />
                         </div>
                       </div>
                     )}
@@ -724,7 +728,11 @@ const PageAddListing7: FC<PageAddListing7Props> = () => {
                                 className="w-28 h-28 object-contain rounded-lg  border border-gray-500"
                               /> */}
                               {/* <Image src={portionPictureUrls[index][i]} alt="No-image" className="w-28 h-28 object-contain rounded-lg  border border-gray-500" width={200} height={200}/> */}
-                              <img src={portionPictureUrls[index][i]} alt="Portion Pictures" className="w-28 h-28 object-contain rounded-lg  border border-gray-500" />
+                              <img
+                                src={portionPictureUrls[index][i]}
+                                alt="Portion Pictures"
+                                className="w-28 h-28 object-contain rounded-lg  border border-gray-500"
+                              />
                             </div>
                           ))}
                         </div>

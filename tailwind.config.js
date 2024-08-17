@@ -71,6 +71,8 @@ module.exports = {
           800: customColors("--c-neutral-800"),
           900: customColors("--c-neutral-900"),
         },
+        'custom-red': '#f12711',
+        'custom-orange': '#f5af19',
       },
     },
   },
