@@ -18,7 +18,9 @@ export interface SectionGridFeaturePlacesProps {
   cardType?: "card1" | "card2";
 }
 
-const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> = ({
+const SectionGridFeaturePlacesAllProperties: FC<
+  SectionGridFeaturePlacesProps
+> = ({
   stayListings,
   gridClass = "",
   heading = "Places to stay",
@@ -42,7 +44,7 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
       const response = await axios.get(
         `/api/allproperties?limit=12&page=${page}${rentalType ? `&rentalType=${rentalType}` : ""}`
       );
-      console.log(response.data.length , " I am here find me")
+      // console.log(response.data.length , " I am here find me")
       if (response.data.length === 0) {
         setHasMore(false);
 

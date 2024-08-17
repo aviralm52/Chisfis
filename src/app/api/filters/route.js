@@ -8,7 +8,7 @@ export async function POST(request) {
   try {
     const filterCriteria = await request.json();
     
-    // console.log("filterCriteria: ", filterCriteria);
+    console.log("filterCriteria: ", filterCriteria);
     
     const {
       rentalForm,

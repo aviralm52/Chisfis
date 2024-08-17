@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
 import { StaySearchFormFields } from "../type";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-
 import ButtonPrimary from "@/shared/ButtonPrimary";
 
 interface Header3Props {
@@ -27,10 +26,16 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   //
   const [showHeroSearch, setShowHeroSearch] =
     useState<StaySearchFormFields | null>();
-  //
   // const [currentTab, setCurrentTab] = useState<SearchTab>("Stays");
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
+
+  let token = "";
+  const IsServer = typeof window === "undefined";
+  if (!IsServer) {
+    token = window.localStorage.getItem("token") || "";
+  }
+
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
@@ -178,10 +183,10 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                   List your property
                 </Link>
 
-                <nav>
+                {/* <nav>
                   {isLoggedIn ? (
                     <>
-                      <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+                      
                     </>
                   ) : (
                     <ButtonPrimary>
@@ -189,7 +194,16 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                       <Link href="/login">Login</Link>
                     </ButtonPrimary>
                   )}
-                </nav>
+                </nav> */}
+
+                {token ? (
+                  <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+                ) : (
+                  <ButtonPrimary>
+                    <Link href="/login">Login</Link>
+                  </ButtonPrimary>
+                )}
+
                 <MenuBar />
               </div>
             </div>

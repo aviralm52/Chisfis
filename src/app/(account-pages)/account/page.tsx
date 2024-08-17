@@ -84,7 +84,7 @@ const AccountPage = () => {
               <div className="">
                 <Input
                   className="w-full"
-                  value={name || ""}
+                  value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
