@@ -1,4 +1,3 @@
-import { sendEmail } from "@/helper/mailer";
 import { connectDb } from "../../../../helper/db";
 import User from "../../../../models/user";
 import { NextResponse } from "next/server";

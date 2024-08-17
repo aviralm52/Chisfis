@@ -462,7 +462,7 @@ export const RegistrationTemplate = (emailID , password) => {
 `};
 
 
-export const ResetPasswordTemplate = (tokenlink) => {
+export const ResetPasswordTemplate = (hashedToken) => {
 return `
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -800,7 +800,27 @@ return `
 													<td align="left" valign="middle" style="font-family:'Poppins', sans-serif;color:#191919;font-size:18px;line-height:28px;font-weight:600;letter-spacing:0px;padding:0px;padding-bottom:20px;">Hi Owner,</td>
 												</tr>
 												<tr>
-													<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br><br>User Email ID :&nbsp ${emailID};<br>Password : ${password}<br><a href="https://www.vacationsaga.com/login" style="text-size-adjust: 100%; text-decoration: none; color: #f4a53d;">LOGIN HERE&nbsp;<br></a><br><br>For any support please mail us on support@vacationsaga.com</td>
+													<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Looks like your forgot your password<br><br>
+													 <p style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
+                                                         To reset your password, please click the button below:
+                                                    </p>
+                                                    <table cellspacing="0" cellpadding="0" style="margin-top:  20px; margin-bottom: 20px;">
+                                                    <tr>
+                                                       <td align="center" width="300" height="40" bgcolor="#FF9800" style="border-radius: 5px;">
+                                                      <a href="${process.env.NEXT_PUBLIC_URL}/resetpassword?token=${hashedToken}" 
+                                                      target="_blank" 
+                                                      style="font-size: 16px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; border: 1px solid #FF9800; display: inline-block;">
+                                                      Reset Your Password
+                                                    </a>
+                                                   </td>
+    </tr>
+  </table>
+  <p style="font-family: Arial, sans-serif; font-size: 14px; color: #666;">
+    If the button doesn't work, you can copy and paste this link into your browser:
+    <br>
+    <span style="color: #0066cc;">${process.env.NEXT_PUBLIC_URL}/resetpassword?token=${hashedToken}</span>
+  </p>
+													<br><br><br>For any support please mail us on support@vacationsaga.com</td>
 												</tr>
 												<tr>
 													<td  style="font-size: 0px; height: 0px; line-height: 0px;">&nbsp;</td>
@@ -924,7 +944,7 @@ return `
 `;
 }
 
-export const ForgotPassword = (forgetPasswordLink)  => {
+export const ForgotPassword = ( email ,  resetPasswordLink)  => {
 return `
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -1262,7 +1282,10 @@ return `
 													<td align="left" valign="middle" style="font-family:'Poppins', sans-serif;color:#191919;font-size:18px;line-height:28px;font-weight:600;letter-spacing:0px;padding:0px;padding-bottom:20px;">Hi Owner,</td>
 												</tr>
 												<tr>
-													<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br><br>User Email ID :&nbsp;<br>Password : 6473<br><a href="https://www.vacationsaga.com/login" style="text-size-adjust: 100%; text-decoration: none; color: #f4a53d;">LOGIN HERE&nbsp;<br></a><br><br>For any support please mail us on support@vacationsaga.com</td>
+												 "${resetPasswordLink}"
+												</tr>
+												<tr>
+													<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br><br>Reset Password Link :&nbsp;<br>Password : 6473<br><a href="{resetPasswordLink}" style="text-size-adjust: 100%; text-decoration: none; color: #f4a53d;">Reset Your Password &nbsp;<br></a><br><br>For any support please mail us on support@vacationsaga.com</td>
 												</tr>
 												<tr>
 													<td  style="font-size: 0px; height: 0px; line-height: 0px;">&nbsp;</td>
@@ -1387,7 +1410,7 @@ return `
 } 
 
 
-export const VerificationTemplate = (verificationLink) => {
+export const VerificationTemplate = (hashedToken , password , email) => {
 return   `
 	<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 	<head>
@@ -1725,7 +1748,12 @@ return   `
 														<td align="left" valign="middle" style="font-family:'Poppins', sans-serif;color:#191919;font-size:18px;line-height:28px;font-weight:600;letter-spacing:0px;padding:0px;padding-bottom:20px;">Hi Owner,</td>
 													</tr>
 													<tr>
-														<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br><br>User Email ID :&nbsp;<br>Password : 6473<br><a href="https://www.vacationsaga.com/login" style="text-size-adjust: 100%; text-decoration: none; color: #f4a53d;">LOGIN HERE&nbsp;<br></a><br><br>For any support please mail us on support@vacationsaga.com</td>
+														<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br>
+														<br>Password:"${password}"<br>
+														<br>
+													    </br>
+														<br>For any support please mail us on support@vacationsaga.com</td>
+                                                        <br>  
 													</tr>
 													<tr>
 														<td  style="font-size: 0px; height: 0px; line-height: 0px;">&nbsp;</td>

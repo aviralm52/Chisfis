@@ -1,6 +1,7 @@
-import { sendEmail } from "@/helper/mailer";
+
 import { connectDb } from "../../../../helper/db";
 import User from "../../../../models/user";
+import { sendEmail } from "../newauth/route";
 
 connectDb();
 

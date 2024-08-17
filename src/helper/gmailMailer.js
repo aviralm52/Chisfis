@@ -21,6 +21,7 @@ export const sendEmail = async ({ email, subject, text }) => {
 
     // Send email
     await transporter.sendMail(mailOptions);
+    
     console.log('No-reply email sent successfully');
   } catch (error) {
     console.error('Error sending no-reply email:', error);
