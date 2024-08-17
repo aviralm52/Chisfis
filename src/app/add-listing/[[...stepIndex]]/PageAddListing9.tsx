@@ -304,7 +304,7 @@ const PageAddListing9: FC<PageAddListing9Props> = () => {
         <div className=" flex gap-2 flex-wrap">
           <h1 className=" text-2xl text-white font-semibold w-full">Long Term Months</h1>
           {longTermMonths.map((m, i) => (
-            <p>{m}, </p>
+            <p key={i}>{m}, </p>
           ))}
         </div>
       )}
