@@ -8,6 +8,8 @@ import PropertyCard from "@/components/PropertyCard";
 import { Properties } from "../page";
 import Loader from "@/helper/loader";
 
+// Random Comments
+
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
   gridClass?: string;
