@@ -4,11 +4,8 @@ import axios from "axios";
 import { StayDataType } from "@/data/types";
 import { useSearchParams } from "next/navigation";
 import TabFilters from "../(stay-listings)/TabFiltersTwo";
-import ButtonPrimary from "@/shared/ButtonPrimary";
-import ButtonThird from "@/shared/ButtonThird";
 import PropertyCard from "@/components/PropertyCard";
 import { Properties } from "../page";
-import { useInView } from "react-intersection-observer";
 import Loader from "@/helper/loader";
 
 export interface SectionGridFeaturePlacesProps {
@@ -24,15 +21,13 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   gridClass = "",
   cardType = "card2",
 }) => {
-  const [dataLength, setDataLength] = useState(0);
   const [fetchedData, setFetchedData] = useState<Properties[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: false });
   const params = useSearchParams();
   const country = params.get("place") || "Greece";
-  const recordPerPage = 8;
+  const recordPerPage = 12;
 
   const [rentalForm, setRentalForm] = useState<string>();
   const [rentalType, setRentalType] = useState<string>();
@@ -46,7 +41,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
 
   const fetchProperties = async (page: number = 1) => {
     setLoading(true);
-    setRentalType("")
+    setRentalType("");
     try {
       const response = await axios.get(
         `/api/countryspecificproperties/${country}`,
@@ -62,7 +57,6 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
       } else {
         setFetchedData((prevData) => [...prevData, ...response.data]);
       }
-      setDataLength(response.data.length);
       setHasMore(response.data.length === recordPerPage);
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -74,12 +68,6 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   useEffect(() => {
     fetchProperties(currentPage);
   }, [currentPage, country]);
-
-  useEffect(() => {
-    if (inView && !loading && hasMore) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  }, [inView, loading, hasMore]);
 
   const handleFilters = async () => {
     setLoading(true);
@@ -98,9 +86,6 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         houserool,
       });
       setFetchedData(response.data);
-      setDataLength(response.data.length);
-      console.log(propertyType);
-      console.log(fetchedData, "I am fetched data i am here");
       setHasMore(response.data.length === recordPerPage);
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -114,12 +99,16 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
     console.log(rentalType);
   };
 
+  const loadMore = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
   return (
     <div>
       <div className="nc-SectionGridFeaturePlaces relative">
         <div className="flex items-center mb-10 justify-between">
           <div className="w-full">
-            <div className="flex items-center justify-between ">
+            <div className="flex items-center justify-between">
               <div>
                 <TabFilters
                   setMinPrice={setMinPrice}
@@ -156,14 +145,14 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
                     className={`px-4 text-sm py-2 rounded-l-full ${
                       rentalType === "Long Term"
                         ? "bg-primary-6000 text-white"
-                        : "border "
+                        : "border"
                     }`}
                   >
                     Long Term
                   </button>
                   <button
                     onClick={() => handleRentalType("Short Term")}
-                    className={`px-4 text-sm  py-2 rounded-r-full ${
+                    className={`px-4 text-sm py-2 rounded-r-full ${
                       rentalType === "Short Term"
                         ? "bg-primary-6000 text-white"
                         : "border"
@@ -179,7 +168,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
 
         {loading && (
           <div className="flex items-center justify-center w-full h-full">
-            <p className="text-lg text-center flex items-center ">
+            <p className="text-lg text-center flex items-center">
               Things are getting ready...
               <Loader />
             </p>
@@ -213,22 +202,14 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         </div>
 
         {hasMore && (
-          <div
-            ref={ref}
-            className={`grid gap-6 md:gap-8 mt-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
-          >
-            {loading &&
-              [1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <div key={n} className="flex flex-col gap-y-2">
-                  <div className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"></div>
-                  <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
-                  <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                  <div className="flex items-center justify-between">
-                    <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                    <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                  </div>
-                </div>
-              ))}
+          <div className="flex justify-center mt-6">
+            <button
+              className="px-6 py-3 text-sm rounded-full border"
+              onClick={loadMore}
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "Load More"}
+            </button>
           </div>
         )}
       </div>

@@ -157,3 +157,4 @@ const SectionGridFeaturePlacesAllProperties: FC<
 };
 
 export default SectionGridFeaturePlacesAllProperties;
+
