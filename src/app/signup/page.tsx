@@ -20,7 +20,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [emailSent, setEmailSent] = useState<boolean>(false)
   const [sendDetails, setSendDetails] = useState(false);
 
   // const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
@@ -63,6 +63,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
       toast.success(
         "Signup successful! Please verify your email address via link that has been sent to your email address."
       );
+      setEmailSent(true);
       setName("");
       setEmail("");
       setPassword("");
@@ -198,6 +199,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                   onChange={(e) => setSendDetails(e.target.checked)}
                 />{" "}
                 Send my registration details to my email
+                {emailSent && <p className=" text-green-500 text-sm flex justify-start">Please check your spam folder also</p>}
               </label>
               <ButtonPrimary type="submit" disabled={loading}>
                 {loading ? (
