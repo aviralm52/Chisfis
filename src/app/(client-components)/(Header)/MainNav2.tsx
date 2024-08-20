@@ -18,9 +18,6 @@ export interface MainNav2Props {
 }
 
 const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
-
-  const {user} = useAuth();
-
   return (
     <div className={`MainNav2 relative z-10 ${className}`}>
       <div className="px-4 h-20 lg:container flex justify-between">
@@ -56,17 +53,6 @@ const MainNav2: FC<MainNav2Props> = ({ className = "" }) => {
               List your property
             </Link>
 
-            <NotifyDropdown />
-            {user?._id ? (
-              <AvatarDropdown />
-            ) : (
-              <div className="flex items-center text-2xl text-blue-400 ">
-                Sign In 
-              </div>
-            )}
-          </div>
-          <div className="flex space-x-2 lg:hidden">
-            <NotifyDropdown />
             <MenuBar />
           </div>
         </div>
