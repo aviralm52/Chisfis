@@ -1,6 +1,7 @@
-import { sendEmail } from "@/helper/mailer";
+
 import { connectDb } from "../../../../helper/db";
 import User from "../../../../models/user";
+import { sendEmail } from "../newauth/route";
 
 connectDb();
 
@@ -8,6 +9,7 @@ export async function POST(request) {
   try {
     const { email } = await request.json();
     const user = await User.findOne({ email });
+    console.log('user', user);
 
     if (user) {
       await sendEmail({ email, emailType: "RESET", userId: user._id });

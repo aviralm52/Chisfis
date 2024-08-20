@@ -1,21 +1,15 @@
 "use client";
-
 import React, { FC, Fragment, useEffect, useState } from "react";
 import { Dialog, Popover, Transition } from "@headlessui/react";
 import NcInputNumber from "@/components/NcInputNumber";
-import ButtonPrimary from "@/shared/ButtonPrimary";
-import ButtonThird from "@/shared/ButtonThird";
 import ButtonClose from "@/shared/ButtonClose";
-// import Checkbox from "@/shared/Checkbox";
 import Checkbox from "@/shared/CheckboxTwo";
 import Slider from "rc-slider";
 import convertNumbThousand from "@/utils/convertNumbThousand";
-import SectionGridFeaturePlaces from "@/components/SectionGridFeaturePlaces";
-import axios from "axios";
 
 const typeOfPaces = [
   {
-    name: "Private room",
+    name: "Private Room",
     description: "Have a place to yourself",
   },
   {
@@ -36,27 +30,6 @@ const typeOfPaces = [
     description: "Stay in a shared space, like a common room",
   },
 ];
-
-// const moreFilter1 = [
-//   { name: "Kitchen", defaultChecked: true },
-//   { name: "Air conditioning", defaultChecked: true },
-//   { name: "Heating" },
-//   { name: "Dryer" },
-//   { name: "Washer" },
-//   { name: "Wifi" },
-//   { name: "Indoor fireplace" },
-//   { name: "Breakfast" },
-//   { name: "Hair dryer" },
-//   { name: " Dedicated workspace" },
-// ];
-
-// const moreFilter2 = [
-//   { name: " Free parking on premise" },
-//   { name: "Hot tub" },
-//   { name: "Gym" },
-//   { name: " Pool" },
-//   { name: " EV charger" },
-// ];
 
 const moreFilter3 = [
   { name: "Hotel" },
@@ -79,10 +52,8 @@ const moreFilter3 = [
   { name: "Apart Hotel" },
 ];
 
-const moreFilter4 = [{ name: " Pets allowed" }, { name: "Smoking allowed" }];
-
 export interface RentalType {
-  // rentalType: (value: string) => void;
+  setRentalType: (value: string) => void;
   setBedRooms: (value: number) => void;
   setBathrooms: (value: number) => void;
   setBeds: (value: number) => void;
@@ -90,9 +61,11 @@ export interface RentalType {
   setPropertyType: (value: string) => void;
   setMaxPrice: (value: number) => void;
   setMinPrice: (value: number) => void;
+  setHouseRool: (value: string) => void;
 }
 
 const TabFilters: FC<RentalType> = ({
+  setRentalType,
   setBathrooms,
   setBedRooms,
   setBeds,
@@ -104,32 +77,17 @@ const TabFilters: FC<RentalType> = ({
   const [isOpenMoreFilter, setisOpenMoreFilter] = useState(false);
   const [isOpenMoreFilterMobile, setisOpenMoreFilterMobile] = useState(false);
   const [rangePrices, setRangePrices] = useState([0, 1000]);
-
-
-
-  const [selectValue, setSelectValue] = useState<string>("");
-
   const [selectedValue, setSelectedValue] = useState<string>("");
 
   const handleRadioChange = (value: string) => {
     setSelectedValue(value);
     setRentalForm(value);
   };
-
-  useEffect(()=>{
-    console.log(rangePrices)
-    setMinPrice(rangePrices[0])
-    setMaxPrice(rangePrices[1])
-  }, [rangePrices])
-
-  const roomtype = async (selectValue: string) => {
-    try {
-      const response = await axios.post("api/filters", { selectValue });
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error making the request:", error);
-    }
-  };
+  useEffect(() => {
+    console.log(rangePrices);
+    setMinPrice(rangePrices[0]);
+    setMaxPrice(rangePrices[1]);
+  }, [rangePrices]);
 
   const closeModalMoreFilter = () => setisOpenMoreFilter(false);
   const openModalMoreFilter = () => setisOpenMoreFilter(true);
@@ -164,7 +122,8 @@ const TabFilters: FC<RentalType> = ({
             <Popover.Button
               className={`flex items-center justify-center px-4 py-2 text-sm rounded-full border border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-6000 focus:outline-none ${
                 open ? "!border-primary-500 " : ""
-              }`}>
+              }`}
+            >
               <span>Type of place</span>
               <i className="las la-angle-down ml-2"></i>
             </Popover.Button>
@@ -175,15 +134,15 @@ const TabFilters: FC<RentalType> = ({
               enterTo="opacity-100 translate-y-0"
               leave="transition ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 translate-y-1">
+              leaveTo="opacity-0 translate-y-1"
+            >
               <Popover.Panel className="absolute z-10 w-screen max-w-sm px-4 mt-3 left-0 sm:px-0 lg:max-w-md">
                 <div className="overflow-hidden rounded-2xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700">
                   <div className="relative flex flex-col px-5 py-6 space-y-5">
                     {typeOfPaces.map((item) => (
                       <div
                         key={item.name}
-                        className="flex items-center gap-x-4"
-                      >
+                        className="flex items-center gap-x-4">
                         <input
                           id={item.name}
                           type="radio"
@@ -204,17 +163,6 @@ const TabFilters: FC<RentalType> = ({
                       </div>
                     ))}
                   </div>
-                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
-                      Clear
-                    </ButtonThird>
-                    <ButtonPrimary
-                      onClick={close}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Apply
-                    </ButtonPrimary>
-                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -265,17 +213,6 @@ const TabFilters: FC<RentalType> = ({
                       onChange={(value) => setBathrooms(value)}
                     />
                   </div>
-                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
-                      Clear
-                    </ButtonThird>
-                    <ButtonPrimary
-                      onClick={close}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Apply
-                    </ButtonPrimary>
-                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -329,7 +266,8 @@ const TabFilters: FC<RentalType> = ({
                       <div>
                         <label
                           htmlFor="minPrice"
-                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300" >
+                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        >
                           Min price
                         </label>
                         <div className="mt-1 relative rounded-md">
@@ -351,13 +289,14 @@ const TabFilters: FC<RentalType> = ({
                       <div>
                         <label
                           htmlFor="maxPrice"
-                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                        >
                           Max price
                         </label>
                         <div className="mt-1 relative rounded-md">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-neutral-500 sm:text-sm">
-                            €
+                              €
                             </span>
                           </div>
                           <input
@@ -372,17 +311,6 @@ const TabFilters: FC<RentalType> = ({
                       </div>
                     </div>
                   </div>
-                  {/* <div className="p-5 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird onClick={close} sizeClass="px-4 py-2 sm:px-5">
-                      Clear
-                    </ButtonThird>
-                    <ButtonPrimary
-                      onClick={close}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Apply
-                    </ButtonPrimary>
-                  </div> */}
                 </div>
               </Popover.Panel>
             </Transition>
@@ -407,9 +335,8 @@ const TabFilters: FC<RentalType> = ({
             <Checkbox
               setPropertyType={(value: string) => setPropertyType(value)}
               key={item.name}
-              name={item.name}
+              name={data[0].name}
               label={item.name}
-              // defaultChecked={!!item.defaultChecked}
             />
           ))}
         </div>
@@ -418,7 +345,7 @@ const TabFilters: FC<RentalType> = ({
             <Checkbox
               setPropertyType={(value: string) => setPropertyType(value)}
               key={item.name}
-              name={item.name}
+              name={data[0].name}
               label={item.name}
               // defaultChecked={!!item.defaultChecked}
             />
@@ -489,47 +416,14 @@ const TabFilters: FC<RentalType> = ({
 
                   <div className="flex-grow overflow-y-auto">
                     <div className="px-10 divide-y divide-neutral-200 dark:divide-neutral-800">
-                      {/* <div className="py-7">
-                        <h3 className="text-xl font-medium">Amenities</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter1)}
-                        </div>
-                      </div> */}
-                      {/* <div className="py-7">
-                        <h3 className="text-xl font-medium">Facilities</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter2)}
-                        </div>
-                      </div> */}
                       <div className="py-7">
                         <h3 className="text-xl font-medium">Property type</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter3)}
                         </div>
                       </div>
-                      <div className="py-7">
-                        <h3 className="text-xl font-medium">House rules</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter4)}
-                        </div>
-                      </div>
                     </div>
                   </div>
-
-                  {/* <div className="p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <ButtonThird
-                      onClick={closeModalMoreFilter}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Clear
-                    </ButtonThird>
-                    <ButtonPrimary
-                      onClick={closeModalMoreFilter}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Apply
-                    </ButtonPrimary>
-                  </div> */}
                 </div>
               </Transition.Child>
             </div>
@@ -544,11 +438,11 @@ const TabFilters: FC<RentalType> = ({
       <div>
         <div
           className={`flex lg:hidden items-center justify-center px-4 py-2 text-sm rounded-full border border-primary-500 bg-primary-50 text-primary-700 focus:outline-none cursor-pointer`}
-          onClick={openModalMoreFilterMobile}>
+          onClick={openModalMoreFilterMobile}
+        >
           <span>More filters (3)</span>
           {renderXClear()}
         </div>
-
         <Transition appear show={isOpenMoreFilterMobile} as={Fragment}>
           <Dialog
             as="div"
@@ -567,8 +461,6 @@ const TabFilters: FC<RentalType> = ({
               >
                 <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-40 dark:bg-opacity-60" />
               </Transition.Child>
-
-              {/* This element is to trick the browser into centering the modal contents. */}
               <span
                 className="inline-block h-screen align-middle"
                 aria-hidden="true"
@@ -582,12 +474,14 @@ const TabFilters: FC<RentalType> = ({
                 enterTo="opacity-100 scale-100"
                 leave="ease-in duration-200"
                 leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95" >
+                leaveTo="opacity-0 scale-95"
+              >
                 <div className="inline-flex flex-col w-full max-w-4xl text-left align-middle transition-all transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-700 dark:text-neutral-100 shadow-xl h-full">
                   <div className="relative flex-shrink-0 px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 text-center">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900">
+                      className="text-lg font-medium leading-6 text-gray-900"
+                    >
                       More filters
                     </Dialog.Title>
                     <span className="absolute left-3 top-3">
@@ -683,55 +577,14 @@ const TabFilters: FC<RentalType> = ({
                           <NcInputNumber label="Bathrooms" max={10} />
                         </div>
                       </div>
-
-                      {/* ---- */}
-                      {/* <div className="py-7">
-                        <h3 className="text-xl font-medium">Amenities</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter1)}
-                        </div>
-                      </div> */}
-
-                      {/* ---- */}
-                      {/* <div className="py-7">
-                        <h3 className="text-xl font-medium">Facilities</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter2)}
-                        </div>
-                      </div> */}
-
-                      {/* ---- */}
                       <div className="py-7">
                         <h3 className="text-xl font-medium">Property type</h3>
                         <div className="mt-6 relative ">
                           {renderMoreFilterItem(moreFilter3)}
                         </div>
                       </div>
-
-                      {/* ---- */}
-                      <div className="py-7">
-                        <h3 className="text-xl font-medium">House rules</h3>
-                        <div className="mt-6 relative ">
-                          {renderMoreFilterItem(moreFilter4)}
-                        </div>
-                      </div>
                     </div>
                   </div>
-
-                  {/* <div className="p-4 sm:p-6 flex-shrink-0 bg-neutral-50 dark:bg-neutral-900 dark:border-t dark:border-neutral-800 flex items-center justify-between">
-                    <
-                      onClick={closeModalMoreFilterMobile}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Clear
-                    </ButtonThird>
-                    <ButtonPrimary
-                      onClick={closeModalMoreFilterMobile}
-                      sizeClass="px-4 py-2 sm:px-5"
-                    >
-                      Apply
-                    </ButtonPrimary>
-                  </div> */}
                 </div>
               </Transition.Child>
             </div>
@@ -750,7 +603,6 @@ const TabFilters: FC<RentalType> = ({
         {renderTabMoreFilter()}
       </div>
       {renderTabMoreFilterMobile()}
-     
     </div>
   );
 };

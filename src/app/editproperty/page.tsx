@@ -503,7 +503,7 @@ const EditPropertyPage: React.FC = () => {
             length: numberOfPortions,
           }).map((item, index) => {
             return (
-              <div key={index} className=" flex flex-col  space-y-4 my-4">
+              <div className=" flex flex-col space-y-4 my-4" key={index}>
                 <h1
                   className=" text-2xl font-medium dark:text-white text-black cursor-pointer inline-flex items-center space-x-2"
                   onClick={() =>

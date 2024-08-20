@@ -4,14 +4,12 @@ import { DEMO_STAY_LISTINGS } from "@/data/listings";
 import { StayDataType } from "@/data/types";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import HeaderFilter from "./HeaderFilter";
-import StayCard from "./StayCard";
-import StayCard2 from "./StayCard2";
-import CustomStayCard from "./CustomStayCard";
 import Link from "next/link";
 import { Properties } from "@/app/page";
 import axios from "axios";
 import PropertyCard from "./PropertyCard";
 import { PropertyDataType } from "@/data/types";
+
 
 // OTHER DEMO WILL PASS PROPS
 const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
@@ -113,7 +111,6 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
             ))
           : allProperties?.map((stay, index) => renderCard(stay, index))}
       </div>
-
       <div className="flex mt-16 justify-center items-center">
         <Link href="/allproperties">
           <ButtonPrimary>Show me more</ButtonPrimary>

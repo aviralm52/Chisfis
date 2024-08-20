@@ -154,18 +154,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
       </div>
     );
   };
-
-  // const { isSignedIn } = useUser();
-  // const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
-  // useEffect(() => {
-  //   setIsLoggedIn(isSignedIn);
-  // }, [isSignedIn]);
-
-  // const { user } = useUser();
-
-  
-
-
   return (
     <>
       <div
