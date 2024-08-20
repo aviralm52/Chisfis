@@ -60,7 +60,7 @@ const PropertySchema = new mongoose.Schema(
 
     basePrice: [Number],
     weekendPrice: [Number],
-    monthlyDiscount: [Number],
+    weeklyDiscount: [Number],
     currency: String,
 
     generalAmenities: {
@@ -92,6 +92,11 @@ const PropertySchema = new mongoose.Schema(
     night: [Number],
     time: [Number],
     datesPerPortion: [[String]],
+
+    rentalType: String,
+    basePriceLongTerm: [Number],
+    monthlyDiscount: [Number],
+    longTermMonths: [String],
 
     isLive: {
       type: Boolean,
