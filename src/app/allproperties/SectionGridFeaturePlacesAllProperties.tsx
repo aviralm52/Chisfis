@@ -18,7 +18,9 @@ export interface SectionGridFeaturePlacesProps {
   cardType?: "card1" | "card2";
 }
 
-const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> = ({
+const SectionGridFeaturePlacesAllProperties: FC<
+  SectionGridFeaturePlacesProps
+> = ({
   stayListings,
   gridClass = "",
   heading = "Places to stay",
@@ -42,7 +44,7 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
       const response = await axios.get(
         `/api/allproperties?limit=12&page=${page}${rentalType ? `&rentalType=${rentalType}` : ""}`
       );
-      console.log(response.data.length , " I am here find me")
+      // console.log(response.data.length , " I am here find me")
       if (response.data.length === 0) {
         setHasMore(false);
 
@@ -92,16 +94,16 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
   const renderCard = (stay: PropertyDataType, index: number) => (
     <PropertyCard key={stay._id} data={stay} index={index} />
   );
-
   return (
-    <div className="nc-SectionGridFeaturePlaces p-4 relative">
+    <div className="max-w-7xl mx-auto w-full p-4">
+    <div className="nc-SectionGridFeaturePlaces relative">
       <HeaderFilter
         tabActive={"New York"}
         subHeading={subHeading}
         tabs={tabs}
         heading={heading}
       />
-      <div className="top-4 absolute right-8  ">
+      <div className="top-4 absolute  right-0  ">
         <button
           onClick={handleToggle}
           className={` text-4xl flex items-center justify-center gap-x-2  text-primary-6000 ${
@@ -150,7 +152,9 @@ const SectionGridFeaturePlacesAllProperties: FC<SectionGridFeaturePlacesProps> =
         </div>
       )}
     </div>
+    </div>
   );
 };
 
 export default SectionGridFeaturePlacesAllProperties;
+

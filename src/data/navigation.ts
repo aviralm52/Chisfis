@@ -61,7 +61,6 @@ const megaMenuDemo: MegamenuItem[] = [
   },
 ];
 
-
 const otherPageChildMenus: NavItemType[] = [
   { id: ncNanoId(), href: "/blog", name: "Blog page" },
   { id: ncNanoId(), href: "/blog/single" as Route, name: "Blog single" },
@@ -196,6 +195,14 @@ export const NAVIGATION_DEMO: NavItemType[] = [
   },
   {
     id: ncNanoId(),
+    href: "/author",
+    name: "View Profile",
+    // type: "dropdown",
+    // children: demoChildMenus,
+    isNew: true,
+  },
+  {
+    id: ncNanoId(),
     href: "/contact",
     name: "Contact us",
     // type: "dropdown",
@@ -283,7 +290,7 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
     type: "dropdown",
     children: templatesChildrenMenus,
   },
- 
+
   //
   {
     id: ncNanoId(),
