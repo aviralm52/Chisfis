@@ -8,7 +8,6 @@ import { Toaster, toast } from "sonner";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
 import axios from "axios";
-
 export interface PageSignUpProps {}
 
 const PageSignUp: FC<PageSignUpProps> = () => {
@@ -23,7 +22,6 @@ const PageSignUp: FC<PageSignUpProps> = () => {
   const [emailSent, setEmailSent] = useState<boolean>(false)
   const [sendDetails, setSendDetails] = useState(false);
 
-  // const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const router = useRouter();
@@ -196,8 +194,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                 <input
                   type="checkbox"
                   checked={sendDetails}
-                  onChange={(e) => setSendDetails(e.target.checked)}
-                />{" "}
+                  onChange={(e) => setSendDetails(e.target.checked)}/>
                 Send my registration details to my email
                 {emailSent && <p className=" text-green-500 text-sm flex justify-start">Please check your spam folder also</p>}
               </label>
@@ -213,7 +210,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
               </ButtonPrimary>
             </form>
             <span className="block text-center text-neutral-700 dark:text-neutral-300">
-              Already have an account? {` `}
+              Already have an account?
               <Link href="/login" className="font-semibold underline">
                 Sign in
               </Link>
