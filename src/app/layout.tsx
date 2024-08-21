@@ -8,6 +8,7 @@ import "rc-slider/assets/index.css";
 import Footer from "@/components/Footer";
 import FooterNav from "@/components/FooterNav";
 import { Metadata } from "next";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 import { MyProvider } from "@/context/propertyContext";
 
@@ -34,21 +35,22 @@ export default function RootLayout({
 }) {
   return (
     <MyProvider>
-        <html lang="en" className={poppins.className}>
-          <body className="bg-white text-base dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200">
-            {/* <SignedOut>
+      <html lang="en" className={poppins.className}>
+        <GoogleAnalytics />
+        <body className="bg-white text-base dark:bg-neutral-900 text-neutral-900 dark:text-neutral-200">
+          {/* <SignedOut>
               <SignInButton />
             </SignedOut>
             <SignedIn>
               <UserButton/>
             </SignedIn> */}
-            <ClientCommons />
-            <SiteHeader />
-            {children}
-            <FooterNav />
-            <Footer />
-          </body>
-        </html>
+          <ClientCommons />
+          <SiteHeader />
+          {children}
+          <FooterNav />
+          <Footer />
+        </body>
+      </html>
     </MyProvider>
   );
 }
