@@ -183,7 +183,6 @@ const PageAddListing8: FC<PageAddListing8Props> = () => {
   ]);
 
   const handleSelectedMonths = (e: any, index: number) => {
-    console.log("index: ", e.target.innerText, index);
     const newMonthState = [...monthState];
     newMonthState[index] = !newMonthState[index];
     setMonthState(newMonthState);

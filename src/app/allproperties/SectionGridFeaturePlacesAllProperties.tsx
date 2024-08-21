@@ -155,8 +155,6 @@
 
 // export default SectionGridFeaturePlacesAllProperties;
 
-
-
 "use client";
 import React, { FC, ReactNode, useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -165,6 +163,8 @@ import HeaderFilter from "@/components/HeaderFilter";
 import PropertyCard from "@/components/PropertyCard";
 import { FaToggleOn } from "react-icons/fa";
 import { FaToggleOff } from "react-icons/fa";
+import { PiToggleLeftFill } from "react-icons/pi";
+import { PiToggleRightFill } from "react-icons/pi";
 
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
@@ -182,7 +182,7 @@ const SectionGridFeaturePlacesAllProperties: FC<
   stayListings,
   gridClass = "",
   heading = "Places to stay",
-  subHeading = "Popular places to stay that Chisfis recommends for you",
+  subHeading = "Popular places to stay that Vacation Saga recommends for you",
   headingIsCenter,
   tabs = ["Greece", "Italy", "Romania", "Spain"],
   cardType = "card2",
@@ -199,7 +199,9 @@ const SectionGridFeaturePlacesAllProperties: FC<
     setLoading(true);
     try {
       const response = await axios.get(
-        `/api/allproperties?limit=12&page=${page}${rentalType ? `&rentalType=${rentalType}` : ""}`
+        `/api/allproperties?limit=12&page=${page}${
+          rentalType ? `&rentalType=${rentalType}` : ""
+        }`
       );
       if (response.data.length === 0) {
         setHasMore(false);
@@ -233,7 +235,8 @@ const SectionGridFeaturePlacesAllProperties: FC<
   }, [page, rentalType]);
 
   const handleToggle = () => {
-    const newRentalType = rentalType === "Long Term" ? "Short Term" : "Long Term";
+    const newRentalType =
+      rentalType === "Long Term" ? "Short Term" : "Long Term";
     setRentalType(newRentalType);
     setPage(1);
     setFetchedData([]);
@@ -260,12 +263,17 @@ const SectionGridFeaturePlacesAllProperties: FC<
         <div className="top-4 absolute right-0">
           <button
             onClick={handleToggle}
-            className={`text-4xl flex items-center justify-center gap-x-2 text-primary-6000 ${
+            className={`text-4xl flex items-center justify-center gap-x-2  ${
               rentalType === "Long Term" ? "" : ""
             }`}
           >
             <span className="text-xl hidden sm:block">Tap to Longterm</span>
-            {rentalType === "Long Term" ? <FaToggleOn /> : <FaToggleOff />}
+            {/* {rentalType === "Long Term" ? <FaToggleOn /> : <FaToggleOff />} */}
+            {rentalType === "Long Term" ? (
+              <PiToggleRightFill className=" text-5xl text-primary-6000" />
+            ) : (
+              <PiToggleLeftFill className=" text-5xl text-primary-6000" />
+            )}
           </button>
         </div>
 

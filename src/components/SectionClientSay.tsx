@@ -252,7 +252,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
 
   return (
     <div className={`nc-SectionClientSay relative ${className} `}>
-      <Heading desc="Let's see what people think of Chisfis" isCenter>
+      <Heading desc="Let's see what people think of Vacation Saga" isCenter>
         Good news from far away
       </Heading>
       <div className="relative md:mb-16 max-w-2xl mx-auto">
