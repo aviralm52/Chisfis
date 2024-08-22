@@ -20,14 +20,13 @@
 //         { status: 400 }
 //       );
 //     }
-  
+
 //     const salt = await bcryptjs.genSalt(10);
 //     const hashedPassword = await bcryptjs.hash(password, salt);
 
-//     const token = await bcryptjs.hash(email + Date.now(), salt); 
+//     const token = await bcryptjs.hash(email + Date.now(), salt);
 //     const verificationExpire = new Date();
-//     verificationExpire.setHours(verificationExpire.getHours() + 1); 
-
+//     verificationExpire.setHours(verificationExpire.getHours() + 1);
 
 //     const newUser = new User({
 //       name,
@@ -64,9 +63,7 @@
 //   }
 // }
 
-
-// TODO: // Above code is working fine 
-
+// TODO: // Above code is working fine
 
 import { connectDb } from "../../../../helper/db";
 import User from "../../../../models/user";
@@ -79,7 +76,7 @@ await connectDb();
 export async function POST(request) {
   try {
     const reqBody = await request.json();
-    const { name, email, password, role, sendDetails } = reqBody;
+    const { name, email, password, role, sendDetails, phone } = reqBody;
     console.log(reqBody);
 
     const user = await User.findOne({ email });
@@ -93,20 +90,41 @@ export async function POST(request) {
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
+    if (
+      name == null ||
+      email == null ||
+      password == null ||
+      role == null ||
+      phone == null
+    ) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 },
+        { success: false }
+      );
+    }
+
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
       role,
+      phone,
     });
 
     const savedUser = await newUser.save();
     console.log(savedUser);
 
     if (sendDetails) {
-      await sendEmail({ email, emailType: "VERIFY", userId: savedUser._id , password: reqBody.password});
+      await sendEmail({
+        email,
+        emailType: "VERIFY",
+        userId: savedUser._id,
+        password: reqBody.password,
+      });
       return NextResponse.json({
-        message: "User created successfully. Please check your email for verification.",
+        message:
+          "User created successfully. Please check your email for verification.",
         success: true,
         savedUser,
       });

@@ -55,19 +55,82 @@
 
 // TODO : Above code is working fine if you not able to implement just uncomment it and yah good to go....
 
+// import nodemailer from "nodemailer";
+// import Users from "@/models/user";
+// import bcryptjs from "bcryptjs";
+// import {
+//   VerificationTemplate,
+//   ResetPasswordTemplate,
+//   RegistrationTemplate,
+//   ForgotPassword,
+// } from "@/app/emailTemplate/email";
+
+// export const sendEmail = async ({ email, emailType, userId, password }) => {
+//   try {
+//     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+   
+//     if (emailType === "VERIFY") {
+//       await Users.findByIdAndUpdate(userId, {
+//         $set: {
+//           verifyToken: hashedToken,
+//           verifyTokenExpiry: new Date(Date.now() + 3600000),
+//         },
+//       });
+//     } else if (emailType === "RESET") {
+//       await Users.findByIdAndUpdate(userId, {
+//         $set: {
+//           forgotPasswordToken: hashedToken,
+//           forgotPasswordTokenExpiry: new Date(Date.now() + 3600000),
+//         },
+//       });
+//     }
+//     let transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       auth: {
+//         user: "no-reply@vacationsaga.com",
+//         pass: process.env.GMAIL_APP_PASSWORD,
+//       },
+//     });
+
+//     let templateContent;
+//     if (emailType === "VERIFY") {
+//       templateContent = VerificationTemplate(hashedToken, password, email);
+//     } else if (emailType === "RESET") {
+//       templateContent = ResetPasswordTemplate(hashedToken);
+//     }
+
+//     const mailOptions = {
+//       from: "No Reply <no-reply@vacationsaga.com>",
+//       to: email,
+//       subject:
+//         emailType === "VERIFY" ? "Verify your email" : "Reset Your Password",
+//       html: templateContent,
+//     };
+//     const mailResponse = await transporter.sendMail(mailOptions);
+//     return mailResponse;
+//   } catch (error) {
+//     console.error("Error sending email:", error);
+//     throw new Error(error.message);
+//   }
+// };
+
+
+// TODO: The above code is fine without decoded token
+
+
 import nodemailer from "nodemailer";
 import Users from "@/models/user";
 import bcryptjs from "bcryptjs";
 import {
   VerificationTemplate,
   ResetPasswordTemplate,
-  RegistrationTemplate,
-  ForgotPassword,
 } from "@/app/emailTemplate/email";
 
 export const sendEmail = async ({ email, emailType, userId, password }) => {
   try {
     const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+    const encodedToken = encodeURIComponent(hashedToken); // Encode the token
+
     if (emailType === "VERIFY") {
       await Users.findByIdAndUpdate(userId, {
         $set: {
@@ -83,6 +146,7 @@ export const sendEmail = async ({ email, emailType, userId, password }) => {
         },
       });
     }
+
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -93,9 +157,9 @@ export const sendEmail = async ({ email, emailType, userId, password }) => {
 
     let templateContent;
     if (emailType === "VERIFY") {
-      templateContent = VerificationTemplate(hashedToken, password, email);
+      templateContent = VerificationTemplate(encodedToken, password, email);
     } else if (emailType === "RESET") {
-      templateContent = ResetPasswordTemplate(hashedToken);
+      templateContent = ResetPasswordTemplate(encodedToken);
     }
 
     const mailOptions = {
