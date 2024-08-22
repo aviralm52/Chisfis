@@ -1,28 +1,27 @@
 "use client";
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface UserData {
   _id: string;
   email: string;
   isVerified: boolean;
   name: string;
-  profilePic:string,
+  profilePic: string;
   role: string;
   createdAt: string;
   updatedAt: string;
   address: string;
   bankDetails: string;
-  declinedRequests: any[]; 
+  declinedRequests: any[];
   gender: string;
-  spokenLanguage:string;
+  spokenLanguage: string;
   nationality: string;
   phone: string | null;
-  myRequests: any[]; 
-  myUpcommingRequests: any[]; 
+  myRequests: any[];
+  myUpcommingRequests: any[];
 }
-
 
 export const useAuth = () => {
   const [user, setUser] = useState<UserData | null>(null);
@@ -60,11 +59,27 @@ export const useAuth = () => {
     return false;
   };
 
+  // const logout = async () => {
+  //   try {
+  //     await axios.get("/api/user/logout");
+  //     setUser(null);
+  //     localStorage.removeItem("token");
+
+  //     router.push("/login");
+  //   } catch (error) {
+  //     console.error("Logout failed:", error);
+  //   }
+  // };
+
   const logout = async () => {
     try {
       await axios.get("/api/user/logout");
       setUser(null);
       localStorage.removeItem("token");
+
+      // Confirm token removal
+      console.log("Token removed:", localStorage.getItem("token") === null);
+
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);

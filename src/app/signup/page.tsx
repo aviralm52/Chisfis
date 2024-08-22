@@ -2,12 +2,12 @@
 import React, { FC, useState, FormEvent } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { useRouter } from "next/navigation";
 import Input from "@/shared/Input";
 import { Toaster, toast } from "sonner";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
 import axios from "axios";
+import countryCodesList from "country-codes-list";
 export interface PageSignUpProps {}
 
 const PageSignUp: FC<PageSignUpProps> = () => {
@@ -22,9 +22,14 @@ const PageSignUp: FC<PageSignUpProps> = () => {
 
   const [sendDetails, setSendDetails] = useState(false);
 
-  const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const [countryCode, setCountryCode] = useState("+1");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
-  const router = useRouter();
+  const countryCodes: { [key: string]: string } = countryCodesList.customList(
+    "countryCallingCode" as countryCodesList.CountryProperty,
+    "{countryNameEn} (+{countryCallingCode})"
+  );
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const validateForm = () => {
     if (!name) {
@@ -50,12 +55,14 @@ const PageSignUp: FC<PageSignUpProps> = () => {
     }
     try {
       setLoading(true);
+      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       const response = await axios.post("/api/user/signup", {
         name,
         email,
         password,
         role,
         sendDetails,
+        phone: fullPhoneNumber,
       });
       console.log("Signup successful:", response.data);
       toast.success(
@@ -67,6 +74,8 @@ const PageSignUp: FC<PageSignUpProps> = () => {
       setConfirmPassword("");
       setRole("Owner");
       setSendDetails(false);
+      setCountryCode("+1");
+      setPhoneNumber("");
       // router.push("/login")
     } catch (error) {
       console.error("Signup failed:", error);
@@ -75,7 +84,6 @@ const PageSignUp: FC<PageSignUpProps> = () => {
       setLoading(false);
     }
   };
-
   return (
     <>
       <Toaster />
@@ -101,7 +109,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
               </label>
               <label className="block">
                 <span className="text-neutral-800 dark:text-neutral-200">
-                  Gmail address
+                  Email address
                 </span>
                 <Input
                   type="email"
@@ -112,6 +120,36 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                   required
                 />
               </label>
+
+              <label className="block">
+                <span className="text-neutral-800 dark:text-neutral-200">
+                  Phone Number
+                </span>
+                <div className="flex items-center">
+                  <select
+                    className="mr-2 w-1/2 rounded-xl focus:border-blue-500/10"
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                  >
+                    {Object.entries(countryCodes).map(([code, name]) => (
+                      <option key={code} value={`+${code}`}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                  <Input
+                    type="tel"
+                    placeholder="Phone number"
+                    className="w-full"
+                    value={phoneNumber}
+                    onChange={(e) =>
+                      setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                    }
+                    required
+                  />
+                </div>
+              </label>
+
               <label className="block relative">
                 <span className="flex justify-between items-center text-neutral-800 dark:text-neutral-200">
                   Password
@@ -193,7 +231,8 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                 <input
                   type="checkbox"
                   checked={sendDetails}
-                  onChange={(e) => setSendDetails(e.target.checked)}/>
+                  onChange={(e) => setSendDetails(e.target.checked)}
+                />
                 Send my registration details to my email
               </label>
               <ButtonPrimary type="submit" disabled={loading}>
