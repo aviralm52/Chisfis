@@ -55,7 +55,11 @@ const PageSignUp: FC<PageSignUpProps> = () => {
     }
     try {
       setLoading(true);
-      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      // const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      let fullPhoneNumber = "";
+      if (phoneNumber){
+        fullPhoneNumber = `${countryCode}${phoneNumber}`
+      }
       const response = await axios.post("/api/user/signup", {
         name,
         email,
@@ -78,9 +82,9 @@ const PageSignUp: FC<PageSignUpProps> = () => {
       setCountryCode("+1");
       setPhoneNumber("");
       // router.push("/login")
-    } catch (error) {
+    } catch (error:any) {
       console.error("Signup failed:", error);
-      toast.error("Signup failed. Please try again.");
+      toast.error(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -128,7 +132,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                 </span>
                 <div className="flex items-center">
                   <select
-                    className="mr-2 w-1/2 rounded-xl focus:border-blue-500/10"
+                    className="mr-2 w-1/2 rounded-xl focus:border-blue-500/10 dark:bg-slate-900 dark:text-white"
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
                   >

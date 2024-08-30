@@ -1,6 +1,6 @@
 import { SocialType } from "@/shared/SocialsShare";
 import React, { FC } from "react";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaPinterest, FaXTwitter } from "react-icons/fa6";
 import { GrGroup } from "react-icons/gr";
 import { FaFacebookSquare } from "react-icons/fa";
 import { FiInstagram } from "react-icons/fi";
@@ -23,6 +23,11 @@ const socialsDemo: SocialType[] = [
     name: "Instagram",
     icon: "lab la-instagram",
     href: "https://www.instagram.com/vacationsaga/",
+  },
+  {
+    name: "Pinterest",
+    icon: "lab la-pinterest",
+    href: "https://in.pinterest.com/vacationsaga/",
   },
 ];
 
@@ -50,6 +55,7 @@ const SocialsList: FC<SocialsListProps> = ({
           {item.name == "X" && <FaXTwitter className=" text-md" />}
           {item.name == "Community" && <GrGroup className=" text-md" />}
           {item.name == "Instagram" && <FiInstagram className=" text-md" />}
+          {item.name == "Pinterest" && <FaPinterest className=" text-md" />}
         </a>
       ))}
     </nav>

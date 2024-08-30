@@ -81,8 +81,9 @@ export async function POST(request) {
 
     const user = await User.findOne({ email });
     if (user) {
+      console.log('yes');
       return NextResponse.json(
-        { error: "User already exists" },
+        { message: "User already exists" },
         { status: 400 }
       );
     }
@@ -91,14 +92,15 @@ export async function POST(request) {
     const hashedPassword = await bcryptjs.hash(password, salt);
 
     if (
-      name == null ||
-      email == null ||
-      password == null ||
-      role == null ||
-      phone == null
+      name == "" ||
+      email == "" ||
+      password == "" ||
+      role == "" ||
+      phone == ""
     ) {
+      console.log('not complete')
       return NextResponse.json(
-        { error: "All fields are required" },
+        { message: "All fields are required" },
         { status: 400 },
         { success: false }
       );
@@ -138,7 +140,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("Error while creating user:", error);
     return NextResponse.json(
-      { error: "Error while creating user" },
+      { message: "Error while creating user" },
       { status: 500 }
     );
   }

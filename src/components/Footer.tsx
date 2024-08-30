@@ -11,6 +11,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import { GrGroup } from "react-icons/gr";
 import { FaFacebookSquare } from "react-icons/fa";
 import { FiInstagram } from "react-icons/fi";
+import { FaPinterest } from "react-icons/fa";
 
 export interface WidgetFooterMenu {
   id: string;
@@ -104,6 +105,11 @@ const socials: SocialType[] = [
     icon: "lab la-instagram",
     href: "https://www.facebook.com/share/cQVoYkgSxmp465km/",
   },
+  {
+    name: "Pinterest",
+    icon: "lab la-instagram",
+    href: "https://in.pinterest.com/marketingvacationsaga/",
+  },
 ];
 
 const renderItem = (item: SocialType, index: number) => {
@@ -117,6 +123,7 @@ const renderItem = (item: SocialType, index: number) => {
       {item.name == "Twitter" && <FaXTwitter className=" text-md" /> }
       {item.name == "Community" && <GrGroup className=" text-md" /> }
       {item.name == "Instagram" && <FiInstagram className=" text-md" /> }
+      {item.name == "Pinterest" && <FaPinterest className=" text-md" /> }
       <span className="hidden lg:block text-sm ml-8">{item.name}</span>
     </a>
   );

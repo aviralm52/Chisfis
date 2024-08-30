@@ -22,6 +22,22 @@ const NavMobile: React.FC<NavMobileProps> = ({
   data = NAVIGATION_DEMO,
   onClickClose,
 }) => {
+
+  let token = "";
+  const IsServer = typeof window === "undefined";
+  if (!IsServer) {
+    token = window.localStorage.getItem("token") || "";
+  }
+
+  let navigationWhenLoggedIn = NAVIGATION_DEMO;
+  if (token){
+    navigationWhenLoggedIn = NAVIGATION_DEMO.filter((item) => item.href!="/signup");
+  }else{
+    navigationWhenLoggedIn = NAVIGATION_DEMO.filter((item) => item.name!="Logout");
+  }
+
+
+
   const _renderMenuChild = (item: NavItemType) => {
     return (
       <ul className="nav-mobile-sub-menu pl-6 pb-1 text-base">
@@ -125,7 +141,7 @@ const NavMobile: React.FC<NavMobileProps> = ({
         </span>
       </div>
       <ul className="flex flex-col py-6 px-2 space-y-1">
-        {data.map(_renderItem)}
+        {navigationWhenLoggedIn.map(_renderItem)}
       </ul>
       <div className="flex items-center justify-between py-6 px-5">
         <a
