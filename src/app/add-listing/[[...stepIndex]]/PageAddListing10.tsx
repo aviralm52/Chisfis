@@ -11,9 +11,9 @@ import Link from "next/link";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 
-
 import { FaHouseUser } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
+import PricingCard from "@/app/subscription/PricingCard";
 
 export interface PageAddListing10Props {}
 
@@ -100,6 +100,7 @@ interface checkBoxState {
 
 const PageAddListing10: FC<PageAddListing10Props> = () => {
   const { user } = useAuth();
+  const [goLiveState, setGoLiveState] = useState<boolean>(false);
 
   const clearLocalStorage = () => {
     localStorage.removeItem("page1");
@@ -205,9 +206,10 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
   const [propertyVSID, setPropertyVSID] = useState<string>();
 
   const handleGoLive = async () => {
+    setGoLiveState(true);
     const data = {
       userId: user?._id,
-      email:user?.email,
+      email: user?.email,
       propertyType: combinedData?.propertyType,
       placeName: combinedData?.placeName,
       rentalForm: combinedData?.rentalForm,
@@ -267,7 +269,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       const response = await axios.post("/api/users", data);
       if (data?.userId) {
         toast.success("Property is successfully live!");
-        console.log(response.data)
+        console.log(response.data);
         clearLocalStorage();
       } else {
         toast.error("User must be logged in to go live");
@@ -324,7 +326,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           </div>
           <hr className=" w-16 border-gray-600 boder-2 my-2" />
           <div className=" mt-1 font-medium text-xl ml-2">
-            {basePrice>0 && <div>€ {basePrice} /night</div>}
+            {basePrice > 0 && <div>€ {basePrice} /night</div>}
           </div>
         </div>
 
@@ -339,12 +341,14 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
 
           <div>
             {propertyVSID && (
-              <Link href={{
-                pathname: "/listing-stay-detail",
-                query: {
-                  id: propertyId,
-                }
-              }}>
+              <Link
+                href={{
+                  pathname: "/listing-stay-detail",
+                  query: {
+                    id: propertyId,
+                  },
+                }}
+              >
                 <ButtonPrimary className="-p-4">
                   <span className="text-sm ">Preview</span>
                 </ButtonPrimary>
@@ -373,7 +377,16 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
         )}
       </div>
       <ToastContainer className=" w-20 h-20 absolute right-16 top-28" />
-  
+
+      <div className={` ${goLiveState ? "block" : "hidden"} relative w-screen mx-auto max-w-3xl`}>
+        <div className="flex justify-center h-screen">
+          {goLiveState && (
+            <div className="absolute inset-0 w-[90vw] left-1/2 transform -translate-x-1/2">
+              <PricingCard />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

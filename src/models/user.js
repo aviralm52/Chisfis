@@ -32,8 +32,8 @@ const userSchema = new mongoose.Schema(
       default:""
     },
     phone:{
-      type:Number,
-      required:true
+      type:String,
+      required: true
     },
     myRequests:{
       type:[String],

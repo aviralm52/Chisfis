@@ -58,7 +58,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
       // const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       let fullPhoneNumber = "";
       if (phoneNumber){
-        fullPhoneNumber = `${countryCode}${phoneNumber}`
+        fullPhoneNumber = `${countryCode} ${phoneNumber}`
       }
       const response = await axios.post("/api/user/signup", {
         name,

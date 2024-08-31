@@ -98,9 +98,15 @@ const PropertySchema = new mongoose.Schema(
     monthlyDiscount: [Number],
     longTermMonths: [String],
 
+    hostedFrom: String,
+    lastUpdatedBy: {
+      type: [String],
+      default: [],
+    },
+
     isLive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   { timestamps: true }
