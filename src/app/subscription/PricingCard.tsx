@@ -1,3 +1,4 @@
+"use client";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import React, { FC, useEffect, useState } from "react";
 import ButtonPrimary from "@/shared/ButtonPrimary";
