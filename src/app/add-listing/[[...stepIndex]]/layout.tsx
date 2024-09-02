@@ -52,13 +52,8 @@ const CommonLayout: FC<CommonLayoutProps> = ({ children, params }) => {
 
   return (
     <>
-      {/* <div
-        className={`nc-PageAddListing1 px-4 max-w-3xl mx-auto pb-24 pt-14 sm:py-24 lg:pb-32`}
-      > */}
       <div
-        className={`nc-PageAddListing1 px-4 max-w-3xl mx-auto pb-24 pt-14 sm:py-24 lg:pb-32`}
-        // className={`nc-PageAddListing1 px-4 pb-24 pt-14 sm:py-24 lg:pb-32`}
-      >
+        className={`nc-PageAddListing1 px-4 max-w-3xl mx-auto pb-24 pt-14 sm:py-24 lg:pb-32`}>
         <div className="space-y-11">
           <div className="text-center">
             <span className="text-4xl font-semibold">{index}</span>{" "}
@@ -67,14 +62,11 @@ const CommonLayout: FC<CommonLayoutProps> = ({ children, params }) => {
             </span>
           </div>
 
-          {/* --------------------- */}
-          {/* <div className="listingSection__wrap" style={{'border':'1px solid white', 'width': '80vw'}}>{children} */}
           <div className="listingSection__wrap" style={{ border: "none" }}>
-              {children}
+            {children}
           </div>
 
-          {/* --------------------- */}
-          <div className="flex justify-end space-x-5">
+          <div className="flex justify-end mt-10 space-x-5">
             <ButtonSecondary href={backtHref}>Go back</ButtonSecondary>
             <ButtonPrimary href={nextHref}>
               {nextBtnText || "Continue"}
@@ -82,7 +74,7 @@ const CommonLayout: FC<CommonLayoutProps> = ({ children, params }) => {
           </div>
         </div>
       </div>
-      </>
+    </>
   );
 };
 

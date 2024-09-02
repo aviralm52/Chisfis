@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -503,9 +503,9 @@ const EditPropertyPage: React.FC = () => {
             length: numberOfPortions,
           }).map((item, index) => {
             return (
-              <div className=" flex flex-col space-y-4 my-4" key={index}>
+              <div className=" flex  flex-col space-y-4 my-4" key={index}>
                 <h1
-                  className=" text-2xl font-medium dark:text-white text-black cursor-pointer inline-flex items-center space-x-2"
+                  className=" text-lg border rounded-xl hover:bg-white/30 border-neutral-600  p-2 font-medium dark:text-white text-black cursor-pointer inline-flex items-center space-x-2"
                   onClick={() =>
                     setIsPortionOpen((prev) => {
                       const newIsPortionOpen = [...prev];

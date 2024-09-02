@@ -1,12 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { FaPlus } from "react-icons/fa6";
 import Label from "@/components/Label";
 import { useAuth } from "@/hooks/useAuth";
-import Avatar from "@/shared/Avatar";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Input from "@/shared/Input";
 import Select from "@/shared/Select";
-import Textarea from "@/shared/Textarea";
 import axios from "axios";
 import { Toaster, toast } from "sonner";
 
@@ -20,10 +19,14 @@ const AccountPage = () => {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [bankdetails, setBankDetails] = useState("");
-  // const [profilePic, setProfilePic] = useState("");
+
+  const [profilePic, setProfilePic] = useState("");
+  const [profilePicLoading, setProfilePicLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
 
   useEffect(() => {
     if (user) {
+      setProfilePic(user?.profilePic || "");
       setName(user?.name || "");
       setGender(user?.gender || "");
       setLanguage(user?.spokenLanguage || " ");
@@ -39,6 +42,7 @@ const AccountPage = () => {
     try {
       const updateData = {
         _id: user?._id,
+        profilePic,
         name,
         gender,
         spokenLanguage: language,
@@ -58,6 +62,73 @@ const AccountPage = () => {
     }
   };
 
+  // TODO : Add image upload
+
+  const generatePassword = (length: any) => {
+    const characters = "0123456789";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      password += characters.charAt(randomIndex);
+    }
+    return password;
+  };
+
+  const handleProfilePhoto = async (e: any) => {
+    setProfilePicLoading(true);
+    setPreviewImage(e?.target?.files[0]?.name);
+    const file = e?.target?.files[0];
+
+    if (
+      !file ||
+      !(
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/webp"
+      )
+    ) {
+      toast.error("Error: Only PNG and JPEG files are allowed.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e: any) {
+      setPreviewImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+
+    const storageZoneName = process.env.NEXT_PUBLIC_BUNNY_STORAGE_ZONE;
+    const accessKey = process.env.NEXT_PUBLIC_BUNNY_ACCESS_KEY;
+    const storageUrl = process.env.NEXT_PUBLIC_BUNNY_STORAGE_URL;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const randomNumberToAddInImageName = generatePassword(7);
+      const response = await axios.put(
+        `${storageUrl}/${storageZoneName}/ProfilePictures/${randomNumberToAddInImageName}${file.name}`,
+        file,
+        {
+          headers: {
+            AccessKey: accessKey,
+            "Content-Type": file.type,
+          },
+        }
+      );
+
+      console.log("response: ", response);
+      console.log(randomNumberToAddInImageName);
+      console.log(file.name);
+      const imageUrl = `https://vacationsaga.b-cdn.net/ProfilePictures/${randomNumberToAddInImageName}${file.name}`;
+
+      setProfilePic(imageUrl);
+      setProfilePicLoading(false);
+    } catch (error) {
+      toast.error("Error uploading image. Please try again.");
+    }
+  };
+
   return (
     <>
       <Toaster />
@@ -67,15 +138,39 @@ const AccountPage = () => {
         <div className="flex flex-col md:flex-row">
           <div className="flex-shrink-0 flex items-start">
             <div className="relative rounded-full overflow-hidden flex">
-              <Avatar sizeClass="w-32 h-32" />
-              <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center text-neutral-50 cursor-pointer">
-                <span className="mt-1 text-xs">Change Image</span>
-              </div>
-              {/* <Input
-              type="file"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              onChange={(e) => setProfilePic(e.target.files[0])} 
-            /> */}
+              <label htmlFor="file-upload">
+                <div className="lg:w-36 relative lg:h-36 md:w-28 md:h-28 w-20 h-20 rounded-full border border-gray-500 flex justify-center items-center mx-auto cursor-pointer hover:opacity-60 ">
+                  {(!previewImage || !profilePic) && !profilePicLoading && (
+                    <span className="absolute flex items-center justify-center w-full h-full">
+                      <FaPlus className="opacity-70 text-3xl cursor-pointer" />
+                    </span>
+                  )}
+                  <input
+                    type="file"
+                    className=" sr-only"
+                    accept="image/*"
+                    id="file-upload"
+                    name="file-upload"
+                    onChange={(e) => handleProfilePhoto(e)}
+                  />
+                  {profilePic && !profilePicLoading && (
+                    <div className=" w-full h-full rounded-full overflow-hidden transition-all">
+                      <img
+                        src={profilePic}
+                        className=" object-cover h-full w-full transition-all"
+                      />
+                    </div>
+                  )}
+                  {profilePicLoading && (
+                    <div className=" w-full h-full rounded-full overflow-hidden transition-all">
+                      <img
+                        src={previewImage}
+                        className=" opacity-70 object-contain h-full w-full transition-all"
+                      />
+                    </div>
+                  )}
+                </div>
+              </label>
             </div>
           </div>
           <div className="flex-grow mt-10 md:mt-0 md:pl-16 max-w-3xl space-y-6">
@@ -96,7 +191,8 @@ const AccountPage = () => {
                 value={gender}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setGender(e.target.value)
-                }>
+                }
+              >
                 <option value=""></option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>

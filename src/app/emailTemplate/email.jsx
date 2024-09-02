@@ -1,7 +1,19 @@
+export const PropertyListedTemplate = (userId, email) => {
+  return `
+	  <html>
+	  <body>
+		<h1>Hii</h1>
+		<p>Someone has listed a property contact details are below contact them</p>
+		<p>Contact details:</p>
+		<p>${userId}</p>
+		<p>${email}</p>
+	  </body>
+	  </html>
+	`;
+};
 
-
-export const RegistrationTemplate = (emailID , password) => { 
-	return `
+export const RegistrationTemplate = (emailID, password) => {
+  return `
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 	<!--[if (gte mso 9)|(IE)]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
@@ -459,11 +471,11 @@ export const RegistrationTemplate = (emailID , password) => {
 	</center>
 </body>
 </html>
-`};
-
+`;
+};
 
 export const ResetPasswordTemplate = (hashedToken) => {
-return `
+  return `
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 	<!--[if (gte mso 9)|(IE)]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
@@ -942,10 +954,10 @@ return `
 </body>
 </html>
 `;
-}
+};
 
-export const ForgotPassword = ( email ,  resetPasswordLink)  => {
-return `
+export const ForgotPassword = (email, resetPasswordLink) => {
+  return `
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 	<!--[if (gte mso 9)|(IE)]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
@@ -1407,11 +1419,10 @@ return `
 </body>
 </html>
 `;
-} 
+};
 
-
-export const VerificationTemplate = (hashedToken , password , email) => {
-return   `
+export const VerificationTemplate = (hashedToken, password, email) => {
+  return `
 	<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 	<head>
 		<!--[if (gte mso 9)|(IE)]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
@@ -1875,5 +1886,4 @@ return   `
 	</body>
 	</html>
 	`;
-}
-
+};

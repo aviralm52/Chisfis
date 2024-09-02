@@ -1,6 +1,3 @@
-
-// NEXTAUTH: --> Authentication Middleware goes here
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -48,6 +45,7 @@ export const config = {
     "/account-password",
     "/account-savelists",
     "/editproperty",
+    "/add-listing/:path*"
   ],
 };
 
