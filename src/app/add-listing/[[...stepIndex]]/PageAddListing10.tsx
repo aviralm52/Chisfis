@@ -258,7 +258,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       basePriceLongTerm: combinedData?.basePriceLongTerm,
       monthlyDiscount: combinedData?.monthlyDiscount,
       longTermMonths: combinedData?.longTermMonths,
-      isLive: true,
+      isLive: false,
     };
 
     try {
