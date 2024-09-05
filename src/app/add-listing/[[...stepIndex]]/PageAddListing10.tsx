@@ -203,6 +203,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
 
   const handleGoLive = async () => {
     setGoLiveState(true);
+    return ;
     setIsLoading(true);
     const data = {
       userId: user?._id,

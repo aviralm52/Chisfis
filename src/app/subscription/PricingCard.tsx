@@ -5,6 +5,9 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonSecondary from "@/shared/ButtonSecondary";
 import axios from "axios";
 import PopupCard from "@/components/PopupCard";
+import Link from "next/link";
+import CryptoJS from "crypto-js";
+import { LuLoader2 } from "react-icons/lu";
 export interface PageSubcriptionProps {
   email?: string;
 }
@@ -26,7 +29,7 @@ const pricings: PricingItem[] = [
   {
     isPopular: false,
     name: "Action  Plan",
-    pricing: "€299",
+    pricing: "299",
     per: "/12 months",
     features: [
       "12 Months Listing",
@@ -44,7 +47,7 @@ const pricings: PricingItem[] = [
   {
     isPopular: true,
     name: "Game Plan",
-    pricing: "€399",
+    pricing: "399",
     per: "/18 months",
     features: [
       "18 Months Listing",
@@ -62,7 +65,7 @@ const pricings: PricingItem[] = [
   {
     isPopular: false,
     name: "Master Plan",
-    pricing: "€499",
+    pricing: "499",
     per: "/24 months",
     features: [
       "24 Months Listing",
@@ -78,6 +81,7 @@ const pricings: PricingItem[] = [
     desc: ` Literally you probably haven't heard of them jean shorts.`,
   },
 ];
+const PAYMENT_SECRET = process.env.PAYMENT_TOKEN_SECRET!;
 
 const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
   const [selectedCard, setSelectedCard] = useState<selectedCard>();
@@ -93,42 +97,18 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
 
   const handleSelectCard = (pricing: any) => {
     setSelectedCard(pricing.pricing);
-    console.log(pricing.pricing);
   };
 
   const handleClickedCard = (pricing: any) => {
-    console.log(pricing);
     setClickedCard(pricing.pricing);
     const selectedCard: selectedCard = {
       pricing: pricing.pricing,
     };
     setSelectedCard(selectedCard);
-    console.log(pricing.pricing);
   };
 
-  useEffect(() => {
-    console.log(clickedCard);
-    console.log(email);
-  }, [clickedCard]);
-
-  // const handlePlan = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await axios.post("/api/pricedetails", {
-  //       email,
-  //       price: clickedCard,
-  //     });
-
-  //     setIsPlanDisabled(true);
-  //     setIsLoading(false);
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     console.error("Error sending plan details:", error);
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handlePlan = async () => {
+    return;
     if (!clickedCard) {
       alert("You have to choose one plan before continuing.");
       return;
@@ -156,6 +136,34 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
     setShowPopup(false);
   };
 
+  const [amount, setAmount] = useState<number>(299);
+  const [paymentToken, setPaymentToken] = useState<string>("");
+  const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
+  const [subscribeButton, setSubscribeButton] = useState<boolean[]>(
+    Array.from({ length: 3 }, () => false)
+  );
+  const handleSubscribeButton = (index: number, price: number) => {
+    setSubscribeLoader(false);
+    setAmount(price);
+    setSubscribeButton((prevState) => {
+      const newState = Array.from({ length: 3 }, () => false);
+      newState[index] = true;
+      return newState;
+    });
+
+    const encryptToken = async () => {
+      try {
+        const response = await axios.post("/api/encrypt", { amount: price });
+        console.log(response.data);
+        setPaymentToken(response.data.encryptedAmount);
+        setSubscribeLoader(true);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    encryptToken();
+  };
+
   const renderPricingItem = (pricing: PricingItem, index: number) => {
     return (
       <>
@@ -178,7 +186,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
               {pricing.name}
             </h3>
             <h2 className="text-xl leading-none flex items-center text-neutral-900 dark:text-neutral-300">
-              <span>{pricing.pricing}</span>
+              <span>€{pricing.pricing}</span>
               <span className="text-lg ml-1 font-normal text-neutral-500">
                 {pricing.per}
               </span>
@@ -200,8 +208,21 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
             onClick={() => handleSelectCard(pricing)}
             className={` flex flex-col mt-auto`}
           >
-            <ButtonSecondary>
-              <span className={`font-medium`}>Subscribe to this plan</span>
+            {" "}
+            <ButtonSecondary
+              // onClick={() => setAmount(parseInt(pricing.pricing))}
+              onClick={() =>
+                handleSubscribeButton(index, parseInt(pricing.pricing))
+              }
+              className=""
+            >
+              <span
+                className={`font-medium p-2 w-full h-full rounded-xl flex justify-center items-center  ${
+                  subscribeButton[index] && "bg-orange-500 text-white"
+                }`}
+              >
+                Subscribe to this plan {subscribeButton[index] && (subscribeLoader ? "✔️" : <LuLoader2 className=" animate-spin" />)}
+              </span>
             </ButtonSecondary>
           </div>
         </div>
@@ -232,10 +253,18 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
         <div className="relative">
           <ButtonPrimary
             onClick={handlePlan}
-            className="absolute -top-20 ml-10"
-            disabled={isPlanDisabled}
+            className="absolute -top-20 ml-10 disabled:cursor-not-allowed"
+            disabled={isPlanDisabled && !subscribeLoader}
           >
-            {isLoading ? "Processing..." : "Continue"}
+            <Link
+              href={{
+                pathname: "/payment",
+                query: { amount: amount, paymentToken: paymentToken },
+              }}
+              onClick={(e) => {if(!subscribeLoader) e.preventDefault()}}
+            >
+              {isLoading ? "Processing..." : "Continue"}
+            </Link>
           </ButtonPrimary>
         </div>
 
