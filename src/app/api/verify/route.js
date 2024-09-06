@@ -16,22 +16,24 @@ const generatedSignature = (razorpayOrderId, razorpayPaymentId) => {
 };
 
 export async function POST(request) {
-  // const { orderCreationId, razorpayPaymentId, razorpaySignature } =
-  //   await request.json();
+  const data = await request.json();
+  console.log("verify data: ", data);
+  const { orderCreationId, razorpayPaymentId, razorpaySignature } = {
+    ...data.data,
+  };
 
-	const data = await request.json();
-	console.log(data);
-  const { orderCreationId, razorpayPaymentId, razorpaySignature } = data;
-
-	console.log(orderCreationId, razorpayPaymentId, razorpaySignature);
+  console.log(orderCreationId, razorpayPaymentId, razorpaySignature);
 
   const signature = generatedSignature(orderCreationId, razorpayPaymentId);
+  console.log("signature: ", signature);
   if (signature !== razorpaySignature) {
+    console.log("invalid signature");
     return NextResponse.json(
       { message: "payment verification failed", isOk: false },
       { status: 400 }
     );
   }
+  console.log("valid signature");
   return NextResponse.json(
     { message: "payment verified successfully", isOk: true },
     { status: 200 }

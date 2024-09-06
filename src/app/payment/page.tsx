@@ -4,7 +4,6 @@ import Script from "next/script";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
-import CryptoJS from "crypto-js";
 import { toast, Toaster } from "sonner";
 
 declare global {
@@ -14,8 +13,8 @@ declare global {
 }
 
 function Payment() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("Aviral");
+  const [email, setEmail] = useState("aviralm52@gmail.com");
   // const [amount, setAmount] = useState("0");
   const [currency, setCurrency] = useState("EUR");
   const [loading, setLoading] = useState(false);
@@ -49,7 +48,8 @@ function Payment() {
         amount: amount * 100,
         currency: currency,
       });
-      console.log(response);
+      console.log("orderId response: ",response);
+      console.log(response.data.orderId);
       return response.data.orderId;
     } catch (error) {
       console.error("There was a problem with your fetch operation:", error);
@@ -77,7 +77,7 @@ function Payment() {
         amount: amount * 100,
         currency: currency,
         name: "VacationSaga",
-        description: "description",
+        description: "Listing Plan Subscription",
         order_id: orderId,
         handler: async function (response: any) {
           const data = {
@@ -86,6 +86,8 @@ function Payment() {
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
           };
+
+          console.log("option data: ", data);
 
           try {
             console.log("here");
