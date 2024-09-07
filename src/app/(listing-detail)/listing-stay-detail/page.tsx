@@ -1025,7 +1025,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <Slider {...settings} className="w-full">
           {Array.from({ length: propertyPortions }, () => 1).map(
             (item, index) => (
-              <div className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer">
+              <div className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer" key={index}>
                 <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
                   {particularProperty?.portionCoverFileUrls[index] ? (
                     <img
