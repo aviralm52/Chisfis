@@ -154,40 +154,56 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
+  const [propertyPortions, setPropertyPortions] = useState<number>(0);
 
   useEffect(() => {
     const getProperties = async () => {
-      const response = await axios.get(`/api/particular/${indexId}`);
-      if (response.data) {
-        setParticualarProperty(response?.data);
-        setUserIdOfProperty(response.data.userId);
-        setPropertyId(response.data._id);
-      }
+      try {
+        const response = await axios.get(`/api/particular/${indexId}`);
+        if (response.data) {
+          setParticualarProperty(response?.data);
+          setUserIdOfProperty(response.data.userId);
+          setPropertyId(response.data._id);
+          setPropertyPortions(response?.data?.portionName.length);
+        }
 
-      const languageResponse = await axios.get(
-        `https://restcountries.com/v3.1/name/${response?.data?.country}`
-      );
-      const languageKey = Object.keys(languageResponse?.data[0]?.languages)[0];
-      const lang = languageResponse?.data[0]?.languages[languageKey];
-      setLanguage(lang);
-      const allAmen = [];
-      const general = Object.entries(response?.data?.generalAmenities);
-      const safe = Object.entries(response?.data?.safeAmenities);
-      const other = Object.entries(response?.data?.otherAmenities);
-      allAmen.push(...general, ...safe, ...other);
-      const filteredAllAmen = allAmen.filter((item, index) => item[1] === true);
-      setAllAmenities(filteredAllAmen);
+        const languageResponse = await axios.get(
+          `https://restcountries.com/v3.1/name/${response?.data?.country}`
+        );
+        const languageKey = Object.keys(
+          languageResponse?.data[0]?.languages
+        )[0];
+        const lang = languageResponse?.data[0]?.languages[languageKey];
+        setLanguage(lang);
+        const allAmen = [];
+        const general = Object.entries(response?.data?.generalAmenities);
+        const safe = Object.entries(response?.data?.safeAmenities);
+        const other = Object.entries(response?.data?.otherAmenities);
+        allAmen.push(...general, ...safe, ...other);
+        const filteredAllAmen = allAmen.filter(
+          (item, index) => item[1] === true
+        );
+        setAllAmenities(filteredAllAmen);
+      } catch (err) {
+        console.log("error: ", err);
+      }
     };
     getProperties();
   }, []);
 
   useEffect(() => {
     const getUsername = async () => {
-      const response = await axios.get(`/api/getUsername/${userIdOfPorperty}`);
-      if (response.data) {
-        const tempName = response.data.name;
-        const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
-        setUsername(name);
+      try {
+        const response = await axios.get(
+          `/api/getUsername/${userIdOfPorperty}`
+        );
+        if (response.data) {
+          const tempName = response.data.name;
+          const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
+          setUsername(name);
+        }
+      } catch (err) {
+        console.log("error: ", err);
       }
     };
     getUsername();
@@ -414,36 +430,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       <div className="listingSection__wrap">
         <h2 className="text-2xl font-semibold mb-2">Stay information</h2>
         {particularProperty?.reviews[indexId]}
-        <div className="relative">
-          <div>
-            <h3
-              className="cursor-pointer text-medium"
-              onClick={() => setIsExpanded((prev) => !prev)}
-            >
-              {!isExpanded && (
-                <h4 className="font-medium underline">
-                  Know more about {particularProperty?.portionName[indexId]}
-                </h4>
-              )}
-            </h3>
-          </div>
-          <div>
-            {isExpanded && (
-              <MdCancel
-                className="text-2xl cursor-pointer absolute right-4"
-                onClick={() => setIsExpanded((prev) => !prev)}
-              />
-            )}
-          </div>
-        </div>
-        {isExpanded && (
-          <div className="">
-            <h2 className=" font-medium text-lg underline">
-              Portion {indexId + 1}
-            </h2>
-            <h3>{description[indexId]}</h3>
-          </div>
-        )}
       </div>
     );
   };
@@ -976,15 +962,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     );
   };
 
-  let sliderSettings = {
-    dots: true,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 2,
-    slidesToScroll: 1,
-    variableWidth: true,
-  };
-
   const [clicked, setClicked] = useState<boolean[]>(
     Array(portions).fill(false)
   );
@@ -995,117 +972,115 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setClicked(newLike);
   };
 
+  const settings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 3, // Adjust the number of cards to show at once
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
+  };
+
+  // Custom Arrow Components
+  function SampleNextArrow(props: any) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} slick-next`}
+        onClick={onClick}
+        style={{ display: "block", right: "10px" }}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props: any) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} slick-prev z-10`}
+        onClick={onClick}
+        style={{ display: "block", left: "10px" }}
+      />
+    );
+  }
+
   const renderPortionCards = () => {
     return (
-      <Slider {...sliderSettings} className=" h-[440px]">
-        {myArray.map((item, index) => (
-          <div
-            key={index}
-            className=" w-[250px] h-[380px] rounded-3xl first:ml-4 flex-shrink-0 m-4 shadow-sm shadow-slate-400 border-1 border-slate-500"
-          >
-            <div className="h-52 flex justify-center rounded-3xl overflow-hidden flex-wrap relative">
-              {/* {page8?.monthlyDiscount ? ( */}
-              {particularProperty?.monthlyDiscount[index] ? (
-                <div className=" absolute bg-red-600 text-white font-medium rounded-xl mx-4 my-2 text-xs p-1 left-1">
-                  {/* -{page8.monthlyDiscount[index]}% today */}-
-                  {particularProperty?.monthlyDiscount[index]}% today
+      <div className=" flex gap-4 property-carousel-container">
+        <Slider {...settings} className="w-full">
+          {Array.from({ length: propertyPortions }, () => 1).map(
+            (item, index) => (
+              <div className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer" key={index}>
+                <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
+                  {particularProperty?.portionCoverFileUrls[index] ? (
+                    <img
+                      src={particularProperty?.portionCoverFileUrls[index]}
+                      alt="Portion Image"
+                      className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
+                    />
+                  ) : (
+                    <div className=" w-full h-full flex flex-col justify-center items-center">
+                      <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                      <span className=" text-neutral-600 font-medium">
+                        Image not found
+                      </span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div></div>
-              )}
-              <FaHeart
-                className={`absolute text-2xl right-4 top-2 cursor-pointer ${
-                  clicked[index] ? "text-red-500" : ""
-                }`}
-                onClick={(e) => handleLike(index)}
-              />
-              <Link
-                href={{
-                  pathname: "/listing-stay-detail",
-                  query: { id: index },
-                }}
-                key={index}
-              >
-                <img
-                  src={
-                    particularProperty?.portionCoverFileUrls[index]
-                      ? particularProperty?.portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt="Portion Image"
-                  className="cover w-56 h-48"
-                />
-                {/* <Image
-                  src={
-                    portionCoverFileUrls[index]
-                      ? portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt=""
-                  width={300}
-                  height={300}
-                  className="fill w-56 h-48"
-                /> */}
-                {/* <Image
-                  src={
-                    particularProperty?.portionCoverFileUrls[index]
-                      ? particularProperty?.portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt=""
-                  width={300}
-                  height={300}
-                  className="fill w-56 h-48"
-                /> */}
-              </Link>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <div className="flex gap-2 items-center">
-                <FaUser className="text-md" />
-                {/* <h3 className=" text-sm">{page3.guests[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.guests[index]}
-                </h3>
+                <div className=" flex gap-4 justify-center items-center my-2">
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.beds[index]}
+                    </h2>{" "}
+                    <IoIosBed className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.bathroom[index]}
+                    </h2>{" "}
+                    <FaBath className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.guests[index]}
+                    </h2>{" "}
+                    <FaUser className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.portionSize[index]} sq
+                    </h2>{" "}
+                    <SlSizeFullscreen className="text-md" />
+                  </div>
+                </div>
+                <div className=" px-2 py-4">
+                  <h2 className=" font-semibold text-xl">
+                    Portion {index + 1}
+                  </h2>
+                  <p className=" text-lg font-medium">
+                    € {particularProperty?.basePrice[index]}/night
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <IoIosBed className="text-md" />
-                {/* <h3 className=" text-sm">{page3.bedrooms[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.bedrooms[index]}
-                </h3>
-              </div>
-              <div className="flex gap-2 items-center">
-                <FaBath className="text-md" />
-                {/* <h3 className=" text-sm">{page3.bathroom[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.bathroom[index]}
-                </h3>
-              </div>
-              <div className="flex gap-2 items-center">
-                <SlSizeFullscreen className="text-md" />
-                {/* <h3 className=" text-sm">{page3.portionSize[index]} sq</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.portionSize[index]} sq
-                </h3>
-              </div>
-            </div>
-            <div>
-              <h2 className="ml-6 mt-2 text-lg font-medium">
-                Portion {index + 1}
-              </h2>
-            </div>
-            <div className=" h-0.5 w-12 bg-slate-600 rounded-xl ml-4 mt-4"></div>
-            <div>
-              <h2 className="text-xl font-bold ml-4 mt-4">
-                {" "}
-                {/* € {page8.basePrice[index]} /night */}
-                {/* € {particularProperty} */}€{" "}
-                {particularProperty?.basePrice[index]} /night
-              </h2>
-            </div>
-          </div>
-        ))}
-      </Slider>
+            )
+          )}
+        </Slider>
+      </div>
     );
   };
 
@@ -1352,7 +1327,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {renderSection3()}
           {renderSection4()}
           <SectionDateRange />
-          {checkPortion > 0 && renderPortionCards()}
+          {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
           {/* {renderSection7()} */}
