@@ -13,8 +13,8 @@ declare global {
 }
 
 function Payment() {
-  const [name, setName] = useState("Aviral");
-  const [email, setEmail] = useState("aviralm52@gmail.com");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   // const [amount, setAmount] = useState("0");
   const [currency, setCurrency] = useState("EUR");
   const [loading, setLoading] = useState(false);

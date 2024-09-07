@@ -108,7 +108,6 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
   };
 
   const handlePlan = async () => {
-    return;
     if (!clickedCard) {
       alert("You have to choose one plan before continuing.");
       return;
@@ -153,7 +152,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
 
     const encryptToken = async () => {
       try {
-        const response = await axios.post("/api/encrypt", { amount: price });
+        const response = await axios.post("/api/encrypt", { amount: 1 });
         console.log(response.data);
         setPaymentToken(response.data.encryptedAmount);
         setSubscribeLoader(true);
@@ -259,7 +258,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
             <Link
               href={{
                 pathname: "/payment",
-                query: { amount: amount, paymentToken: paymentToken },
+                query: { amount: 1, paymentToken: paymentToken },
               }}
               onClick={(e) => {if(!subscribeLoader) e.preventDefault()}}
             >
