@@ -366,7 +366,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           </div>
         </div>
 
-        <div className=" flex flex-col">
+        {/* <div className=" flex flex-col">
           {propertyVSID && <div>Your VSID: {propertyVSID}</div>}
           {propertyId && (
             <div className="">
@@ -374,7 +374,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
               {`https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`}
             </div>
           )}
-        </div>
+        </div> */}
         <div
           className={` ${
             goLiveState ? "block" : "hidden"
