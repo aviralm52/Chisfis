@@ -11,6 +11,8 @@ export async function POST(request) {
   const {
     userId,
     email,
+    phone,
+    name,
     propertyType,
     placeName,
     rentalForm,
@@ -110,9 +112,15 @@ export async function POST(request) {
 
   try {
     const createdProperty = await property.save();
+    const VSID = createdProperty.VSID;
+    const propertyId = createdProperty._id;
     await sendUserDetailsToCompany({
-      name: userId,
+      // name: userId,
       email: email,
+      phone: phone,
+      name: name,
+      VSID: VSID,
+      Link: `https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`
     });
 
     const response = NextResponse.json(createdProperty, { status: 200 });

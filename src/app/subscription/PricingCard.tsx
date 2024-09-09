@@ -9,7 +9,9 @@ import Link from "next/link";
 import CryptoJS from "crypto-js";
 import { LuLoader2 } from "react-icons/lu";
 export interface PageSubcriptionProps {
+  name?: string;
   email?: string;
+  phone?: string;
 }
 
 export interface PricingItem {
@@ -83,7 +85,7 @@ const pricings: PricingItem[] = [
 ];
 const PAYMENT_SECRET = process.env.PAYMENT_TOKEN_SECRET!;
 
-const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
+const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone }) => {
   const [selectedCard, setSelectedCard] = useState<selectedCard>();
   const [clickedCard, setClickedCard] = useState<string>("");
 
@@ -115,7 +117,9 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email }) => {
     try {
       setIsLoading(true);
       const response = await axios.post("/api/pricedetails", {
+        name,
         email,
+        phone,
         price: clickedCard,
       });
       setIsPlanDisabled(true);

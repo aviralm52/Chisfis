@@ -207,6 +207,8 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
     const data = {
       userId: user?._id,
       email: user?.email,
+      phone: user?.phone,
+      name: user?.name,
       propertyType: combinedData?.propertyType,
       placeName: combinedData?.placeName,
       rentalForm: combinedData?.rentalForm,
@@ -383,7 +385,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           <div className="flex justify-center h-screen">
             {goLiveState && (
               <div className="absolute inset-0 w-[90vw] left-1/2 transform -translate-x-1/2">
-                <PricingCard email={user?.email} />
+                <PricingCard email={user?.email} name={user?.name} phone={user?.phone || "N/A"} />
               </div>
             )}
           </div>

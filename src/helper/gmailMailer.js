@@ -77,23 +77,28 @@ export const sendUserDetailsToCompany = async (userDetails) => {
     if (userDetails.price !== undefined) {
       subject = "User's selected price details";
       text = `
+        Name: ${userDetails.name}
         Email: ${userDetails.email}
+        Phone: ${userDetails.phone}
         Selected Plan: ${userDetails.price}
-        Someone has choosen a price details are above.
+        Someone has choosen a plan, details are above.
       `;
     } else {
-   
       subject = "User's Details";
       text = `
+        Name: ${userDetails.name}
         Email: ${userDetails.email}
-        Someone has listed a property contact details are above.
+        Phone: ${userDetails.phone}
+        VSID: ${userDetails.VSID}
+        Link: ${userDetails.Link}
+        Someone has listed a property, contact details are above.
       `;
     }
 
     // Set up email options
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "support@vacationsaga.com",
+      to: "aviralm52@gmail.com",
       subject: subject,
       text: text,
     };
