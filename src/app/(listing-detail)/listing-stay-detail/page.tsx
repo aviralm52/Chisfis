@@ -330,31 +330,31 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className=" mt-32 md:mt-52  lg:mt-0 ">
+      <div className=" mt-48 md:mt-52  lg:mt-0 lg:border lg:border-neutral-700 rounded-xl lg:p-2">
         {/* 1 */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
           <LikeSaveBtns />
         </div>
 
         {/* 2 */}
-        <h2 className="text-xl sm:text-3xl lg:text-4xl font-semibold">
+        <h2 className="text-xl sm:text-3xl lg:text-4xl lg:mt-4 font-semibold">
           VS ID - {particularProperty?.VSID}
         </h2>
 
         {/* 3 */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 lg:my-2">
           {/* <StartRating /> */}
-          <span className="text-sm">
+          <span className="text-sm lg:text-lg">
             <i className="las la-map-marker-alt"></i>
-            <span className="ml-1 text-xs">
+            <span className="ml-1 text-xs lg:text-lg">
               {particularProperty?.city} {particularProperty?.country}
             </span>
           </span>
         </div>
 
-        <div className="flex  items-center">
+        <div className="flex  items-center lg:my-4">
           <img
             src={
               "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
@@ -364,7 +364,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           />
           <span className="ml-2.5 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
             Hosted by
-            <span className="text-neutral-900 mr-2 dark:text-neutral-200 font-medium">
+            <span className="text-neutral-900 mr-2 dark:text-neutral-200 font-medium ml-2 ">
               {username}
             </span>
           </span>
@@ -373,34 +373,37 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="w-full border-b border-neutral-100 mt-2 mb-2 dark:border-neutral-700" />
 
         {/* 6 */}
-        <div className="flex items-center overflow-scroll sm:overflow-hidden justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
+        <div className="flex items-center overflow-hidden sm:overflow-hidden justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300 lg:p-4">
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
 
             <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
               {particularProperty?.guests[indexId] || 3}
-              <span className=" sm:hidden md:block lg:block">Guests</span>
+              <span className=" hidden md:block ml-1"> Guests</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
 
             <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.bedrooms[indexId]} Bedrooms
+              {particularProperty?.bedrooms[indexId]} 
+              <span className=" hidden md:block ml-1"> Bedrooms</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
 
             <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.bathroom[indexId]} Bathroom
+              {particularProperty?.bathroom[indexId]} 
+              <span className=" hidden md:block ml-1"> Bathrooms</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
 
             <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.portionSize[indexId]} sq
+              {particularProperty?.portionSize[indexId]} 
+              <span className=" hidden md:block ml-1"> sq</span>
             </h3>
           </div>
         </div>
@@ -1297,7 +1300,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
           {/* Show all photos button for larger screens */}
           <button
-            className="absolute flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            className="absolute flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-30"
             onClick={() => setModalIsOpen(true)}
           >
             <Squares2X2Icon className="w-5 h-5" />
