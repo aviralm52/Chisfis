@@ -4,23 +4,25 @@ import ButtonPrimary from "@/shared/ButtonPrimary";
 import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalReserveMobile from "./ModalReserveMobile";
 
-const MobileFooterSticky = () => {
+const MobileFooterSticky = ({nights, price} : {nights?: number, price?: number|undefined}) => {
   const [startDate, setStartDate] = useState<Date | null>(
-    new Date("2023/02/06")
+    new Date()
   );
-  const [endDate, setEndDate] = useState<Date | null>(new Date("2023/02/23"));
+  const dt = new Date();
+  dt.setDate(dt.getDate() + (nights || 3));
+  const [endDate, setEndDate] = useState<Date | null>(new Date(dt));
 
   return (
-    <div className="block lg:hidden fixed bottom-0 inset-x-0 py-2 sm:py-3 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-6000 z-40">
+    <div className="block inset-x-0 rounded-lg lg:hidden  py-2 sm:py-3 bg-white dark:bg-neutral-800  z-100">
       <div className="container flex items-center justify-between">
         <div className="">
           <span className="block text-xl font-semibold">
-            $311
+            €{price || NaN}
             <span className="ml-1 text-sm font-normal text-neutral-500 dark:text-neutral-400">
               /night
             </span>
           </span>
-          <ModalSelectDate
+          <ModalSelectDate footerStartDate={(value) => setStartDate(value)} footerEndDate={(value) => setEndDate(value)}
             renderChildren={({ openModal }) => (
               <span
                 onClick={openModal}

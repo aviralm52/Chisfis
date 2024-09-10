@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { getDataFromToken } from "@/helper/getDataFromToken";
+import Users from "@/models/user";
 
 const generatedSignature = (razorpayOrderId, razorpayPaymentId) => {
   const keySecret = process.env.RAZORPAY_APT_SECRET;
@@ -18,7 +20,7 @@ const generatedSignature = (razorpayOrderId, razorpayPaymentId) => {
 export async function POST(request) {
   const data = await request.json();
   console.log("verify data: ", data);
-  const { orderCreationId, razorpayPaymentId, razorpaySignature } = {
+  const { orderCreationId, razorpayPaymentId, razorpaySignature, amount } = {
     ...data.data,
   };
 
@@ -34,6 +36,27 @@ export async function POST(request) {
     );
   }
   console.log("valid signature");
+
+  const loggedInUserId = getDataFromToken();
+  const user = await Users.findOne({ _id: loggedInUserId });
+  if (!user) {
+    return NextResponse.json(
+      { message: "payment verification failed", isOk: false },
+      { status: 400 }
+    );
+  }
+  const paymentObject = {
+    OrderId: orderCreationId,
+    PaymentId: razorpayPaymentId,
+    Plan: amount
+  }
+
+  try{
+    await user.updateOne({ Payment: paymentObject });
+  }catch(err){
+    console.log('Payment details not saved');
+  }
+
   return NextResponse.json(
     { message: "payment verified successfully", isOk: true },
     { status: 200 }

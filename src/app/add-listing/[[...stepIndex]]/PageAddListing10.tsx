@@ -202,7 +202,6 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
   const [propertyVSID, setPropertyVSID] = useState<string>();
 
   const handleGoLive = async () => {
-    setGoLiveState(true);
     setIsLoading(true);
     const data = {
       userId: user?._id,
@@ -281,6 +280,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       setIsLoading(false);
       throw error;
     }
+    setGoLiveState(true);
   };
   return (
     <>
@@ -385,7 +385,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
           <div className="flex justify-center h-screen">
             {goLiveState && (
               <div className="absolute inset-0 w-[90vw] left-1/2 transform -translate-x-1/2">
-                <PricingCard email={user?.email} name={user?.name} phone={user?.phone || "N/A"} />
+                <PricingCard email={user?.email} name={user?.name} phone={user?.phone || "N/A"} propertyId={propertyId} />
               </div>
             )}
           </div>

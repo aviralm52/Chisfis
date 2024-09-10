@@ -46,6 +46,7 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { BsExclamationCircleFill } from "react-icons/bs";
+import MobileFooterSticky from "../(components)/MobileFooterSticky";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -329,7 +330,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className="listingSection__wrap !space-y-6">
+      <div className=" mt-32 md:mt-52  lg:mt-0 ">
         {/* 1 */}
         <div className="flex justify-between items-center">
           <Badge name={particularProperty?.propertyType} />
@@ -338,28 +339,22 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </div>
 
         {/* 2 */}
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-          {/* {page3.portionName[indexId]} */}
-          {/* {particularProperty?.portionName[indexId]} */}
+        <h2 className="text-xl sm:text-3xl lg:text-4xl font-semibold">
           VS ID - {particularProperty?.VSID}
         </h2>
 
         {/* 3 */}
         <div className="flex items-center space-x-4">
           {/* <StartRating /> */}
-          <span>
+          <span className="text-sm">
             <i className="las la-map-marker-alt"></i>
-            <span className="ml-1">
-              {/* {location[2]}, {location[0]} */}
+            <span className="ml-1 text-xs">
               {particularProperty?.city} {particularProperty?.country}
             </span>
           </span>
         </div>
 
-        {/* 4 */}
-        <div className="flex items-center">
-          {/* <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" /> */}
-          {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
+        <div className="flex  items-center">
           <img
             src={
               "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
@@ -367,45 +362,44 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             alt="user"
             className=" rounded-full w-8"
           />
-          <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
-            Hosted by{" "}
-            <span className="text-neutral-900 dark:text-neutral-200 font-medium">
-              {/* Kevin Francis */}
+          <span className="ml-2.5 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
+            Hosted by
+            <span className="text-neutral-900 mr-2 dark:text-neutral-200 font-medium">
               {username}
             </span>
           </span>
         </div>
 
-        {/* 5 */}
-        <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
+        <div className="w-full border-b border-neutral-100 mt-2 mb-2 dark:border-neutral-700" />
 
         {/* 6 */}
-        <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
+        <div className="flex items-center overflow-scroll sm:overflow-hidden justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
-            {/* <h3 className=" text-sm">{page3.guests[indexId]} Guests</h3> */}
-            <h3 className=" text-sm">
-              {particularProperty?.guests[indexId] || 3} Guests
+
+            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
+              {particularProperty?.guests[indexId] || 3}
+              <span className=" sm:hidden md:block lg:block">Guests</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
-            {/* <h3 className=" text-sm">{page3.bedrooms[indexId]} Bedrooms</h3> */}
-            <h3 className=" text-sm">
+
+            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
               {particularProperty?.bedrooms[indexId]} Bedrooms
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
-            {/* <h3 className=" text-sm">{page3.bathroom[indexId]} Bathroom</h3> */}
-            <h3 className=" text-sm">
+
+            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
               {particularProperty?.bathroom[indexId]} Bathroom
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
-            {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
-            <h3 className=" text-sm">
+
+            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
               {particularProperty?.portionSize[indexId]} sq
             </h3>
           </div>
@@ -427,8 +421,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection2 = () => {
     return (
-      <div className="listingSection__wrap">
-        <h2 className="text-2xl font-semibold mb-2">Stay information</h2>
+      <div className="listingSection__wrap ">
+        <div className=" z-50 ">
+          <MobileFooterSticky
+            price={particularProperty?.basePrice[0]}
+            nights={particularProperty?.night[0] || 3}
+          />
+        </div>
+        <h2 className="text-2xl font-semibold  mb-2">Stay information</h2>
         {particularProperty?.reviews[indexId]}
       </div>
     );
@@ -522,9 +522,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   </div>
                   <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
                     {/* Amenities_demos.filter */}
-                    {allAmenities.map((item) => (
+                    {allAmenities.map((item, index) => (
                       <div
-                        key={item.name}
+                        key={index}
                         className="flex items-center py-2.5 sm:py-4 lg:py-5 space-x-5 lg:space-x-8"
                       >
                         <FaCheck className=" text-2xl" />
@@ -1025,7 +1025,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <Slider {...settings} className="w-full">
           {Array.from({ length: propertyPortions }, () => 1).map(
             (item, index) => (
-              <div className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer" key={index}>
+              <div
+                className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer"
+                key={index}
+              >
                 <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
                   {particularProperty?.portionCoverFileUrls[index] ? (
                     <img
@@ -1252,9 +1255,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     >
       {/*  HEADER */}
 
-      <header className="rounded-md sm:rounded-xl h-[60%]">
-        <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 ">
-          <div className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+      <header className="rounded-md sm:rounded-xl h-[40vh] sm:h-[60vh]">
+        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-2 row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={
@@ -1262,24 +1265,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                 }
                 alt="Cover Image"
-                className=" object-cover w-full h-full"
+                className="object-cover w-full h-full"
               />
             ) : (
-              <div className=" w-full h-full flex flex-col justify-center items-center">
-                <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
-                <span className=" text-neutral-600 font-medium">
+              <div className="w-full h-full flex flex-col justify-center items-center">
+                <BsExclamationCircleFill className="w-1/4 h-1/4 mb-2 text-neutral-600" />
+                <span className="text-neutral-600 font-medium">
                   Image not found
                 </span>
               </div>
             )}
-            {/* <Image
-                src={allImages[0]}
-                alt=""
-                className=" object-cover w-full h-full"
-                width={300}
-                height={300}
-              /> */}
           </div>
+
           {propertyPicturesTemp
             .filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
@@ -1293,19 +1290,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                   }
                   alt="Property Picture"
-                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44 "
+                  className="object-cover rounded-md sm:rounded-xl w-full h-full"
                 />
-                {/* <Image
-                    src={allImages[index]}
-                    alt=""
-                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
-                    width={300}
-                    height={300}
-                  /> */}
               </div>
             ))}
+
+          {/* Show all photos button for larger screens */}
           <button
-            className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            className="absolute flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
             onClick={() => setModalIsOpen(true)}
           >
             <Squares2X2Icon className="w-5 h-5" />

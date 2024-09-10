@@ -18,7 +18,8 @@ const DetailtLayout = ({ children }: { children: ReactNode }) => {
   const searchParams = useSearchParams();
   const modal = searchParams?.get("modal");
 
-  const handleCloseModalImageGallery = () => {
+
+  const handleCloseModalImageGallery = () => { 
     let params = new URLSearchParams(document.location.search);
     params.delete("modal");
     router.push(`${thisPathname}/?${params.toString()}` as Route);
@@ -64,7 +65,7 @@ const DetailtLayout = ({ children }: { children: ReactNode }) => {
       </div>
 
       {/* STICKY FOOTER MOBILE */}
-      <MobileFooterSticky />
+      {/* <MobileFooterSticky /> */}
     </div>
   );
 };

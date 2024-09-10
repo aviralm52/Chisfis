@@ -6,9 +6,11 @@ connectDb();
 
 export async function POST(req) {
   try {
-    const { email, price } = await req.json();
+    const { email, price, name, phone } = await req.json();
 
     const userDetails = {
+      name,
+      phone,
       email,
       price,
     };
