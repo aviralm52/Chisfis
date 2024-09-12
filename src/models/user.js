@@ -66,6 +66,8 @@ const userSchema = new mongoose.Schema(
       default: "Owner", // Optional: you can set a default role if needed
     },
 
+    Payment:Object,
+
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,
     verifyToken: String,

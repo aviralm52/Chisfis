@@ -23,6 +23,7 @@ function Payment() {
   const params = useSearchParams();
   const amount = parseInt(params.get("amount") || "299");
   const paymentToken = params.get("paymentToken");
+  const pId = params.get("pId");
 
   const decryptToken = async () => {
     try {
@@ -82,6 +83,8 @@ function Payment() {
         handler: async function (response: any) {
           const data = {
             orderCreationId: orderId,
+            amount: amount,
+            propertyId: pId,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,

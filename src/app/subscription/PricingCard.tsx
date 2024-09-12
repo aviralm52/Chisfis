@@ -12,6 +12,7 @@ export interface PageSubcriptionProps {
   name?: string;
   email?: string;
   phone?: string;
+  propertyId?: string;
 }
 
 export interface PricingItem {
@@ -85,7 +86,7 @@ const pricings: PricingItem[] = [
 ];
 const PAYMENT_SECRET = process.env.PAYMENT_TOKEN_SECRET!;
 
-const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone }) => {
+const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propertyId }) => {
   const [selectedCard, setSelectedCard] = useState<selectedCard>();
   const [clickedCard, setClickedCard] = useState<string>("");
 
@@ -262,7 +263,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone }) => {
             <Link
               href={{
                 pathname: "/payment",
-                query: { amount: 1, paymentToken: paymentToken },
+                query: {  pId: propertyId, amount: 1, paymentToken: paymentToken },
               }}
               onClick={(e) => {if(!subscribeLoader) e.preventDefault()}}
             >

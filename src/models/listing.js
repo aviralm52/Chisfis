@@ -104,6 +104,8 @@ const PropertySchema = new mongoose.Schema(
       default: [],
     },
 
+    OrderId: String,
+
     isLive: {
       type: Boolean,
       default: false,
