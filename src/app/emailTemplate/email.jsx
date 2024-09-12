@@ -1760,7 +1760,7 @@ export const VerificationTemplate = (hashedToken, password, email) => {
 													</tr>
 													<tr>
 														<td align="left" valign="middle" style="font-family: Poppins, sans-serif; color: #595959; font-size: 16px; line-height: 26px; font-weight: 400; letter-spacing: 0px; padding: 0px 0px 40px;">Registration Successful<br><br>You can access your account from the credentials given below<br>
-														<br>Password:"${password}"<br>
+														<br>Password: ${password}<br>
 														<br>
 													    </br>
 														<br>For any support please mail us on support@vacationsaga.com</td>
