@@ -26,6 +26,8 @@ export async function POST(request) {
       { new: true }
     );
 
+    
+
     if (!property) {
       return new Response(JSON.stringify({ message: "Property not found" }), {
         status: 404,

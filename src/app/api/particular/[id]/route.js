@@ -12,7 +12,8 @@ export async function GET(req) {
     const idList = referer.split('id=')
     const id = idList[1];
     // const shortlistedProperties = await Property.find({ country: "Greece" }); 
-    const particularProperty = await Property.findById(id);
+    // const particularProperty = await Property.findById(id);
+    const particularProperty = await Property.findOne({ _id: id, isLive: true });
 
     try {
         console.log('inside try')

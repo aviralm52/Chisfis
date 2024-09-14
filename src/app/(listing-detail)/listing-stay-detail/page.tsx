@@ -364,33 +364,38 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
 
         {/* 6 */}
+
         <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.guests[indexId]} Guests</h3> */}
             <h3 className=" text-sm">
-              {particularProperty?.guests[indexId] || 3} Guests
+              {particularProperty?.guests[indexId] || 3}{" "}
+              <span className="sm:block hidden">Guests</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bedrooms[indexId]} Bedrooms</h3> */}
             <h3 className=" text-sm">
-              {particularProperty?.bedrooms[indexId]} Bedrooms
+              {particularProperty?.bedrooms[indexId]}{" "}
+              <span className="sm:block hidden">Bedrooms</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bathroom[indexId]} Bathroom</h3> */}
             <h3 className=" text-sm">
-              {particularProperty?.bathroom[indexId]} Bathroom
+              {particularProperty?.bathroom[indexId]}{" "}
+              <span className="sm:block hidden">Bathroom</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
             <h3 className=" text-sm">
-              {particularProperty?.portionSize[indexId]} sq
+              {particularProperty?.portionSize[indexId]}{" "}
+              <span className="sm:block hidden">sq</span>
             </h3>
           </div>
         </div>
@@ -1270,16 +1275,24 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     particularProperty?.portionPictureUrls,
   ]);
 
+  const carouselSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+  };
+
   return (
     // <ProtectedRoute>
     <div
       className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
     >
-      {/*  HEADER */}
-
-      <header className="rounded-md sm:rounded-xl h-[60%]">
-        <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 ">
-          <div className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+      <header className="rounded-md sm:rounded-xl">
+        {/* Main Grid Layout for larger screens */}
+        <div className="relative  hidden  w-full h-full md:grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+          <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={
@@ -1287,24 +1300,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                 }
                 alt="Cover Image"
-                className=" object-cover w-full h-full"
+                className="object-cover h-full w-full"
               />
             ) : (
-              <div className=" w-full h-full flex flex-col justify-center items-center">
-                <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
-                <span className=" text-neutral-600 font-medium">
+              <div className="w-full h-full flex flex-col justify-center items-center">
+                <BsExclamationCircleFill className="w-1/4 h-1/4 mb-2 text-neutral-600" />
+                <span className="text-neutral-600 font-medium">
                   Image not found
                 </span>
               </div>
             )}
-            {/* <Image
-                src={allImages[0]}
-                alt=""
-                className=" object-cover w-full h-full"
-                width={300}
-                height={300}
-              /> */}
           </div>
+
+          {/* Thumbnail images for larger screens */}
           {propertyPicturesTemp
             .filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
@@ -1318,17 +1326,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                   }
                   alt="Property Picture"
-                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44 "
+                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
                 />
-                {/* <Image
-                    src={allImages[index]}
-                    alt=""
-                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
-                    width={300}
-                    height={300}
-                  /> */}
               </div>
             ))}
+
           <button
             className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
             onClick={() => setModalIsOpen(true)}
@@ -1337,6 +1339,35 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             <span className="ml-2 text-neutral-800 text-sm font-medium">
               Show all photos
             </span>
+          </button>
+        </div>
+
+        <div className="block md:hidden  w-full mt-4">
+          <Slider {...carouselSettings}>
+            {[particularProperty?.propertyCoverFileUrl, ...propertyPicturesTemp]
+              .filter((url, i) => i >= 0 && i < 5)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
+                >
+                  <img
+                    src={
+                      item ||
+                      "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                    }
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-full h-full"
+                  />
+                </div>
+              ))}
+          </Slider>
+          <button
+            className=" flex mt-10 text-xs items-center gap-x-2 md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            onClick={() => setModalIsOpen(true)}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+            Show all photos
           </button>
         </div>
       </header>
