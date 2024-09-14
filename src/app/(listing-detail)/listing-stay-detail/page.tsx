@@ -330,8 +330,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className=" mt-48 md:mt-52  lg:mt-0 lg:border lg:border-neutral-700 rounded-xl lg:p-2">
-        {/* 1 */}
+      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-2">
         <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
@@ -339,14 +338,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </div>
 
         {/* 2 */}
-        <h2 className="text-xl sm:text-3xl lg:text-4xl lg:mt-4 font-semibold">
+        <h2 className="text-xl sm:text-3xl mt-2 lg:text-4xl lg:mt-4 font-semibold">
           VS ID - {particularProperty?.VSID}
         </h2>
 
         {/* 3 */}
         <div className="flex items-center space-x-4 lg:my-2">
           {/* <StartRating /> */}
-          <span className="text-sm lg:text-lg">
+          <span className="text-sm my-2 lg:text-lg">
             <i className="las la-map-marker-alt"></i>
             <span className="ml-1 text-xs lg:text-lg">
               {particularProperty?.city} {particularProperty?.country}
@@ -373,37 +372,38 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="w-full border-b border-neutral-100 mt-2 mb-2 dark:border-neutral-700" />
 
         {/* 6 */}
-        <div className="flex items-center overflow-hidden sm:overflow-hidden justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300 lg:p-4">
+
+        <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
-
-            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.guests[indexId] || 3}
-              <span className=" hidden md:block ml-1"> Guests</span>
+            {/* <h3 className=" text-sm">{page3.guests[indexId]} Guests</h3> */}
+            <h3 className=" text-sm">
+              {particularProperty?.guests[indexId] || 3}{" "}
+              <span className="sm:block hidden">Guests</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
-
-            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.bedrooms[indexId]} 
-              <span className=" hidden md:block ml-1"> Bedrooms</span>
+            {/* <h3 className=" text-sm">{page3.bedrooms[indexId]} Bedrooms</h3> */}
+            <h3 className=" text-sm">
+              {particularProperty?.bedrooms[indexId]}{" "}
+              <span className="sm:block hidden">Bedrooms</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
-
-            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.bathroom[indexId]} 
-              <span className=" hidden md:block ml-1"> Bathrooms</span>
+            {/* <h3 className=" text-sm">{page3.bathroom[indexId]} Bathroom</h3> */}
+            <h3 className=" text-sm">
+              {particularProperty?.bathroom[indexId]}{" "}
+              <span className="sm:block hidden">Bathroom</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
-
-            <h3 className=" text-sm flex sm:flex-row flex-col items-center sm:items-start">
-              {particularProperty?.portionSize[indexId]} 
-              <span className=" hidden md:block ml-1"> sq</span>
+            {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
+            <h3 className=" text-sm">
+              {particularProperty?.portionSize[indexId]}{" "}
+              <span className="sm:block hidden">sq</span>
             </h3>
           </div>
         </div>
@@ -1103,13 +1103,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 alt="Carousel Image"
                 className="w-16 h-80 rounded-xl"
               />
-              {/* <Image
-                src={item}
-                alt=""
-                className="w-16 h-80 rounded-xl"
-                width={300}
-                height={300}
-              /> */}
             </div>
           ))}
       </Carousel>
@@ -1195,13 +1188,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                                 alt=""
                                 className="w-64 h-64 rounded-xl lg:w-72 lg:h-72"
                               />
-                              {/* <Image
-                                src={item}
-                                alt=""
-                                className="w-64 h-64 rounded-xl lg:w-72 lg:h-72"
-                                width={300}
-                                height={300}
-                              /> */}
                             </a>
                           </div>
                         </div>
@@ -1251,16 +1237,24 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     particularProperty?.portionPictureUrls,
   ]);
 
+  const carouselSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+  };
+
   return (
     // <ProtectedRoute>
     <div
       className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
     >
-      {/*  HEADER */}
-
-      <header className="rounded-md sm:rounded-xl h-[40vh] sm:h-[60vh]">
-        <div className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2 row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+      <header className="rounded-md sm:rounded-xl">
+        {/* Main Grid Layout for larger screens */}
+        <div className="relative  hidden  w-full h-full md:grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+          <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={
@@ -1268,7 +1262,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                 }
                 alt="Cover Image"
-                className="object-cover w-full h-full"
+                className="object-cover h-full w-full"
               />
             ) : (
               <div className="w-full h-full flex flex-col justify-center items-center">
@@ -1280,6 +1274,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             )}
           </div>
 
+          {/* Thumbnail images for larger screens */}
           {propertyPicturesTemp
             .filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
@@ -1293,12 +1288,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                   }
                   alt="Property Picture"
-                  className="object-cover rounded-md sm:rounded-xl w-full h-full"
+                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
                 />
               </div>
             ))}
-
-          {/* Show all photos button for larger screens */}
           <button
             className="absolute flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-30"
             onClick={() => setModalIsOpen(true)}
@@ -1307,6 +1300,35 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             <span className="ml-2 text-neutral-800 text-sm font-medium">
               Show all photos
             </span>
+          </button>
+        </div>
+
+        <div className="block md:hidden  w-full mt-4">
+          <Slider {...carouselSettings}>
+            {[particularProperty?.propertyCoverFileUrl, ...propertyPicturesTemp]
+              .filter((url, i) => i >= 0 && i < 5)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
+                >
+                  <img
+                    src={
+                      item ||
+                      "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                    }
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-full h-full"
+                  />
+                </div>
+              ))}
+          </Slider>
+          <button
+            className=" flex mt-10 text-xs items-center gap-x-2 md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            onClick={() => setModalIsOpen(true)}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+            Show all photos
           </button>
         </div>
       </header>

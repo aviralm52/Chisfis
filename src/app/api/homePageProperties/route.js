@@ -13,9 +13,10 @@ export async function GET(req) {
 
   try {
     const allProperties = await Property.aggregate([
+      { $match: { isLive: true } },
       { $sample: { size: queryLimit || 0 } },
     ]);
-    // const allProperties = await Property.find({}).limit(queryLimit || 8);
+
     console.log("allProperties: ", allProperties);
     return NextResponse.json(allProperties);
   } catch (error) {

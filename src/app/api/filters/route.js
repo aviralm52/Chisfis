@@ -7,9 +7,9 @@ connectDb();
 export async function POST(request) {
   try {
     const filterCriteria = await request.json();
-    
+
     console.log("filterCriteria: ", filterCriteria);
-    
+
     const {
       rentalForm,
       propertyType,
@@ -19,12 +19,11 @@ export async function POST(request) {
       bathrooms,
       beds,
       country,
-      rentalType
+      rentalType,
     } = filterCriteria;
 
-
-    const filter = {};
-
+    // const filter = {};
+    const filter = { isLive: true };
     // Add criteria to the filter only if they are provided
     if (country) filter.country = country;
     if (rentalType) filter.rentalType = rentalType;
@@ -42,13 +41,13 @@ export async function POST(request) {
     if (beds) filter.beds = { $gte: beds };
 
     console.log("Applied filter:", filter);
-    const results = Object.keys(filter).length > 0
-      ? await Property.find(filter)
-      : await Property.find();
+    const results =
+      Object.keys(filter).length > 0
+        ? await Property.find(filter)
+        : await Property.find();
 
     console.log("results: ", results.length);
     return NextResponse.json(results);
-
   } catch (error) {
     console.error("Error filtering properties: ", error);
     return NextResponse.json(
@@ -57,4 +56,3 @@ export async function POST(request) {
     );
   }
 }
-

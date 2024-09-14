@@ -96,7 +96,7 @@ const EditPropertyPage: React.FC = () => {
     time: property?.time,
     datesPerPortion: property?.datesPerPortion,
 
-    isLive: property?.isLive,
+    // isLive: property?.isLive,
   });
 
   useEffect(() => {
@@ -141,7 +141,7 @@ const EditPropertyPage: React.FC = () => {
         time: property.time,
         datesPerPortion: property.datesPerPortion,
 
-        isLive: property.isLive,
+        // isLive: property.isLive,
       });
     }
   }, [property]);
@@ -486,7 +486,7 @@ const EditPropertyPage: React.FC = () => {
               />
             </label>
           </div>
-          <div>
+          {/* <div>
             <label className=" text-xl flex items-center">
               <h1 className="text-xl dark:text-white font-medium">Is Live</h1>
               <input
@@ -497,7 +497,7 @@ const EditPropertyPage: React.FC = () => {
                 className="p-2 rounded-md mx-2 cursor-pointer"
               />
             </label>
-          </div>
+          </div> */}
           {Array.from({
             // length: numberOfPortions > 1 ? numberOfPortions : 0,
             length: numberOfPortions,

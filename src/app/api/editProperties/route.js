@@ -9,7 +9,7 @@ export const POST = async (request) => {
 	const {_id} = propertyData;
 
   try {
-    // const property = await Property.findById(_id);
+    
 		const updatedProperty = await Property.findByIdAndUpdate(_id, propertyData, { new: true });
 
 		return NextResponse.json(updatedProperty);
