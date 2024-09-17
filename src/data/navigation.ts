@@ -1,6 +1,6 @@
 import { MegamenuItem, NavItemType } from "@/shared/Navigation/NavigationItem";
 import ncNanoId from "@/utils/ncNanoId";
-import { Route } from "@/routers/types";
+import { PathName, Route } from "@/routers/types";
 import __megamenu from "./jsons/__megamenu.json";
 
 const megaMenuDemo: MegamenuItem[] = [
@@ -238,7 +238,7 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
       { id: ncNanoId(), href: "/listing-stay", name: "Stay listings" },
       {
         id: ncNanoId(),
-        href: "/listing-stay-map",
+        href: "/listing-stay-map" as PathName,
         name: "Stay listings (map)",
       },
       { id: ncNanoId(), href: "/listing-stay-detail", name: "Stay detail" },
