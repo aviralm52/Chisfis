@@ -183,6 +183,10 @@ const Footer: React.FC = () => {
             {socials.map(renderItem)}
           </div>
         </div>
+        <div className=" w-full flex justify-center">
+          <h1>Managed by <span className=" text-md">Zairo International Pvt. Ltd.</span></h1>
+          {/* <img src="/zairo.jfif" alt="" /> */}
+        </div>
       </div>
     </>
   );

@@ -10,6 +10,10 @@ export interface PageContactProps {}
 
 const info = [
   {
+    title: "Legal Name",
+    desc: "Zairo International Pvt. Ltd.",
+  },
+  {
     title: "🗺 ADDRESS",
     desc: "117/N/70 3rd Floor Kakadeo Kanpur",
   },
@@ -27,7 +31,7 @@ const info = [
   },
   {
     title: "For Booking Support",
-    desc: "+91 8960980806",
+    desc: "+91 8960980806 / 9621119484",
   },
 ];
 
