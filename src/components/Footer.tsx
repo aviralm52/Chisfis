@@ -51,11 +51,11 @@ const widgetMenus: WidgetFooterMenu[] = [
     id: "1",
     title: "Destinations",
     menus: [
-      { href: "/listing-stay-map", label: "Greece" },
-      { href: "/listing-stay-map", label: "Italy" },
-      { href: "/listing-stay-map", label: "Romania" },
-      { href: "/listing-stay-map", label: "Spain" },
-      { href: "/listing-stay-map", label: "Croatia" },
+      { href: "/listing-stay?place=Greece", label: "Greece" },
+      { href: "/listing-stay?place=Italy", label: "Italy" },
+      { href: "/listing-stay?place=Romania", label: "Romania" },
+      { href: "/listing-stay?place=Spain", label: "Spain" },
+      { href: "/listing-stay?place=Croatia", label: "Croatia" },
     ],
   },
   {
