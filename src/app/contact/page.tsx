@@ -1,10 +1,14 @@
-import React, { FC } from "react";
+"use client";
+import React, { FC, useEffect, useRef, useState } from "react";
 import SectionSubscribe2 from "@/components/SectionSubscribe2";
 import SocialsList from "@/shared/SocialsList";
 import Label from "@/components/Label";
 import Input from "@/shared/Input";
 import Textarea from "@/shared/Textarea";
 import ButtonPrimary from "@/shared/ButtonPrimary";
+import axios from "axios";
+import { toast, Toaster } from "sonner";
+import Loader from "@/helper/loader";
 
 export interface PageContactProps {}
 
@@ -36,8 +40,39 @@ const info = [
 ];
 
 const PageContact: FC<PageContactProps> = ({}) => {
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+  const [sendDetailsLoading, setSendDetailsLoading] = useState<boolean>(false);
+
+  const handleContactForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSendDetailsLoading(true);
+    if (!nameRef.current?.value || !emailRef.current?.value) {
+      return;
+    }
+    try {
+      const response = await axios.post("/api/contact", {
+        name: nameRef.current?.value,
+        email: emailRef.current?.value,
+        message: messageRef.current?.value,
+      });
+      if (response) {
+        toast.success(response.data.message);
+        nameRef.current!.value = "";
+        emailRef.current!.value = "";
+        messageRef.current!.value = "";
+      }
+    } catch (err: any) {
+      toast.error(err.response.data.error);
+    } finally {
+      setSendDetailsLoading(false);
+    }
+  };
+
   return (
     <div className={`nc-PageContact overflow-hidden`}>
+      <Toaster />
       <div className="mb-24 lg:mb-32">
         <h2 className="my-16 sm:my-20 flex items-center text-3xl leading-[115%] md:text-5xl md:leading-[115%] font-semibold text-neutral-900 dark:text-neutral-100 justify-center">
           Contact
@@ -63,13 +98,19 @@ const PageContact: FC<PageContactProps> = ({}) => {
               </div>
             </div>
             <div>
-              <form className="grid grid-cols-1 gap-6" action="#" method="post">
+              <form
+                className="grid grid-cols-1 gap-6"
+                // action={handleContactForm}
+                // method="post"
+                onSubmit={handleContactForm}
+              >
                 <label className="block">
                   <Label>Full name</Label>
                   <Input
                     placeholder="Example Doe"
                     type="text"
                     className="mt-1"
+                    ref={nameRef}
                   />
                 </label>
                 <label className="block">
@@ -79,15 +120,24 @@ const PageContact: FC<PageContactProps> = ({}) => {
                     type="email"
                     placeholder="example@example.com"
                     className="mt-1"
+                    ref={emailRef}
                   />
                 </label>
                 <label className="block">
                   <Label>Message</Label>
 
-                  <Textarea className="mt-1" rows={6} />
+                  <Textarea className="mt-1" rows={6} ref={messageRef} />
                 </label>
                 <div>
-                  <ButtonPrimary type="submit">Send Message</ButtonPrimary>
+                  <ButtonPrimary type="submit" disabled={sendDetailsLoading}>
+                    {sendDetailsLoading ? (
+                      <p className=" flex gap-2 disabled">
+                        Sending... <Loader />
+                      </p>
+                    ) : (
+                      "Send Message"
+                    )}
+                  </ButtonPrimary>
                 </div>
               </form>
             </div>

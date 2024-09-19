@@ -30,10 +30,16 @@ export async function POST(request) {
     if (rentalForm) filter.rentalForm = rentalForm;
     if (propertyType) filter.propertyType = propertyType;
 
+    // if (minPrice && maxPrice) {
+    //   filter.basePrice = {};
+    //   if (minPrice) filter.basePrice.$gte = minPrice;
+    //   if (maxPrice) filter.basePrice.$lte = maxPrice;
+    // }
     if (minPrice && maxPrice) {
-      filter.basePrice = {};
-      if (minPrice) filter.basePrice.$gte = minPrice;
-      if (maxPrice) filter.basePrice.$lte = maxPrice;
+      filter["basePrice.0"] = {
+        $gte: minPrice,
+        $lte: maxPrice,
+      };
     }
 
     if (bedrooms) filter.bedrooms = { $gte: bedrooms };
@@ -41,6 +47,7 @@ export async function POST(request) {
     if (beds) filter.beds = { $gte: beds };
 
     console.log("Applied filter:", filter);
+    console.log(Object.keys(filter).length);
     const results =
       Object.keys(filter).length > 0
         ? await Property.find(filter)

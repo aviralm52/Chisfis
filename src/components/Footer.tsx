@@ -27,7 +27,7 @@ export interface SocialsList1Props {
 const widgetMenus: WidgetFooterMenu[] = [
   {
     id: "5",
-    title: "Use Full Links",
+    title: "Useful Links",
     menus: [
       { href: "/about", label: "About Us" },
       { href: "#", label: "How we Work" },
@@ -66,7 +66,7 @@ const widgetMenus: WidgetFooterMenu[] = [
       { href: "#", label: "Traveller Help" },
       { href: "/privacy-policy", label: "Privacy Policy" },
       { href: "/termsandconditions", label: "Terms & Conditions" },
-      { href: "#", label: "Support" },
+      { href: "/contact", label: "Support" },
     ],
   },
   // {

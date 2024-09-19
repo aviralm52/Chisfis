@@ -29,6 +29,9 @@ const PageSignUp: FC<PageSignUpProps> = () => {
     "countryCallingCode" as countryCodesList.CountryProperty,
     "{countryNameEn} (+{countryCallingCode})"
   );
+  const sortedEntries = Object.entries(countryCodes).map(item => item[1]).sort((a, b) => a.localeCompare(b));
+  const sortedCountryCodes = Object.assign({}, sortedEntries);
+
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const validateForm = () => {
@@ -136,7 +139,7 @@ const PageSignUp: FC<PageSignUpProps> = () => {
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
                   >
-                    {Object.entries(countryCodes).map(([code, name]) => (
+                    {Object.entries(sortedCountryCodes).map(([code, name]) => (
                       <option key={code} value={`+${code}`}>
                         {name}
                       </option>

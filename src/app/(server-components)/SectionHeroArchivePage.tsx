@@ -71,7 +71,7 @@ const SectionHeroArchivePage: FC<SectionHeroArchivePageProps> = ({
   rightImage = imagePng,
 }) => {
   const searchParams = useSearchParams();
-  const country: string = searchParams.get("place") || "Greece";
+  const country: string = searchParams.get("place") || "";
   // const [allPropertiesTemp, setAllPropertiesTemp] = useState<PropertyDataType | undefined> (undefined);
   const [countryPropertyCount, setCountryPropertyCount] = useState(0);
   const [countryContext, setCountryContext] = useState<
@@ -84,7 +84,7 @@ const SectionHeroArchivePage: FC<SectionHeroArchivePageProps> = ({
 
   const context = useContext(MyContext);
 
-  let description = "";
+  let description = "We connect travelers with unique and diverse accommodations across multiple countries. Whether you're looking for a luxurious villa by the sea, a peaceful farmhouse in the countryside, a modern apartment in the heart of a city, or a cozy cottage for a serene getaway, we have the perfect property for every kind of traveler. Our extensive range of rentals includes holiday homes for families, stylish apartments for city explorers, and charming cottages for those seeking tranquility. With properties in stunning locations around the world, we make it easy for you to find the perfect place to stay, no matter your destination.";
   places.forEach((item) => {
     if (country === item.placename) {
       description = item.description;
@@ -118,7 +118,7 @@ const SectionHeroArchivePage: FC<SectionHeroArchivePageProps> = ({
             {country}
           </h2>
           <div className="flex items-center text-base md:text-lg text-neutral-500 dark:text-neutral-400">
-            <i className="text-2xl las la-map-marked"></i>
+            {country && <i className="text-2xl las la-map-marked"></i>}
             <span className="ml-2.5">{country} </span>
             <span className="mx-5"></span>
             {listingType ? (

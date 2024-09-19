@@ -29,6 +29,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const params = useSearchParams();
   const country = params.get("place") || "Greece";
+  const pType = params.get("propertyType") || "";
   const recordPerPage = 12;
 
   const [rentalForm, setRentalForm] = useState<string>();
@@ -45,21 +46,31 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
     setLoading(true);
     setRentalType("");
     try {
-      const response = await axios.get(
-        `/api/countryspecificproperties/${country}`,
-        {
-          params: {
-            limit: recordPerPage,
-            page,
-          },
+      if (!pType) {
+        const response = await axios.get(
+          `/api/countryspecificproperties/${country}`,
+          {
+            params: {
+              limit: recordPerPage,
+              page,
+            },
+          }
+        );
+        if (page === 1) {
+          setFetchedData(response.data);
+        } else {
+          setFetchedData((prevData) => [...prevData, ...response.data]);
         }
-      );
-      if (page === 1) {
-        setFetchedData(response.data);
+        setHasMore(response.data.length === recordPerPage);
       } else {
-        setFetchedData((prevData) => [...prevData, ...response.data]);
+        console.log("with property type");
+        const response = await axios.post(`/api/getSpecificPropertyType`, {
+          propertyType:pType,
+        });
+        if (response.data) {
+          setFetchedData(response.data);
+        }
       }
-      setHasMore(response.data.length === recordPerPage);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
@@ -74,6 +85,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const handleFilters = async () => {
     setLoading(true);
     setCurrentPage(1);
+    console.log(rentalForm, propertyType, beds, bedrooms, bathrooms, minPrice, maxPrice, country, rentalType, houserool);
     try {
       const response = await axios.post("api/filters", {
         rentalForm,

@@ -1,5 +1,6 @@
 // TODO: You have to remove the mailer functions and use gmailmailer
 
+import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 export const sendEmail = async ({ email, subject, text, price }) => {
@@ -77,5 +78,44 @@ export const sendUserDetailsToCompany = async (userDetails) => {
   } catch (error) {
     console.error("Error sending user details to company email:", error);
     throw new Error("Could not send user details to company email");
+  }
+};
+
+export const sendContactEmail = async (userDetails) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "User Contact Details and Query";
+    const text = `
+        Name: ${userDetails.name}
+        Email: ${userDetails.email}
+        Message: ${userDetails.message}
+      `;
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: "aviralm52@gmail.com",
+      subject: subject,
+      text: text,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json(
+      { message: "Your query has been delievered to the company" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
   }
 };
