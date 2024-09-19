@@ -165,6 +165,7 @@ import { FaToggleOn } from "react-icons/fa";
 import { FaToggleOff } from "react-icons/fa";
 import { PiToggleLeftFill } from "react-icons/pi";
 import { PiToggleRightFill } from "react-icons/pi";
+import StaySearchForm from "../(client-components)/(HeroSearchForm)/(stay-search-form)/StaySearchForm";
 
 export interface SectionGridFeaturePlacesProps {
   stayListings?: StayDataType[];
@@ -277,6 +278,9 @@ const SectionGridFeaturePlacesAllProperties: FC<
           </button>
         </div>
 
+        <div className="w-full -mt-14 mb-4 md:block hidden">
+          <StaySearchForm />
+        </div>
         <div
           className={`grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
         >
