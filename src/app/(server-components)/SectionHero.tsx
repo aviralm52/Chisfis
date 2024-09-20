@@ -24,7 +24,7 @@ const SectionHero: FC<SectionHeroProps> = ({ className = "" }) => {
             Saga, booking accommodation, resort villas, hotels
           </span>
           <ButtonPrimary
-            href={"/listing-stay-map" as PathName}
+            href={"/allproperties" as PathName}
             sizeClass="px-5 py-4 sm:px-7"
           >
             Start your search
