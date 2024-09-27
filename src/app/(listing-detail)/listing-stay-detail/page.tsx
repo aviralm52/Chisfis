@@ -27,12 +27,17 @@ import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
 import page from "@/app/checkout/page";
 import { useSearchParams } from "next/navigation";
-import { FaUser } from "react-icons/fa";
-import { IoIosBed } from "react-icons/io";
+import { FaHotTub, FaUser } from "react-icons/fa";
+import { IoIosBed, IoIosCompass, IoMdFlame } from "react-icons/io";
 import { FaBath } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { FaHeart } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
+import {
+  MdCancel,
+  MdConstruction,
+  MdHomeWork,
+  MdOutlineEnergySavingsLeaf,
+} from "react-icons/md";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import { Property } from "@/models/listing";
@@ -47,6 +52,9 @@ import { FaCheck } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import MobileFooterSticky from "../(components)/MobileFooterSticky";
+import { PiStudentBold } from "react-icons/pi";
+import { SiLevelsdotfyi } from "react-icons/si";
+import { RiMoneyEuroCircleFill } from "react-icons/ri";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -88,6 +96,7 @@ interface Properties {
   placeName: string;
   rentalForm: string;
   numberOfPortions: number;
+  rentalType: string;
 
   street: string;
   postalCode: string;
@@ -106,6 +115,7 @@ interface Properties {
   childrenAge: number[];
 
   basePrice: number[];
+  basePriceLongTerm: number[];
   weekendPrice: number[];
   monthlyDiscount: number[];
   currency: string;
@@ -126,6 +136,22 @@ interface Properties {
   propertyPictureUrls: string[];
   portionCoverFileUrls: string[];
   portionPictureUrls: string[][];
+
+  area: string;
+  subarea: string;
+  neighbourhood: string;
+  floor: string;
+  isTopFloor: boolean;
+  orientation: string;
+  levels: number;
+  zones: string;
+  propertyStyle: string;
+  constructionYear: number;
+  isSuitableForStudents: boolean;
+  monthlyExpenses: number;
+  heatingType: string;
+  heatingMedium: string;
+  energyClass: string;
 
   night: number[];
   time: number[];
@@ -334,6 +360,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
+          {particularProperty?.rentalType === "Long Term" &&
+            (particularProperty?.isTopFloor ? (
+              <Badge name={"Top Floor"} />
+            ) : (
+              <Badge name={`Floor ${particularProperty?.floor}`} />
+            ))}
+          {particularProperty?.rentalType === "Long Term" && (
+            <Badge name={`${particularProperty.propertyStyle}`} />
+          )}
           <LikeSaveBtns />
         </div>
 
@@ -343,14 +378,24 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </h2>
 
         {/* 3 */}
-        <div className="flex items-center space-x-4 lg:my-2">
+        <div className=" flex items-center space-x-4 lg:my-2">
           {/* <StartRating /> */}
-          <span className="text-sm my-2 lg:text-lg">
+          <span className="text-sm my-2 lg:text-lg flex items-center">
             <i className="las la-map-marker-alt"></i>
             <span className="ml-1 text-xs lg:text-lg">
               {particularProperty?.city} {particularProperty?.country}
             </span>
           </span>
+          <span> - </span>
+          {particularProperty?.rentalType === "Long Term" && (
+            <span className="text-sm my-2 lg:text-lg flex items-center">
+              <span className="text-xs lg:text-sm">
+                {particularProperty?.area} of {particularProperty?.subarea},{" "}
+                {particularProperty?.neighbourhood},{" "}
+                {particularProperty?.postalCode}
+              </span>
+            </span>
+          )}
         </div>
 
         <div className="flex  items-center lg:my-4">
@@ -377,7 +422,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.guests[indexId]} Guests</h3> */}
-            <h3 className=" text-sm">
+            <h3 className=" flex gap-x-1 text-sm">
               {particularProperty?.guests[indexId] || 3}{" "}
               <span className="sm:block hidden">Guests</span>
             </h3>
@@ -385,7 +430,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bedrooms[indexId]} Bedrooms</h3> */}
-            <h3 className=" text-sm">
+            <h3 className=" flex gap-x-1 text-sm">
               {particularProperty?.bedrooms[indexId]}{" "}
               <span className="sm:block hidden">Bedrooms</span>
             </h3>
@@ -393,7 +438,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bathroom[indexId]} Bathroom</h3> */}
-            <h3 className=" text-sm">
+            <h3 className=" flex gap-x-1 text-sm">
               {particularProperty?.bathroom[indexId]}{" "}
               <span className="sm:block hidden">Bathroom</span>
             </h3>
@@ -401,9 +446,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
-            <h3 className=" text-sm">
+            <h3 className=" flex gap-x-1 text-sm">
               {particularProperty?.portionSize[indexId]}{" "}
               <span className="sm:block hidden">sq</span>
+            </h3>
+          </div>
+          <div className="flex items-center space-x-3">
+            <IoIosCompass className="text-2xl" />
+            <h3 className=" flex gap-x-1 text-sm">
+              {particularProperty?.orientation}
             </h3>
           </div>
         </div>
@@ -559,29 +610,54 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="flow-root">
           <div className="text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4">
             <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Monday - Thursday</span>
+              {particularProperty?.rentalType === "Short Term" ? (
+                <span>Monday - Thursday</span>
+              ) : (
+                <span>Monthly Rates</span>
+              )}
               {/* <span>€ {price[indexId]}</span> */}
-              <span>€ {particularProperty?.basePrice[indexId]}</span>
+              <span>
+                €{" "}
+                {particularProperty?.rentalType === "Short Term"
+                  ? particularProperty?.basePrice[indexId]
+                  : particularProperty?.basePriceLongTerm[0]}
+              </span>
             </div>
 
-            <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Friday - Sunday</span>
-              {/* <span>€ {page8.weekendPrice[indexId]}</span> */}
-              <span>€ {particularProperty?.weekendPrice[indexId]}</span>
-            </div>
-            <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Rent by month</span>
-              {/* <span>-{page8.monthlyDiscount[indexId]} %</span> */}
-              <span>-{particularProperty?.monthlyDiscount[indexId]}%</span>
-            </div>
-            <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Minimum number of nights</span>
-              <span>{particularProperty?.night[0]} nights</span>
-            </div>
-            <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Max number of nights</span>
-              <span>{particularProperty?.night[1]} nights</span>
-            </div>
+            {particularProperty?.rentalType === "Short Term" && (
+              <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
+                <span>Friday - Sunday</span>
+                {/* <span>€ {page8.weekendPrice[indexId]}</span> */}
+                <span>€ {particularProperty?.weekendPrice[indexId]}</span>
+              </div>
+            )}
+
+            {particularProperty?.rentalType === "Short Term" ? (
+              <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                <span>Weekly Discount</span>{" "}
+                <span>{particularProperty?.monthlyDiscount[indexId]}</span>
+              </div>
+            ) : (
+              <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                {" "}
+                <span>Monthly Discount</span>
+                <span>- {particularProperty?.monthlyDiscount[indexId]} % </span>
+              </div>
+            )}
+
+            {particularProperty?.rentalType === "Short Term" && (
+              <div>
+                {" "}
+                <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
+                  <span>Minimum number of nights</span>
+                  <span>{particularProperty?.night[0]} nights</span>
+                </div>
+                <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                  <span>Max number of nights</span>
+                  <span>{particularProperty?.night[1]} nights</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -645,76 +721,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             </span>
           </div>
         </div>
-
-        {/* desc */}
-        {/* <span className="block text-neutral-6000 dark:text-neutral-300">
-          Providing lake views, The Symphony 9 Tam Coc in Ninh Binh provides
-          accommodation, an outdoor swimming pool, a bar, a shared lounge, a
-          garden and barbecue facilities...
-        </span> */}
-
-        {/* info */}
-        {/* <div className="block text-neutral-500 dark:text-neutral-400 space-y-2.5">
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span>Joined in March 2016</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-              />
-            </svg>
-            <span>Response rate - 100%</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-
-            <span>Fast response - within a few hours</span>
-          </div>
-        </div> */}
-
-        {/* == */}
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
-        <div>
-          <ButtonSecondary href="/author">See host profile</ButtonSecondary>
-        </div>
-      </div> */}
       </div>
     );
   };
@@ -813,19 +819,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       <div className="listingSection__wrap">
         {/* HEADING */}
         <h2 className="text-2xl font-semibold">Things to know</h2>
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" /> */}
 
         {/* CONTENT */}
-        {/* <div>
-          <h4 className="text-lg font-semibold">Cancellation policy</h4>
-          <span className="block mt-3 text-neutral-500 dark:text-neutral-400">
-            Refund 50% of the booking value when customers cancel the room
-            within 48 hours after successful booking and 14 days before the
-            check-in time. <br />
-            Then, cancel the room 14 days before the check-in time, get a 50%
-            refund of the total amount paid (minus the service fee).
-          </span>
-        </div> */}
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
 
         {/* CONTENT */}
@@ -845,6 +840,58 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
         </div>
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+
+        {/* LONG TERM INFO */}
+
+        {particularProperty?.rentalType === "Long Term" && (
+          <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
+            <div className=" md:flex justify-between w-full">
+              <div className=" flex items-center gap-x-2 w-3/5">
+                <SiLevelsdotfyi />
+                Number of Levels: {particularProperty?.levels}
+              </div>
+              <div className=" flex items-center justify-start gap-x-2 w-2/5">
+                <MdHomeWork />
+                Zones: {particularProperty?.zones}
+              </div>
+            </div>
+            <div className=" md:flex justify-between w-full">
+              <div className=" flex items-center gap-x-2 w-3/5">
+                <PiStudentBold />
+                This property is{" "}
+                {particularProperty?.isSuitableForStudents ? "" : "not"}{" "}
+                suitable for students
+              </div>
+              <div className=" flex items-center gap-x-2 w-2/5">
+                <MdConstruction />
+                Construction Year: {particularProperty?.constructionYear}
+              </div>
+            </div>
+            <div className=" md:flex justify-between w-full">
+              <div className=" flex items-center gap-x-2 w-3/5">
+                <RiMoneyEuroCircleFill />
+                Expected Monthly Expenses: {particularProperty?.monthlyExpenses}
+              </div>
+              <div className=" flex items-center gap-x-2 w-2/5">
+                {" "}
+                <FaHotTub />
+                Type of Heating: {particularProperty?.heatingType}
+              </div>
+            </div>
+            <div className=" md:flex justify-between w-full">
+              <div className=" flex items-center gap-x-2 w-3/5">
+                {" "}
+                <IoMdFlame />
+                Heating Medium: {particularProperty?.heatingMedium}
+              </div>
+              <div className=" flex items-center gap-x-2 w-2/5">
+                {" "}
+                <MdOutlineEnergySavingsLeaf /> Energy Class:{" "}
+                {particularProperty?.energyClass}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* CONTENT */}
         <div>
@@ -896,9 +943,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       return 0;
     };
 
-    const basePrice = particularProperty?.basePrice[indexId] ?? 0;
+    // const basePrice = particularProperty?.basePrice[indexId] ?? 0;
+    const basePrice =
+      particularProperty?.rentalType === "Short Term"
+        ? particularProperty?.basePrice[indexId]
+        : particularProperty?.basePriceLongTerm[0] || 0;
     const nights = Math.max(numberOfNights, minNights);
-    const totalPrice = basePrice * nights;
+    const totalPrice =
+      particularProperty?.rentalType === "Short Term"
+        ? basePrice * nights
+        : particularProperty?.basePriceLongTerm[0] || 0;
 
     return (
       <div className="listingSectionSidebar__wrap shadow-xl">
@@ -906,7 +960,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <span className="text-3xl font-semibold">
             € {basePrice}
             <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-              /night
+              /
+              {particularProperty?.rentalType === "Short Term"
+                ? "night"
+                : "month"}
             </span>
           </span>
           <StartRating />
@@ -928,12 +985,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-            <span>
+            <span className=" flex gap-x-1">
               € {basePrice} *{" "}
-              {minNightStay === undefined
-                ? particularProperty?.night[0]
-                : minNightStay}{" "}
-              nights
+              {particularProperty?.rentalType === "Short Term" ? (
+                <div>
+                  {minNightStay === undefined
+                    ? particularProperty?.night[0]
+                    : minNightStay}{" "}
+                  nights
+                </div>
+              ) : (
+                <div>1 month</div>
+              )}
             </span>
             <span>€ {totalPrice}</span>
           </div>
@@ -968,12 +1031,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [clicked, setClicked] = useState<boolean[]>(
     Array(portions).fill(false)
   );
-
-  const handleLike = (index: number) => {
-    const newLike = [...clicked];
-    newLike[index] = !clicked[index];
-    setClicked(newLike);
-  };
 
   const settings = {
     dots: true,
@@ -1032,22 +1089,32 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer"
                 key={index}
               >
-                <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
-                  {particularProperty?.portionCoverFileUrls[index] ? (
-                    <img
-                      src={particularProperty?.portionCoverFileUrls[index]}
-                      alt="Portion Image"
-                      className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
-                    />
-                  ) : (
-                    <div className=" w-full h-full flex flex-col justify-center items-center">
-                      <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
-                      <span className=" text-neutral-600 font-medium">
-                        Image not found
-                      </span>
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href={{
+                    pathname: `/listing-stay-detail`,
+                    query: {
+                      id: propertyId,
+                      portion: index,
+                    },
+                  }}
+                >
+                  <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
+                    {particularProperty?.portionCoverFileUrls[index] ? (
+                      <img
+                        src={particularProperty?.portionCoverFileUrls[index]}
+                        alt="Portion Image"
+                        className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
+                      />
+                    ) : (
+                      <div className=" w-full h-full flex flex-col justify-center items-center">
+                        <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                        <span className=" text-neutral-600 font-medium">
+                          Image not found
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
                 <div className=" flex gap-4 justify-center items-center my-2">
                   <div className=" flex items-center gap-2 ">
                     <h2 className=" text-sm">
