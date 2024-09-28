@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px; /* Change this value to decrease width */
+    background: #525252; /* Color of the scrollbar */
+    border-radius: 10px; 
+}
