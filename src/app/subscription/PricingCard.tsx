@@ -32,7 +32,7 @@ const pricings: PricingItem[] = [
   {
     isPopular: false,
     name: "Action  Plan",
-    pricing: "299",
+    pricing: "49",
     per: "/12 months",
     features: [
       "12 Months Listing",
@@ -140,7 +140,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
     setShowPopup(false);
   };
 
-  const [amount, setAmount] = useState<number>(299);
+  const [amount, setAmount] = useState<number>(49);
   const [paymentToken, setPaymentToken] = useState<string>("");
   const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
   const [subscribeButton, setSubscribeButton] = useState<boolean[]>(
@@ -157,8 +157,8 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
 
     const encryptToken = async () => {
       try {
-        const response = await axios.post("/api/encrypt", { amount: 1 });
-        console.log(response.data);
+        const response = await axios.post("/api/encrypt", { amount: 49 });
+        console.log("token response: ", response.data);
         setPaymentToken(response.data.encryptedAmount);
         setSubscribeLoader(true);
       } catch (err) {
@@ -258,14 +258,14 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
           <ButtonPrimary
             onClick={handlePlan}
             className="absolute -top-20 ml-10 disabled:cursor-not-allowed"
-            disabled={isPlanDisabled && !subscribeLoader}
+            disabled={!paymentToken || isPlanDisabled && !subscribeLoader}
           >
             <Link
               href={{
                 pathname: "/payment",
-                query: {  pId: propertyId, amount: 1, paymentToken: paymentToken },
+                query: {  pId: propertyId, amount: 49, paymentToken: paymentToken },
               }}
-              onClick={(e) => {if(!subscribeLoader) e.preventDefault()}}
+              onClick={(e) => {if(!subscribeLoader || !paymentToken) e.preventDefault()}}
             >
               {isLoading ? "Processing..." : "Continue"}
             </Link>

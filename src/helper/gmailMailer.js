@@ -67,7 +67,7 @@ export const sendUserDetailsToCompany = async (userDetails) => {
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "support@vacationsaga.com",
+      to: "aviralm52@gmail.com",
       subject: subject,
       text: text,
     };
