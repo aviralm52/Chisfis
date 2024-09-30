@@ -150,6 +150,7 @@ interface Properties {
   additionalRules: string[];
 
   reviews: string[];
+  newReviews?: string;
 
   propertyCoverFileUrl: string;
   propertyPictureUrls: string[];
@@ -226,7 +227,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       setCurrentLocation({ latitude, longitude });
     };
 
-    // Error callback
+    // TODO: Current Location
     const handleError = (error: GeolocationPositionError) => {
       switch (error.code) {
         case error.PERMISSION_DENIED:
@@ -549,7 +550,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           />
         </div>
         <h2 className="text-2xl font-semibold  mb-2">Stay information</h2>
-        {particularProperty?.reviews[indexId]}
+        {particularProperty?.newReviews ? particularProperty?.newReviews : particularProperty?.reviews[indexId]}
       </div>
     );
   };
@@ -951,21 +952,31 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                                 ?.nearbyLocationTag[index] && (
                               <div className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
                                 <div>
-                                  <Link
-                                    href={
-                                      new URL(
+                                  {particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl != undefined ? (
+                                    <Link
+                                      href={
+                                        new URL(
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationUrl?.[index] || ""
+                                        )
+                                      }
+                                      target="_blank"
+                                    >
+                                      {" "}
+                                      {
                                         particularProperty?.nearbyLocations
-                                          ?.nearbyLocationUrl[index] || ""
-                                      )
-                                    }
-                                    target="_blank"
-                                  >
-                                    {" "}
-                                    {
-                                      particularProperty?.nearbyLocations
-                                        ?.nearbyLocationName[index]
-                                    }
-                                  </Link>
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <p>
+                                      {
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </p>
+                                  )}
                                 </div>
                                 <div>
                                   {particularProperty?.nearbyLocations
@@ -1398,6 +1409,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
       }
     }
+    arr = arr.filter(item => item!="");
     setAllImages(arr);
   }, [particularProperty]);
 
