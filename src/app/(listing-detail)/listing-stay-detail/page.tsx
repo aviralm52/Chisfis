@@ -27,8 +27,19 @@ import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
 import page from "@/app/checkout/page";
 import { useSearchParams } from "next/navigation";
-import { FaHotTub, FaUser } from "react-icons/fa";
-import { IoIosBed, IoIosCompass, IoMdFlame } from "react-icons/io";
+import {
+  FaHotTub,
+  FaMapMarkedAlt,
+  FaMapMarkerAlt,
+  FaUser,
+} from "react-icons/fa";
+import {
+  IoIosArrowDropdownCircle,
+  IoIosArrowDroprightCircle,
+  IoIosBed,
+  IoIosCompass,
+  IoMdFlame,
+} from "react-icons/io";
 import { FaBath } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { FaHeart } from "react-icons/fa";
@@ -52,9 +63,10 @@ import { FaCheck } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { BsExclamationCircleFill } from "react-icons/bs";
 import MobileFooterSticky from "../(components)/MobileFooterSticky";
-import { PiStudentBold } from "react-icons/pi";
+import { PiMapPinSimpleAreaFill, PiStudentBold } from "react-icons/pi";
 import { SiLevelsdotfyi } from "react-icons/si";
 import { RiMoneyEuroCircleFill } from "react-icons/ri";
+import { BentoGridDemo } from "@/components/BentoGrid";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -85,6 +97,13 @@ interface Page8State {
 interface DateRange {
   startDate: Date | null;
   endDate: Date | null;
+}
+
+interface nearbyLocationInterface {
+  nearbyLocationName: string[];
+  nearbyLocationDistance: number[];
+  nearbyLocationTag: string[];
+  nearbyLocationUrl: string[];
 }
 
 interface Properties {
@@ -131,6 +150,7 @@ interface Properties {
   additionalRules: string[];
 
   reviews: string[];
+  newReviews?: string;
 
   propertyCoverFileUrl: string;
   propertyPictureUrls: string[];
@@ -152,6 +172,8 @@ interface Properties {
   heatingType: string;
   heatingMedium: string;
   energyClass: string;
+
+  nearbyLocations: nearbyLocationInterface;
 
   night: number[];
   time: number[];
@@ -182,6 +204,49 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [language, setLanguage] = useState<string>("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
   const [propertyPortions, setPropertyPortions] = useState<number>(0);
+  const [nearbyAccordion, setNearbyAccordion] = useState<boolean[]>(() =>
+    Array(3).fill(false)
+  );
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // TODO: Accessing current Location
+  useEffect(() => {
+    // Check if the browser supports Geolocation API
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    // Success callback
+    const handleSuccess = (position: GeolocationPosition) => {
+      const { latitude, longitude } = position.coords;
+      setCurrentLocation({ latitude, longitude });
+    };
+
+    // TODO: Current Location
+    const handleError = (error: GeolocationPositionError) => {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setError("Permission denied");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          setError("Position unavailable");
+          break;
+        case error.TIMEOUT:
+          setError("Request timed out");
+          break;
+        default:
+          setError("An unknown error occurred");
+      }
+    };
+
+    // Get the current position
+    navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
+  }, []);
 
   useEffect(() => {
     const getProperties = async () => {
@@ -386,11 +451,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               {particularProperty?.city} {particularProperty?.country}
             </span>
           </span>
-          <span> - </span>
           {particularProperty?.rentalType === "Long Term" && (
             <span className="text-sm my-2 lg:text-lg flex items-center">
               <span className="text-xs lg:text-sm">
-                {particularProperty?.area} of {particularProperty?.subarea},{" "}
+                {" "}
+                - {particularProperty?.area} of {particularProperty?.subarea},{" "}
                 {particularProperty?.neighbourhood},{" "}
                 {particularProperty?.postalCode}
               </span>
@@ -451,12 +516,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               <span className="sm:block hidden">sq</span>
             </h3>
           </div>
-          <div className="flex items-center space-x-3">
-            <IoIosCompass className="text-2xl" />
-            <h3 className=" flex gap-x-1 text-sm">
-              {particularProperty?.orientation}
-            </h3>
-          </div>
+          {particularProperty?.rentalType === "Long Term" && (
+            <div className="flex items-center space-x-3">
+              <IoIosCompass className="text-2xl" />
+              <h3 className=" flex gap-x-1 text-sm">
+                {particularProperty?.orientation}
+              </h3>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -483,7 +550,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           />
         </div>
         <h2 className="text-2xl font-semibold  mb-2">Stay information</h2>
-        {particularProperty?.reviews[indexId]}
+        {particularProperty?.newReviews ? particularProperty?.newReviews : particularProperty?.reviews[indexId]}
       </div>
     );
   };
@@ -673,13 +740,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
         {/* host */}
         <div className="flex items-center space-x-4">
-          {/* <Avatar
-            hasChecked
-            hasCheckedClass="w-4 h-4 -top-0.5 right-0.5"
-            sizeClass="h-14 w-14"
-            radius="rounded-full"
-          /> */}
-          {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
           <img
             src={
               "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
@@ -695,28 +755,24 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
         </div>
 
-        <div className="mt-1.5 flex flex-col text-neutral-500 dark:text-neutral-400">
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <CiCalendar className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
-              Joined long time ago
-            </span>
+        <div className="mt-1.5 flex flex-col text-neutral-500 dark:text-neutral-400 gap-y-2">
+          <div className="flex items-center gap-3 mb-3">
+            <CiCalendar className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">Joined long time ago</span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <BiMessageAltDetail className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
-              Response rate - 100%
-            </span>
+          <div className="flex items-center gap-3 mb-3">
+            <BiMessageAltDetail className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">Response rate - 100%</span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <FaRegClock className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
+          <div className="flex items-center gap-3 mb-3">
+            <FaRegClock className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">
               Fast response - within a few hours
             </span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
-            <IoLanguageOutline className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
+          <div className="flex items-center gap-3">
+            <IoLanguageOutline className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">
               Language spoken - English, {language}
             </span>
           </div>
@@ -816,92 +872,182 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection8 = () => {
     return (
-      <div className="listingSection__wrap">
-        {/* HEADING */}
-        <h2 className="text-2xl font-semibold">Things to know</h2>
+      <div className="listingSection__wrap ">
+        <div className="w-full md:flex">
+          {/* // TODO: Left Half */}
+          <div className=" w-full md:w-1/2">
+            {/* HEADING */}
+            <h2 className="text-2xl font-semibold">Things to know</h2>
 
-        {/* CONTENT */}
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+            {/* CONTENT */}
+            <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mb-2" />
 
-        {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Check-in time</h4>
-          <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
-            <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-              <span>Check-in</span>
-              {/* <span>{time[0]}:00 am</span> */}
-              <span>{particularProperty?.time[0]}:00 am</span>
+            {/* CONTENT */}
+            <div className="">
+              <h4 className="text-lg font-semibold">Check-in time</h4>
+              <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
+                <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                  <span>Check-in</span>
+                  {/* <span>{time[0]}:00 am</span> */}
+                  <span>{particularProperty?.time[0]}:00 am</span>
+                </div>
+                <div className="flex space-x-10 justify-between p-3">
+                  <span>Check-out</span>
+                  {/* <span>{time[1]}:00 pm</span> */}
+                  <span>{particularProperty?.time[1]}:00 pm</span>
+                </div>
+              </div>
             </div>
-            <div className="flex space-x-10 justify-between p-3">
-              <span>Check-out</span>
-              {/* <span>{time[1]}:00 pm</span> */}
-              <span>{particularProperty?.time[1]}:00 pm</span>
-            </div>
-          </div>
-        </div>
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+            <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mb-2" />
 
-        {/* LONG TERM INFO */}
-
-        {particularProperty?.rentalType === "Long Term" && (
-          <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
-            <div className=" md:flex justify-between w-full">
-              <div className=" flex items-center gap-x-2 w-3/5">
-                <SiLevelsdotfyi />
-                Number of Levels: {particularProperty?.levels}
-              </div>
-              <div className=" flex items-center justify-start gap-x-2 w-2/5">
-                <MdHomeWork />
-                Zones: {particularProperty?.zones}
-              </div>
-            </div>
-            <div className=" md:flex justify-between w-full">
-              <div className=" flex items-center gap-x-2 w-3/5">
-                <PiStudentBold />
-                This property is{" "}
-                {particularProperty?.isSuitableForStudents ? "" : "not"}{" "}
-                suitable for students
-              </div>
-              <div className=" flex items-center gap-x-2 w-2/5">
-                <MdConstruction />
-                Construction Year: {particularProperty?.constructionYear}
-              </div>
-            </div>
-            <div className=" md:flex justify-between w-full">
-              <div className=" flex items-center gap-x-2 w-3/5">
-                <RiMoneyEuroCircleFill />
-                Expected Monthly Expenses: {particularProperty?.monthlyExpenses}
-              </div>
-              <div className=" flex items-center gap-x-2 w-2/5">
-                {" "}
-                <FaHotTub />
-                Type of Heating: {particularProperty?.heatingType}
-              </div>
-            </div>
-            <div className=" md:flex justify-between w-full">
-              <div className=" flex items-center gap-x-2 w-3/5">
-                {" "}
-                <IoMdFlame />
-                Heating Medium: {particularProperty?.heatingMedium}
-              </div>
-              <div className=" flex items-center gap-x-2 w-2/5">
-                {" "}
-                <MdOutlineEnergySavingsLeaf /> Energy Class:{" "}
-                {particularProperty?.energyClass}
+            {/* CONTENT */}
+            <div>
+              <h4 className="text-lg font-semibold">Special Note</h4>
+              <div className="prose sm:prose">
+                <ul className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
+                  {particularProperty?.additionalRules.map((rule, index) => {
+                    return <li key={index}>{rule}</li>;
+                  })}
+                </ul>
               </div>
             </div>
           </div>
-        )}
 
-        {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Special Note</h4>
-          <div className="prose sm:prose">
-            <ul className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
-              {particularProperty?.additionalRules.map((rule, index) => {
-                return <li key={index}>{rule}</li>;
-              })}
-            </ul>
+          {/* // TODO: Right Half */}
+          {/* // ! data according to Short Term and Long Term */}
+          <div className=" w-full md:w-1/2 md:ml-3">
+            {particularProperty?.rentalType === "Short Term" &&
+            particularProperty?.nearbyLocations?.nearbyLocationName?.length >
+              0 ? (
+              <>
+                {" "}
+                <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
+                  Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
+                </h2>
+                <div className=" h-full max-h-64 overflow-y-auto scrollbar-thin">
+                  {["Cafe", "Restaurant", "Mall"]?.map((item, ind) => (
+                    <div key={ind} className=" px-2">
+                      <h3
+                        className=" flex items-center gap-x-2 text-lg font-medium cursor-pointer"
+                        onClick={() => {
+                          setNearbyAccordion((prev) => {
+                            const newState = [...prev];
+                            newState[ind] = !newState[ind];
+                            return newState;
+                          });
+                        }}
+                      >
+                        {item}{" "}
+                        {nearbyAccordion[ind] ? (
+                          <IoIosArrowDropdownCircle />
+                        ) : (
+                          <IoIosArrowDroprightCircle />
+                        )}
+                      </h3>
+                      {nearbyAccordion[ind] &&
+                        particularProperty?.nearbyLocations?.nearbyLocationName?.map(
+                          (innerItem, index) =>
+                            item ===
+                              particularProperty?.nearbyLocations
+                                ?.nearbyLocationTag[index] && (
+                              <div key={index} className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
+                                <div>
+                                  {particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl != undefined ? (
+                                    <Link
+                                      href={
+                                        new URL(
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationUrl?.[index] || ""
+                                        )
+                                      }
+                                      target="_blank"
+                                    >
+                                      {" "}
+                                      {
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <p>
+                                      {
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                                <div>
+                                  {particularProperty?.nearbyLocations
+                                    ?.nearbyLocationDistance[index] >= 1000
+                                    ? (
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationDistance[index] / 1000
+                                      ).toFixed(1) + " km"
+                                    : particularProperty?.nearbyLocations
+                                        ?.nearbyLocationDistance[index] + " m"}
+                                </div>
+                              </div>
+                            )
+                        )}
+
+                      <div className=" w-full h-0.5 bg-neutral-700 my-2"></div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className=" ml-2">
+                {/* LONG TERM INFO */}
+
+                {particularProperty?.rentalType === "Long Term" && (
+                  <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2 w-full">
+                    <div className=" flex items-center gap-x-2">
+                      <SiLevelsdotfyi />
+                      Number of Levels: {particularProperty?.levels}
+                    </div>
+                    <div className=" flex items-center justify-start gap-x-2">
+                      <MdHomeWork />
+                      Zones: {particularProperty?.zones}
+                    </div>
+
+                    <div className=" flex items-center gap-x-2 ">
+                      <PiStudentBold />
+                      This property is{" "}
+                      {particularProperty?.isSuitableForStudents
+                        ? ""
+                        : "not"}{" "}
+                      suitable for students
+                    </div>
+                    <div className=" flex items-center gap-x-2 ">
+                      <MdConstruction />
+                      Construction Year: {particularProperty?.constructionYear}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      <RiMoneyEuroCircleFill />
+                      Expected Monthly Expenses:{" "}
+                      {particularProperty?.monthlyExpenses}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <FaHotTub />
+                      Type of Heating: {particularProperty?.heatingType}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <IoMdFlame />
+                      Heating Medium: {particularProperty?.heatingMedium}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <MdOutlineEnergySavingsLeaf /> Energy Class:{" "}
+                      {particularProperty?.energyClass}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1157,37 +1303,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     );
   };
 
-  const allImagesParam: string = searchParams.get("allImages") || "";
-  const imageCarousel = () => {
-    return (
-      <Carousel>
-        {allImages
-          .filter((_, i) => i >= 1)
-          .map((item, index) => (
-            <div key={index}>
-              <img
-                src={item}
-                alt="Carousel Image"
-                className="w-16 h-80 rounded-xl"
-              />
-            </div>
-          ))}
-      </Carousel>
-    );
-  };
-
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-  const customStyles = {
-    content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "-50%",
-      transform: "translate(-50%, -50%)",
-    },
-  };
-
   const modalImages = () => {
     return (
       <Transition appear show={modalIsOpen} as={Fragment}>
@@ -1237,7 +1353,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   </span>
                 </div>
                 <div className="flex-grow overflow-auto px-8 py-4 text-neutral-700 dark:text-neutral-300">
-                  <div className="flex flex-wrap gap-4 justify-center lg:gap-12">
+                  {/* <div className="flex flex-wrap gap-4 justify-center lg:gap-12">
                     {allImages
                       .filter((_, i) => i >= 1 && i < 1212) // Assuming this is to limit the number of images displayed
                       .map((item, index) => (
@@ -1259,7 +1375,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                           </div>
                         </div>
                       ))}
-                  </div>
+                  </div> */}
+                  <BentoGridDemo allImages={allImages} />
                 </div>
               </div>
             </Transition.Child>
@@ -1279,30 +1396,22 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   }, [particularProperty?.propertyPictureUrls]);
 
   useEffect(() => {
-    if (
-      particularProperty?.propertyCoverFileUrl &&
-      particularProperty?.propertyPictureUrls &&
-      particularProperty?.portionCoverFileUrls &&
-      particularProperty?.portionPictureUrls
-    ) {
-      const allImagesArray = [
-        particularProperty?.portionCoverFileUrls,
-        particularProperty?.propertyPictureUrls,
-        particularProperty?.portionCoverFileUrls,
-        particularProperty?.portionPictureUrls,
-      ];
-      const arr = allImagesArray
-        .flat(Infinity)
-        .filter((item) => item !== null && item !== "");
-
-      setAllImages(arr);
+    let arr: string[] = [];
+    if (particularProperty?.propertyCoverFileUrl != undefined)
+      arr.push(particularProperty?.propertyCoverFileUrl);
+    if (particularProperty?.propertyPictureUrls != undefined)
+      arr = [...arr, ...particularProperty?.propertyPictureUrls];
+    if (particularProperty?.portionCoverFileUrls != undefined)
+      arr = [...arr, ...particularProperty?.portionCoverFileUrls];
+    if (particularProperty?.portionPictureUrls != undefined) {
+      for (let i = 0; i < particularProperty?.portionPictureUrls.length; i++) {
+        if (particularProperty?.portionPictureUrls[i] != undefined)
+          arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
+      }
     }
-  }, [
-    particularProperty?.propertyCoverFileUrl,
-    particularProperty?.propertyPictureUrls,
-    particularProperty?.portionCoverFileUrls,
-    particularProperty?.portionPictureUrls,
-  ]);
+    arr = arr.filter(item => item!="");
+    setAllImages(arr);
+  }, [particularProperty]);
 
   const carouselSettings = {
     dots: true,
