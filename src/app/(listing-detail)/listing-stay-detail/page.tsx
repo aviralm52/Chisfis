@@ -950,7 +950,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                             item ===
                               particularProperty?.nearbyLocations
                                 ?.nearbyLocationTag[index] && (
-                              <div className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
+                              <div key={index} className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
                                 <div>
                                   {particularProperty?.nearbyLocations
                                     ?.nearbyLocationUrl != undefined ? (
