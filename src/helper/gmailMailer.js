@@ -100,7 +100,7 @@ export const sendContactEmail = async (userDetails) => {
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "aviralm52@gmail.com",
+      to: "support@vacationsaga.com",
       subject: subject,
       text: text,
     };
