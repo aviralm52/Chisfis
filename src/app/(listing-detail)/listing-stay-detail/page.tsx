@@ -1117,7 +1117,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 : "month"}
             </span>
           </span>
-          <StartRating />
+          {/* <StartRating /> */}
         </div>
 
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">

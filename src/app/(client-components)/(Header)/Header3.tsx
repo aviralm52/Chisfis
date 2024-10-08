@@ -12,6 +12,7 @@ import { StaySearchFormFields } from "../type";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 
+
 interface Header3Props {
   className?: string;
 }
@@ -45,7 +46,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
 
   let pathname = usePathname();
   //
-
   useEffect(() => {
     setShowHeroSearch(null);
   }, [pathname]);
@@ -186,7 +186,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                 {/* <nav>
                   {isLoggedIn ? (
                     <>
-                      
                     </>
                   ) : (
                     <ButtonPrimary>
