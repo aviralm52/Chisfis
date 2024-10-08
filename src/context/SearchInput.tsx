@@ -22,7 +22,7 @@ const SearchInputProvider: React.FC<{ children: ReactNode }> = ({
   const dt = new Date(Date.now());
 	const [place, setPlace] = useState<string>("");
 	const [date, setDate] = useState<Date[]>([]);
-	const [guests, setGuests] = useState<number>(4);
+	const [guests, setGuests] = useState<number>(1);
 
   return (
     <SearchInputContext.Provider value={{place, setPlace, date, setDate, guests, setGuests}}>{children}</SearchInputContext.Provider>

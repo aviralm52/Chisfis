@@ -25,7 +25,7 @@ const GuestsInput: FC<GuestsInputProps> = ({
 }) => {
   const context = useContext(SearchInputContext);
 
-  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(2);
+  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1);
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0);
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0);
 

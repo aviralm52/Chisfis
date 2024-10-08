@@ -10,7 +10,6 @@ import axios from "axios";
 import PropertyCard from "./PropertyCard";
 import { PropertyDataType } from "@/data/types";
 
-
 // OTHER DEMO WILL PASS PROPS
 const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
 
@@ -55,15 +54,18 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   useEffect(() => {
     // console.log("loading: ", loading);
     const getAllProperties = async () => {
-      const response = await axios.get("/api/homePageProperties", {
-        params: {
-          limit: 8,
-        },
-      });
-      if (response.data) {
-        setLoading(false);
-        // console.log(response)
-        setAllProperties(response.data);
+      try{
+        const response = await axios.get("/api/homePageProperties", {
+          params: {
+            limit: 8,
+          },
+        });
+        if (response.data) {
+          setLoading(false);
+          setAllProperties(response.data);
+        }
+      }catch(err:any){
+        console.log("Error in fetching properties: ", err);
       }
     };
 

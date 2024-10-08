@@ -16,14 +16,13 @@ export async function GET(req) {
       { $match: { isLive: true } },
       { $sample: { size: queryLimit || 0 } },
     ]);
-
-    console.log("allProperties: ", allProperties);
     return NextResponse.json(allProperties);
   } catch (error) {
     console.error("Error fetching properties: ", error);
 
-    return NextResponse.json({
-      message: "Failed to fetch properties from the database",
-    });
+    return NextResponse.json(
+      { message: "Failed to fetch properties from the database" },
+      { status: 400 }
+    );
   }
 }

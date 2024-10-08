@@ -21,7 +21,7 @@ function Payment() {
 
   const router = useRouter();
   const params = useSearchParams();
-  const amount = parseInt(params.get("amount") || "299");
+  const amount = parseInt(params.get("amount") || "49");
   const paymentToken = params.get("paymentToken");
   const pId = params.get("pId");
 

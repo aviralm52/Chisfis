@@ -55,7 +55,7 @@ import { Property } from "@/models/listing";
 import { ObjectId } from "mongodb";
 import axios from "axios";
 import { CiCalendar } from "react-icons/ci";
-import { BiMessageAltDetail } from "react-icons/bi";
+import { BiMessageAltDetail, BiSolidArea } from "react-icons/bi";
 import { FaRegClock } from "react-icons/fa";
 import { IoLanguageOutline } from "react-icons/io5";
 import { FaRegCheckSquare } from "react-icons/fa";
@@ -509,7 +509,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             </h3>
           </div>
           <div className="flex items-center space-x-3">
-            <SlSizeFullscreen className="text-2xl" />
+            <BiSolidArea className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
             <h3 className=" flex gap-x-1 text-sm">
               {particularProperty?.portionSize[indexId]}{" "}
@@ -550,7 +550,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           />
         </div>
         <h2 className="text-2xl font-semibold  mb-2">Stay information</h2>
-        {particularProperty?.newReviews ? particularProperty?.newReviews : particularProperty?.reviews[indexId]}
+        {particularProperty?.newReviews
+          ? particularProperty?.newReviews
+          : particularProperty?.reviews[indexId]}
       </div>
     );
   };
@@ -950,7 +952,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                             item ===
                               particularProperty?.nearbyLocations
                                 ?.nearbyLocationTag[index] && (
-                              <div key={index} className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
+                              <div
+                                key={index}
+                                className=" flex justify-between text-sm text-neutral-500 px-2 font-medium"
+                              >
                                 <div>
                                   {particularProperty?.nearbyLocations
                                     ?.nearbyLocationUrl != undefined ? (
@@ -1112,7 +1117,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 : "month"}
             </span>
           </span>
-          <StartRating />
+          {/* <StartRating /> */}
         </div>
 
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">
@@ -1409,7 +1414,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
       }
     }
-    arr = arr.filter(item => item!="");
+    arr = arr.filter((item) => item != "");
     setAllImages(arr);
   }, [particularProperty]);
 
