@@ -38,6 +38,16 @@ export interface AuthorType {
 }
 
 export interface PostDataType {
+  _id?: string;
+  banner?: string;
+  maintext?: string;
+  content?: string;
+
+  tags?: string[];
+  totalWords?: number;
+  createdAt?: string;
+  updatedAt?: string;
+
   id: string | number;
   author: AuthorType;
   date: string;
@@ -90,7 +100,7 @@ export interface StayDataType {
   };
 }
 
-export interface PropertyDataType{
+export interface PropertyDataType {
   _id?: string;
   id?: string;
   userId?: string;
