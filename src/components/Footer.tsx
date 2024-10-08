@@ -7,7 +7,11 @@ import React, { FC } from "react";
 import FooterNav from "./FooterNav";
 import roundLogo from "@/images/companyLogo/logo1.png";
 import { SocialType } from "@/shared/SocialsShare";
+import { FaXTwitter } from "react-icons/fa6";
 import { GrGroup } from "react-icons/gr";
+import { FaFacebookSquare } from "react-icons/fa";
+import { FiInstagram } from "react-icons/fi";
+import { FaPinterest } from "react-icons/fa";
 
 export interface WidgetFooterMenu {
   id: string;
@@ -23,7 +27,7 @@ export interface SocialsList1Props {
 const widgetMenus: WidgetFooterMenu[] = [
   {
     id: "5",
-    title: "Use Full Links",
+    title: "Useful Links",
     menus: [
       { href: "/about", label: "About Us" },
       { href: "#", label: "How we Work" },
@@ -62,7 +66,7 @@ const widgetMenus: WidgetFooterMenu[] = [
       { href: "#", label: "Traveller Help" },
       { href: "/privacy-policy", label: "Privacy Policy" },
       { href: "/termsandconditions", label: "Terms & Conditions" },
-      { href: "#", label: "Support" },
+      { href: "/contact", label: "Support" },
     ],
   },
   // {
@@ -80,11 +84,32 @@ const widgetMenus: WidgetFooterMenu[] = [
 ];
 
 const socials: SocialType[] = [
-  { name: "Facebook", icon: "lab la-facebook-square", href: "https://www.facebook.com/Vacationsaga" },
-  { name: "Twitter", icon: "lab la-twitter", href: "https://x.com/vacationsaga" },
+  {
+    name: "Facebook",
+    icon: "lab la-facebook-square",
+    href: "https://www.facebook.com/Vacationsaga",
+  },
+  {
+    name: "Twitter",
+    icon: "lab la-xtwitter",
+    href: "https://x.com/vacationsaga",
+  },
   // { name: "Youtube", icon: "lab la-youtube", href: "#" },
-  { name: "Instagram", icon: "lab la-instagram", href: "https://www.instagram.com/vacationsaga/" },
-  { name: "Community", icon: "lab la-instagram", href: "https://www.facebook.com/share/cQVoYkgSxmp465km/" },
+  {
+    name: "Instagram",
+    icon: "lab la-instagram",
+    href: "https://www.instagram.com/vacationsaga/",
+  },
+  {
+    name: "Community",
+    icon: "lab la-instagram",
+    href: "https://www.facebook.com/share/cQVoYkgSxmp465km/",
+  },
+  {
+    name: "Pinterest",
+    icon: "lab la-instagram",
+    href: "https://in.pinterest.com/marketingvacationsaga/",
+  },
 ];
 
 const renderItem = (item: SocialType, index: number) => {
@@ -94,8 +119,12 @@ const renderItem = (item: SocialType, index: number) => {
       className="flex items-center text-2xl my-4 text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white leading-none space-x-2 group"
       key={index}
     >
-      <i className={item.icon}></i>
-      <span className="hidden lg:block text-sm">{item.name}</span>
+      {item.name == "Facebook"&& <FaFacebookSquare className=" text-md"  />}
+      {item.name == "Twitter" && <FaXTwitter className=" text-md" /> }
+      {item.name == "Community" && <GrGroup className=" text-md" /> }
+      {item.name == "Instagram" && <FiInstagram className=" text-md" /> }
+      {item.name == "Pinterest" && <FaPinterest className=" text-md" /> }
+      <span className="hidden lg:block text-sm ml-8">{item.name}</span>
     </a>
   );
 };
@@ -134,10 +163,11 @@ const Footer: React.FC = () => {
             <div className="col-span-2 md:col-span-1 flex flex-col items-center mr-8">
               {/* <Logo /> */}
               <img src={roundLogo.src} alt="Logo" className=" w-28 mb-2" />
-              <p className=" text-primary-6000 text-2xl my-2 font-bold">Vacation Saga</p>
+              <p className=" text-primary-6000 text-2xl my-2 font-bold">
+                Vacation Saga
+              </p>
               <p className="whitespace-nowrap my-2">
-                117/N/70 3rd Floor 
-                Kakadeo Kanpur
+                117/N/70 3rd Floor Kakadeo Kanpur
               </p>
               <a href="mailto:info@vacationsaga.com">info@vacationsaga.com</a>
             </div>
@@ -147,9 +177,15 @@ const Footer: React.FC = () => {
           </div>
           {widgetMenus.map(renderWidgetMenuItem)}
           <div>
-            <h3 className="font-semibold text-neutral-700 dark:text-neutral-200 text-sm">Social Handles</h3>
+            <h3 className="font-semibold text-neutral-700 dark:text-neutral-200 text-sm">
+              Social Handles
+            </h3>
             {socials.map(renderItem)}
           </div>
+        </div>
+        <div className=" w-full flex justify-center">
+          <h1>Managed by <span className=" text-md">Zairo International Pvt. Ltd.</span></h1>
+          {/* <img src="/zairo.jfif" alt="" /> */}
         </div>
       </div>
     </>

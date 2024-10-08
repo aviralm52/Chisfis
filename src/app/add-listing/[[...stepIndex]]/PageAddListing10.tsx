@@ -1,19 +1,17 @@
 "use client";
-import StayCard from "@/components/StayCard";
-import { DEMO_STAY_LISTINGS } from "@/data/listings";
+import { LuLoader2 } from "react-icons/lu";
 import React, { FC, useEffect, useState } from "react";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import ButtonSecondary from "@/shared/ButtonSecondary";
-import { EyeIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { Route } from "@/routers/types";
 
 import Link from "next/link";
 import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-
-
+import toast, { Toaster } from "react-hot-toast";
 import { FaHouseUser } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
+import PricingCard from "@/app/subscription/PricingCard";
 
 export interface PageAddListing10Props {}
 
@@ -62,7 +60,7 @@ interface CombinedData {
 
   basePrice?: number[];
   weekendPrice?: number[];
-  monthlyDiscount?: number[];
+  weeklyDiscount?: number[];
   currency?: string;
 
   generalAmenities?: object;
@@ -86,6 +84,11 @@ interface CombinedData {
   time: number[];
   datesPerPortion: number[][];
 
+  rentalType?: string;
+  basePriceLongTerm?: number[];
+  monthlyDiscount?: number[];
+  longTermMonths?: string[];
+
   isLive?: boolean;
 }
 
@@ -95,6 +98,9 @@ interface checkBoxState {
 
 const PageAddListing10: FC<PageAddListing10Props> = () => {
   const { user } = useAuth();
+  const [goLiveState, setGoLiveState] = useState<boolean>(false);
+  const [isLiveDisabled, setIsLiveDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const clearLocalStorage = () => {
     localStorage.removeItem("page1");
@@ -170,9 +176,6 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       const portionPictureUrls = JSON.parse(
         localStorage.getItem("portionPictureUrls") || "[[]]"
       );
-
-      // console.log("page4: ", page4);
-      // Combine all the data from the pages
       const combinedData = {
         ...page1,
         ...page2,
@@ -193,16 +196,18 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
     };
 
     const data = fetchDataFromLocalStorage();
-    // console.log("fetched data: ", data);
   }, [user, propertyCoverFileUrl]);
 
   const [propertyId, setPropertyId] = useState<string>();
   const [propertyVSID, setPropertyVSID] = useState<string>();
 
   const handleGoLive = async () => {
+    setIsLoading(true);
     const data = {
       userId: user?._id,
-      email:user?.email,
+      email: user?.email,
+      phone: user?.phone,
+      name: user?.name,
       propertyType: combinedData?.propertyType,
       placeName: combinedData?.placeName,
       rentalForm: combinedData?.rentalForm,
@@ -226,7 +231,7 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
 
       basePrice: combinedData?.basePrice,
       weekendPrice: combinedData?.weekendPrice,
-      monthlyDiscount: combinedData?.monthlyDiscount,
+      weeklyDiscount: combinedData?.weeklyDiscount,
       currency: combinedData?.currency,
 
       generalAmenities: combinedData?.generalAmenities,
@@ -250,121 +255,143 @@ const PageAddListing10: FC<PageAddListing10Props> = () => {
       time: combinedData?.time,
       datesPerPortion: combinedData?.datesPerPortion,
 
-      isLive: true,
+      rentalType: combinedData?.rentalType,
+      basePriceLongTerm: combinedData?.basePriceLongTerm,
+      monthlyDiscount: combinedData?.monthlyDiscount,
+      longTermMonths: combinedData?.longTermMonths,
+      isLive: false,
     };
 
     try {
       const response = await axios.post("/api/users", data);
       if (data?.userId) {
         toast.success("Property is successfully live!");
-        console.log(response.data)
         clearLocalStorage();
+        setIsLiveDisabled(true);
+        setIsLoading(false);
       } else {
         toast.error("User must be logged in to go live");
+        setIsLoading(false);
       }
       setPropertyId(response.data._id);
-      console.log(response.data.VSID);
       setPropertyVSID(response.data.VSID);
-      console.log(response.data.VSID);
     } catch (error) {
       toast.error("User must be logged in to go live");
+      setIsLoading(false);
       throw error;
     }
+    setGoLiveState(true);
   };
-
   return (
-    <div className=" flex flex-col gap-12">
-      <div>
-        <h2 className="text-2xl font-semibold">Congratulations 🎉</h2>
-        <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
-          Excellent, congratulations on completing the listing, it is waiting to
-          be reviewed for publication
-        </span>
-      </div>
-      <div className="">
-        {/* {/ <h3 className="text-lg font-semibold mb-4">This is your listing</h3> /} */}
-        {/* <div className="max-w-xs">
-          <StayCard
-            className="mt-8"
-            data={{ ...DEMO_STAY_LISTINGS[0], reviewStart: 0 }}
-          />
-        </div> */}
-
-        <div className="card w-72 border border-gray-600 rounded-xl pb-2">
-          <div className=" h-72 flex justify-center items-center overflow-hidden">
-            {propertyCoverFileUrl ? (
-              <img
-                src={propertyCoverFileUrl}
-                alt="coverImage"
-                className="card-img-top rounded-xl object-cover"
-              />
-            ) : (
-              <FaHouseUser className=" w-3/4 h-3/4" />
-            )}
-          </div>
-          <div className="card-body mt-2 ml-2">
-            <h1 className="mt-2">{page3?.portionName?.[0]}</h1>
-          </div>
-          <div className="flex gap-2 ml-2 mt-2 items-center">
-            {page2?.country && (
-              <h6>
-                {page2?.city}, {page2?.country}
-              </h6>
-            )}
-          </div>
-          <hr className=" w-16 border-gray-600 boder-2 my-2" />
-          <div className=" mt-1 font-medium text-xl ml-2">
-            {basePrice>0 && <div>€ {basePrice} /night</div>}
-          </div>
+    <>
+      <Toaster position="bottom-right" reverseOrder={true} />
+      <div className=" flex flex-col gap-12">
+        <div>
+          <h2 className="text-2xl font-semibold">Congratulations 🎉</h2>
+          <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
+            Excellent, congratulations on completing the listing, it is waiting
+            to be reviewed for publication
+          </span>
         </div>
-
-        <div className="flex mt-8 w-2/5 justify-around items-center">
-          <ButtonSecondary
-            href={"/add-listing/1" as Route}
-            className=" dark:bg-slate-700 bg-slate-700 text-white"
-          >
-            <PencilSquareIcon className="h-3 w-3" />
-            <span className="ml-3 text-sm">Edit</span>
-          </ButtonSecondary>
-
-          <div>
-            {propertyVSID && (
-              <Link href={{
-                pathname: "/listing-stay-detail",
-                query: {
-                  id: propertyId,
-                }
-              }}>
-                <ButtonPrimary className="-p-4">
-                  <span className="text-sm ">Preview</span>
+        <div className="flex flex-col w-72">
+          <div className="card  border border-gray-600 rounded-xl pb-2">
+            <div className=" h-72 flex justify-center items-center overflow-hidden">
+              {propertyCoverFileUrl ? (
+                <img
+                  src={propertyCoverFileUrl}
+                  alt="coverImage"
+                  className="card-img-top rounded-xl object-cover"
+                />
+              ) : (
+                <FaHouseUser className=" w-3/4 h-3/4" />
+              )}
+            </div>
+            <div className="card-body mt-2 ml-2">
+              <h1 className="mt-2">{page3?.portionName?.[0]}</h1>
+            </div>
+            <div className="flex gap-2 ml-2 mt-2 items-center">
+              {page2?.country && (
+                <h6>
+                  {page2?.city}, {page2?.country}
+                </h6>
+              )}
+            </div>
+            <hr className=" w-16 border-gray-600 boder-2 my-2" />
+            <div className=" mt-1 font-medium text-xl ml-2">
+              {basePrice > 0 && <div>€ {basePrice} /night</div>}
+            </div>
+          </div>
+          <div className="flex gap-y-2  mt-2  flex-col    items-center">
+            <div className="w-full">
+              {isLoading ? (
+                <ButtonPrimary className="dark:bg-primary-6000 flex items-center justify-center gap-x-2 w-full dark:text-white text-slate-700 bg-orange-400">
+                  <span className="flex items-center justify-center gap-x-2">
+                    Processing...
+                    <LuLoader2 className="text-base animate-spin ml-2" />
+                  </span>
                 </ButtonPrimary>
-              </Link>
-            )}
-          </div>
+              ) : (
+                <ButtonPrimary
+                  className="dark:bg-primary-6000 disabled:bg-neutral-600 w-full dark:text-white text-slate-700 bg-orange-400"
+                  onClick={handleGoLive}
+                  disabled={isLiveDisabled}>
+                  <span className="text-sm">Go Live</span>
+                </ButtonPrimary>
+              )}
+            </div>
 
-          <div>
-            <ButtonSecondary
-              className=" dark:bg-primary-6000 dark:text-white text-slate-700 bg-orange-400"
-              onClick={handleGoLive}
-            >
-              <span className="text-sm">Go Live</span>
-            </ButtonSecondary>
+            <div className="w-full flex items-center justify-between gap-x-2 ">
+              <ButtonSecondary
+                href={"/add-listing/1" as Route}
+                className="  w-full  ">
+                <PencilSquareIcon className="h-3 w-3" />
+                <span className="ml-3 text-sm">Edit</span>
+              </ButtonSecondary>
+
+              <div>
+                {propertyVSID && (
+                  <Link
+                    href={{
+                      pathname: "/listing-stay-detail",
+                      query: {
+                        id: propertyId,
+                      },
+                    }}
+                  >
+                    <ButtonPrimary className="-p-4 w-full mt-2">
+                      <span className="text-sm ">Preview</span>
+                    </ButtonPrimary>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className=" flex flex-col">
+          {propertyVSID && <div>Your VSID: {propertyVSID}</div>}
+          {propertyId && (
+            <div className="">
+              Your Property Link:{" "}
+              {`https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`}
+            </div>
+          )}
+        </div> */}
+        <div
+          className={` ${
+            goLiveState ? "block" : "hidden"
+          } relative w-screen mx-auto max-w-3xl`}
+        >
+          <div className="flex justify-center h-screen">
+            {goLiveState && (
+              <div className="absolute inset-0 w-[90vw] left-1/2 transform -translate-x-1/2">
+                <PricingCard email={user?.email} name={user?.name} phone={user?.phone || "N/A"} propertyId={propertyId} />
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <div className=" flex flex-col">
-        {propertyVSID && <div>Your VSID: {propertyVSID}</div>}
-        {propertyId && (
-          <div className="">
-            Your Property Link:{" "}
-            {`https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`}
-          </div>
-        )}
-      </div>
-      <ToastContainer className=" w-20 h-20 absolute right-16 top-28" />
-  
-    </div>
+    </>
   );
 };
 

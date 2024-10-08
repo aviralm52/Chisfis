@@ -106,7 +106,7 @@ const SectionGridFilterCard: FC<SectionGridFilterCardProps> = ({
     <div
       className={`nc-SectionGridFilterCard ${className}`}
       data-nc-id="SectionGridFilterCard" >
-      <Heading2 heading={`Stays in ${country}`} countryPropertyCount={placeSpecificCount} />
+      {/* <Heading2 heading={`Stays in ${country}`} countryPropertyCount={placeSpecificCount} /> */}
       
       <div className="mb-8 lg:mb-11">
         {/* <TabFilters  rentalType={(value:string) => setTabfilterValue(value)}  /> */}

@@ -12,7 +12,7 @@ export async function PUT(request) {
   }
   try {
     const updateData = {};
-
+    if (body.profilePic) updateData.profilePic = body.profilePic;
     if (body.nationality) updateData.nationality = body.nationality;
     if (body.name) updateData.name = body.name;
     if (body.profilePic) updateData.profilePic = body.profilePic;
@@ -33,7 +33,7 @@ export async function PUT(request) {
     }
     return NextResponse.json({
       message: "User profile updated successfully",
-      success:true
+      success: true,
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -88,7 +88,7 @@ const DEMO_CATS: TaxonomyType[] = [
 const DEMO_CATS_2: TaxonomyType[] = [
   {
     id: "1",
-    href: "/listing-stay-map",
+    href: "/listing-stay-map" ,
     name: "Enjoy the great cold",
     taxonomy: "category",
     count: 188288,

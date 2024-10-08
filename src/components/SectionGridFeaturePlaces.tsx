@@ -4,14 +4,12 @@ import { DEMO_STAY_LISTINGS } from "@/data/listings";
 import { StayDataType } from "@/data/types";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import HeaderFilter from "./HeaderFilter";
-import StayCard from "./StayCard";
-import StayCard2 from "./StayCard2";
-import CustomStayCard from "./CustomStayCard";
 import Link from "next/link";
 import { Properties } from "@/app/page";
 import axios from "axios";
 import PropertyCard from "./PropertyCard";
 import { PropertyDataType } from "@/data/types";
+
 
 // OTHER DEMO WILL PASS PROPS
 const DEMO_DATA: StayDataType[] = DEMO_STAY_LISTINGS.filter((_, i) => i < 8);
@@ -31,7 +29,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   stayListings = DEMO_DATA,
   gridClass = "",
   heading = "Featured places to stay",
-  subHeading = "Popular places to stay that Chisfis recommends for you",
+  subHeading = "Popular places to stay that Vacation Saga recommends for you",
   headingIsCenter,
   tabs = ["Greece", "Italy", "Romania", "Spain"],
   cardType = "card2",
@@ -55,21 +53,22 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("loading: ", loading);
+    // console.log("loading: ", loading);
     const getAllProperties = async () => {
-      const response = await axios.get("/api/allproperties", {
+      const response = await axios.get("/api/homePageProperties", {
         params: {
           limit: 8,
         },
       });
       if (response.data) {
         setLoading(false);
+        // console.log(response)
         setAllProperties(response.data);
       }
     };
 
     getAllProperties();
-    console.log("loading: ", loading);
+    // console.log("loading: ", loading);
   }, []);
 
   return (
@@ -112,7 +111,6 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
             ))
           : allProperties?.map((stay, index) => renderCard(stay, index))}
       </div>
-
       <div className="flex mt-16 justify-center items-center">
         <Link href="/allproperties">
           <ButtonPrimary>Show me more</ButtonPrimary>

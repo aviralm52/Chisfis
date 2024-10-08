@@ -27,12 +27,28 @@ import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
 import page from "@/app/checkout/page";
 import { useSearchParams } from "next/navigation";
-import { FaUser } from "react-icons/fa";
-import { IoIosBed } from "react-icons/io";
+import {
+  FaHotTub,
+  FaMapMarkedAlt,
+  FaMapMarkerAlt,
+  FaUser,
+} from "react-icons/fa";
+import {
+  IoIosArrowDropdownCircle,
+  IoIosArrowDroprightCircle,
+  IoIosBed,
+  IoIosCompass,
+  IoMdFlame,
+} from "react-icons/io";
 import { FaBath } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
 import { FaHeart } from "react-icons/fa";
-import { MdCancel } from "react-icons/md";
+import {
+  MdCancel,
+  MdConstruction,
+  MdHomeWork,
+  MdOutlineEnergySavingsLeaf,
+} from "react-icons/md";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import { Property } from "@/models/listing";
@@ -46,6 +62,11 @@ import { FaRegCheckSquare } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
 import { useAuth } from "@/hooks/useAuth";
 import { BsExclamationCircleFill } from "react-icons/bs";
+import MobileFooterSticky from "../(components)/MobileFooterSticky";
+import { PiMapPinSimpleAreaFill, PiStudentBold } from "react-icons/pi";
+import { SiLevelsdotfyi } from "react-icons/si";
+import { RiMoneyEuroCircleFill } from "react-icons/ri";
+import { BentoGridDemo } from "@/components/BentoGrid";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -78,6 +99,13 @@ interface DateRange {
   endDate: Date | null;
 }
 
+interface nearbyLocationInterface {
+  nearbyLocationName: string[];
+  nearbyLocationDistance: number[];
+  nearbyLocationTag: string[];
+  nearbyLocationUrl: string[];
+}
+
 interface Properties {
   _id: ObjectId;
   userId: string;
@@ -87,6 +115,7 @@ interface Properties {
   placeName: string;
   rentalForm: string;
   numberOfPortions: number;
+  rentalType: string;
 
   street: string;
   postalCode: string;
@@ -105,6 +134,7 @@ interface Properties {
   childrenAge: number[];
 
   basePrice: number[];
+  basePriceLongTerm: number[];
   weekendPrice: number[];
   monthlyDiscount: number[];
   currency: string;
@@ -120,11 +150,30 @@ interface Properties {
   additionalRules: string[];
 
   reviews: string[];
+  newReviews?: string;
 
   propertyCoverFileUrl: string;
   propertyPictureUrls: string[];
   portionCoverFileUrls: string[];
   portionPictureUrls: string[][];
+
+  area: string;
+  subarea: string;
+  neighbourhood: string;
+  floor: string;
+  isTopFloor: boolean;
+  orientation: string;
+  levels: number;
+  zones: string;
+  propertyStyle: string;
+  constructionYear: number;
+  isSuitableForStudents: boolean;
+  monthlyExpenses: number;
+  heatingType: string;
+  heatingMedium: string;
+  energyClass: string;
+
+  nearbyLocations: nearbyLocationInterface;
 
   night: number[];
   time: number[];
@@ -154,40 +203,99 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
+  const [propertyPortions, setPropertyPortions] = useState<number>(0);
+  const [nearbyAccordion, setNearbyAccordion] = useState<boolean[]>(() =>
+    Array(3).fill(false)
+  );
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // TODO: Accessing current Location
+  useEffect(() => {
+    // Check if the browser supports Geolocation API
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    // Success callback
+    const handleSuccess = (position: GeolocationPosition) => {
+      const { latitude, longitude } = position.coords;
+      setCurrentLocation({ latitude, longitude });
+    };
+
+    // TODO: Current Location
+    const handleError = (error: GeolocationPositionError) => {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setError("Permission denied");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          setError("Position unavailable");
+          break;
+        case error.TIMEOUT:
+          setError("Request timed out");
+          break;
+        default:
+          setError("An unknown error occurred");
+      }
+    };
+
+    // Get the current position
+    navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
+  }, []);
 
   useEffect(() => {
     const getProperties = async () => {
-      const response = await axios.get(`/api/particular/${indexId}`);
-      if (response.data) {
-        setParticualarProperty(response?.data);
-        setUserIdOfProperty(response.data.userId);
-        setPropertyId(response.data._id);
-      }
+      try {
+        const response = await axios.get(`/api/particular/${indexId}`);
+        if (response.data) {
+          setParticualarProperty(response?.data);
+          setUserIdOfProperty(response.data.userId);
+          setPropertyId(response.data._id);
+          setPropertyPortions(response?.data?.portionName.length);
+        }
 
-      const languageResponse = await axios.get(
-        `https://restcountries.com/v3.1/name/${response?.data?.country}`
-      );
-      const languageKey = Object.keys(languageResponse?.data[0]?.languages)[0];
-      const lang = languageResponse?.data[0]?.languages[languageKey];
-      setLanguage(lang);
-      const allAmen = [];
-      const general = Object.entries(response?.data?.generalAmenities);
-      const safe = Object.entries(response?.data?.safeAmenities);
-      const other = Object.entries(response?.data?.otherAmenities);
-      allAmen.push(...general, ...safe, ...other);
-      const filteredAllAmen = allAmen.filter((item, index) => item[1] === true);
-      setAllAmenities(filteredAllAmen);
+        const languageResponse = await axios.get(
+          `https://restcountries.com/v3.1/name/${response?.data?.country}`
+        );
+        const languageKey = Object.keys(
+          languageResponse?.data[0]?.languages
+        )[0];
+        const lang = languageResponse?.data[0]?.languages[languageKey];
+        setLanguage(lang);
+        const allAmen = [];
+        const general = Object.entries(response?.data?.generalAmenities);
+        const safe = Object.entries(response?.data?.safeAmenities);
+        const other = Object.entries(response?.data?.otherAmenities);
+        allAmen.push(...general, ...safe, ...other);
+        const filteredAllAmen = allAmen.filter(
+          (item, index) => item[1] === true
+        );
+        setAllAmenities(filteredAllAmen);
+      } catch (err) {
+        console.log("error: ", err);
+      }
     };
     getProperties();
   }, []);
 
   useEffect(() => {
     const getUsername = async () => {
-      const response = await axios.get(`/api/getUsername/${userIdOfPorperty}`);
-      if (response.data) {
-        const tempName = response.data.name;
-        const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
-        setUsername(name);
+      try {
+        const response = await axios.get(
+          `/api/getUsername/${userIdOfPorperty}`
+        );
+        if (response.data) {
+          const tempName = response.data.name;
+          const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
+          setUsername(name);
+        }
+      } catch (err) {
+        console.log("error: ", err);
       }
     };
     getUsername();
@@ -313,37 +421,49 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className="listingSection__wrap !space-y-6">
-        {/* 1 */}
-        <div className="flex justify-between items-center">
+      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-2">
+        <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
+          {particularProperty?.rentalType === "Long Term" &&
+            (particularProperty?.isTopFloor ? (
+              <Badge name={"Top Floor"} />
+            ) : (
+              <Badge name={`Floor ${particularProperty?.floor}`} />
+            ))}
+          {particularProperty?.rentalType === "Long Term" && (
+            <Badge name={`${particularProperty.propertyStyle}`} />
+          )}
           <LikeSaveBtns />
         </div>
 
         {/* 2 */}
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-          {/* {page3.portionName[indexId]} */}
-          {/* {particularProperty?.portionName[indexId]} */}
+        <h2 className="text-xl sm:text-3xl mt-2 lg:text-4xl lg:mt-4 font-semibold">
           VS ID - {particularProperty?.VSID}
         </h2>
 
         {/* 3 */}
-        <div className="flex items-center space-x-4">
+        <div className=" flex items-center space-x-4 lg:my-2">
           {/* <StartRating /> */}
-          <span>
+          <span className="text-sm my-2 lg:text-lg flex items-center">
             <i className="las la-map-marker-alt"></i>
-            <span className="ml-1">
-              {/* {location[2]}, {location[0]} */}
+            <span className="ml-1 text-xs lg:text-lg">
               {particularProperty?.city} {particularProperty?.country}
             </span>
           </span>
+          {particularProperty?.rentalType === "Long Term" && (
+            <span className="text-sm my-2 lg:text-lg flex items-center">
+              <span className="text-xs lg:text-sm">
+                {" "}
+                - {particularProperty?.area} of {particularProperty?.subarea},{" "}
+                {particularProperty?.neighbourhood},{" "}
+                {particularProperty?.postalCode}
+              </span>
+            </span>
+          )}
         </div>
 
-        {/* 4 */}
-        <div className="flex items-center">
-          {/* <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" /> */}
-          {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
+        <div className="flex  items-center lg:my-4">
           <img
             src={
               "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
@@ -351,48 +471,59 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             alt="user"
             className=" rounded-full w-8"
           />
-          <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
-            Hosted by{" "}
-            <span className="text-neutral-900 dark:text-neutral-200 font-medium">
-              {/* Kevin Francis */}
+          <span className="ml-2.5 text-sm sm:text-base text-neutral-500 dark:text-neutral-400">
+            Hosted by
+            <span className="text-neutral-900 mr-2 dark:text-neutral-200 font-medium ml-2 ">
               {username}
             </span>
           </span>
         </div>
 
-        {/* 5 */}
-        <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
+        <div className="w-full border-b border-neutral-100 mt-2 mb-2 dark:border-neutral-700" />
 
         {/* 6 */}
+
         <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
           <div className="flex items-center space-x-3 ">
             <FaUser className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.guests[indexId]} Guests</h3> */}
-            <h3 className=" text-sm">
-              {particularProperty?.guests[indexId] || 3} Guests
+            <h3 className=" flex gap-x-1 text-sm">
+              {particularProperty?.guests[indexId] || 3}{" "}
+              <span className="sm:block hidden">Guests</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <IoIosBed className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bedrooms[indexId]} Bedrooms</h3> */}
-            <h3 className=" text-sm">
-              {particularProperty?.bedrooms[indexId]} Bedrooms
+            <h3 className=" flex gap-x-1 text-sm">
+              {particularProperty?.bedrooms[indexId]}{" "}
+              <span className="sm:block hidden">Bedrooms</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <FaBath className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.bathroom[indexId]} Bathroom</h3> */}
-            <h3 className=" text-sm">
-              {particularProperty?.bathroom[indexId]} Bathroom
+            <h3 className=" flex gap-x-1 text-sm">
+              {particularProperty?.bathroom[indexId]}{" "}
+              <span className="sm:block hidden">Bathroom</span>
             </h3>
           </div>
           <div className="flex items-center space-x-3">
             <SlSizeFullscreen className="text-2xl" />
             {/* <h3 className=" text-sm">{page3.portionSize[indexId]} sq</h3> */}
-            <h3 className=" text-sm">
-              {particularProperty?.portionSize[indexId]} sq
+            <h3 className=" flex gap-x-1 text-sm">
+              {particularProperty?.portionSize[indexId]}{" "}
+              <span className="sm:block hidden">sq</span>
             </h3>
           </div>
+          {particularProperty?.rentalType === "Long Term" && (
+            <div className="flex items-center space-x-3">
+              <IoIosCompass className="text-2xl" />
+              <h3 className=" flex gap-x-1 text-sm">
+                {particularProperty?.orientation}
+              </h3>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -411,39 +542,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection2 = () => {
     return (
-      <div className="listingSection__wrap">
-        <h2 className="text-2xl font-semibold mb-2">Stay information</h2>
-        {particularProperty?.reviews[indexId]}
-        <div className="relative">
-          <div>
-            <h3
-              className="cursor-pointer text-medium"
-              onClick={() => setIsExpanded((prev) => !prev)}
-            >
-              {!isExpanded && (
-                <h4 className="font-medium underline">
-                  Know more about {particularProperty?.portionName[indexId]}
-                </h4>
-              )}
-            </h3>
-          </div>
-          <div>
-            {isExpanded && (
-              <MdCancel
-                className="text-2xl cursor-pointer absolute right-4"
-                onClick={() => setIsExpanded((prev) => !prev)}
-              />
-            )}
-          </div>
+      <div className="listingSection__wrap ">
+        <div className=" z-50 ">
+          <MobileFooterSticky
+            price={particularProperty?.basePrice[0]}
+            nights={particularProperty?.night[0] || 3}
+          />
         </div>
-        {isExpanded && (
-          <div className="">
-            <h2 className=" font-medium text-lg underline">
-              Portion {indexId + 1}
-            </h2>
-            <h3>{description[indexId]}</h3>
-          </div>
-        )}
+        <h2 className="text-2xl font-semibold  mb-2">Stay information</h2>
+        {particularProperty?.newReviews ? particularProperty?.newReviews : particularProperty?.reviews[indexId]}
       </div>
     );
   };
@@ -536,9 +643,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   </div>
                   <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
                     {/* Amenities_demos.filter */}
-                    {allAmenities.map((item) => (
+                    {allAmenities.map((item, index) => (
                       <div
-                        key={item.name}
+                        key={index}
                         className="flex items-center py-2.5 sm:py-4 lg:py-5 space-x-5 lg:space-x-8"
                       >
                         <FaCheck className=" text-2xl" />
@@ -570,29 +677,54 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         <div className="flow-root">
           <div className="text-sm sm:text-base text-neutral-6000 dark:text-neutral-300 -mb-4">
             <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Monday - Thursday</span>
+              {particularProperty?.rentalType === "Short Term" ? (
+                <span>Monday - Thursday</span>
+              ) : (
+                <span>Monthly Rates</span>
+              )}
               {/* <span>€ {price[indexId]}</span> */}
-              <span>€ {particularProperty?.basePrice[indexId]}</span>
+              <span>
+                €{" "}
+                {particularProperty?.rentalType === "Short Term"
+                  ? particularProperty?.basePrice[indexId]
+                  : particularProperty?.basePriceLongTerm[0]}
+              </span>
             </div>
 
-            <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Friday - Sunday</span>
-              {/* <span>€ {page8.weekendPrice[indexId]}</span> */}
-              <span>€ {particularProperty?.weekendPrice[indexId]}</span>
-            </div>
-            <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Rent by month</span>
-              {/* <span>-{page8.monthlyDiscount[indexId]} %</span> */}
-              <span>-{particularProperty?.monthlyDiscount[indexId]}%</span>
-            </div>
-            <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Minimum number of nights</span>
-              <span>{particularProperty?.night[0]} nights</span>
-            </div>
-            <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
-              <span>Max number of nights</span>
-              <span>{particularProperty?.night[1]} nights</span>
-            </div>
+            {particularProperty?.rentalType === "Short Term" && (
+              <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
+                <span>Friday - Sunday</span>
+                {/* <span>€ {page8.weekendPrice[indexId]}</span> */}
+                <span>€ {particularProperty?.weekendPrice[indexId]}</span>
+              </div>
+            )}
+
+            {particularProperty?.rentalType === "Short Term" ? (
+              <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                <span>Weekly Discount</span>{" "}
+                <span>{particularProperty?.monthlyDiscount[indexId]}</span>
+              </div>
+            ) : (
+              <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                {" "}
+                <span>Monthly Discount</span>
+                <span>- {particularProperty?.monthlyDiscount[indexId]} % </span>
+              </div>
+            )}
+
+            {particularProperty?.rentalType === "Short Term" && (
+              <div>
+                {" "}
+                <div className="p-4 bg-neutral-100 dark:bg-neutral-800 flex justify-between items-center space-x-4 rounded-lg">
+                  <span>Minimum number of nights</span>
+                  <span>{particularProperty?.night[0]} nights</span>
+                </div>
+                <div className="p-4 flex justify-between items-center space-x-4 rounded-lg">
+                  <span>Max number of nights</span>
+                  <span>{particularProperty?.night[1]} nights</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -608,13 +740,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
         {/* host */}
         <div className="flex items-center space-x-4">
-          {/* <Avatar
-            hasChecked
-            hasCheckedClass="w-4 h-4 -top-0.5 right-0.5"
-            sizeClass="h-14 w-14"
-            radius="rounded-full"
-          /> */}
-          {/* <img src={user.imageUrl} alt="user" className=" rounded-full w-8" /> */}
           <img
             src={
               "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18yaWRMcmd4Q01COGJuRWQ2bUl1V3R0dEtzaXkiLCJyaWQiOiJ1c2VyXzJqOHhkb0R5cUl4V05adXFlcWlXTlpsdGpwMiJ9"
@@ -630,102 +755,28 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
         </div>
 
-        <div className="mt-1.5 flex flex-col text-neutral-500 dark:text-neutral-400">
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <CiCalendar className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
-              Joined long time ago
-            </span>
+        <div className="mt-1.5 flex flex-col text-neutral-500 dark:text-neutral-400 gap-y-2">
+          <div className="flex items-center gap-3 mb-3">
+            <CiCalendar className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">Joined long time ago</span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <BiMessageAltDetail className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
-              Response rate - 100%
-            </span>
+          <div className="flex items-center gap-3 mb-3">
+            <BiMessageAltDetail className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">Response rate - 100%</span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3 mb-3">
-            <FaRegClock className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
+          <div className="flex items-center gap-3 mb-3">
+            <FaRegClock className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">
               Fast response - within a few hours
             </span>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
-            <IoLanguageOutline className="mt-1 text-lg md:text-xl" />
-            <span className="mb-3 text-sm md:text-base">
+          <div className="flex items-center gap-3">
+            <IoLanguageOutline className=" text-lg md:text-xl" />
+            <span className="text-sm md:text-base">
               Language spoken - English, {language}
             </span>
           </div>
         </div>
-
-        {/* desc */}
-        {/* <span className="block text-neutral-6000 dark:text-neutral-300">
-          Providing lake views, The Symphony 9 Tam Coc in Ninh Binh provides
-          accommodation, an outdoor swimming pool, a bar, a shared lounge, a
-          garden and barbecue facilities...
-        </span> */}
-
-        {/* info */}
-        {/* <div className="block text-neutral-500 dark:text-neutral-400 space-y-2.5">
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span>Joined in March 2016</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-              />
-            </svg>
-            <span>Response rate - 100%</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-
-            <span>Fast response - within a few hours</span>
-          </div>
-        </div> */}
-
-        {/* == */}
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
-        <div>
-          <ButtonSecondary href="/author">See host profile</ButtonSecondary>
-        </div>
-      </div> */}
       </div>
     );
   };
@@ -821,51 +872,182 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection8 = () => {
     return (
-      <div className="listingSection__wrap">
-        {/* HEADING */}
-        <h2 className="text-2xl font-semibold">Things to know</h2>
-        {/* <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" /> */}
+      <div className="listingSection__wrap ">
+        <div className="w-full md:flex">
+          {/* // TODO: Left Half */}
+          <div className=" w-full md:w-1/2">
+            {/* HEADING */}
+            <h2 className="text-2xl font-semibold">Things to know</h2>
 
-        {/* CONTENT */}
-        {/* <div>
-          <h4 className="text-lg font-semibold">Cancellation policy</h4>
-          <span className="block mt-3 text-neutral-500 dark:text-neutral-400">
-            Refund 50% of the booking value when customers cancel the room
-            within 48 hours after successful booking and 14 days before the
-            check-in time. <br />
-            Then, cancel the room 14 days before the check-in time, get a 50%
-            refund of the total amount paid (minus the service fee).
-          </span>
-        </div> */}
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
+            {/* CONTENT */}
+            <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mb-2" />
 
-        {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Check-in time</h4>
-          <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
-            <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-              <span>Check-in</span>
-              {/* <span>{time[0]}:00 am</span> */}
-              <span>{particularProperty?.time[0]}:00 am</span>
+            {/* CONTENT */}
+            <div className="">
+              <h4 className="text-lg font-semibold">Check-in time</h4>
+              <div className="mt-3 text-neutral-500 dark:text-neutral-400 max-w-md text-sm sm:text-base">
+                <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
+                  <span>Check-in</span>
+                  {/* <span>{time[0]}:00 am</span> */}
+                  <span>{particularProperty?.time[0]}:00 am</span>
+                </div>
+                <div className="flex space-x-10 justify-between p-3">
+                  <span>Check-out</span>
+                  {/* <span>{time[1]}:00 pm</span> */}
+                  <span>{particularProperty?.time[1]}:00 pm</span>
+                </div>
+              </div>
             </div>
-            <div className="flex space-x-10 justify-between p-3">
-              <span>Check-out</span>
-              {/* <span>{time[1]}:00 pm</span> */}
-              <span>{particularProperty?.time[1]}:00 pm</span>
+            <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 mb-2" />
+
+            {/* CONTENT */}
+            <div>
+              <h4 className="text-lg font-semibold">Special Note</h4>
+              <div className="prose sm:prose">
+                <ul className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
+                  {particularProperty?.additionalRules.map((rule, index) => {
+                    return <li key={index}>{rule}</li>;
+                  })}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="w-14 border-b border-neutral-200 dark:border-neutral-700" />
 
-        {/* CONTENT */}
-        <div>
-          <h4 className="text-lg font-semibold">Special Note</h4>
-          <div className="prose sm:prose">
-            <ul className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2">
-              {particularProperty?.additionalRules.map((rule, index) => {
-                return <li key={index}>{rule}</li>;
-              })}
-            </ul>
+          {/* // TODO: Right Half */}
+          {/* // ! data according to Short Term and Long Term */}
+          <div className=" w-full md:w-1/2 md:ml-3">
+            {particularProperty?.rentalType === "Short Term" &&
+            particularProperty?.nearbyLocations?.nearbyLocationName?.length >
+              0 ? (
+              <>
+                {" "}
+                <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
+                  Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
+                </h2>
+                <div className=" h-full max-h-64 overflow-y-auto scrollbar-thin">
+                  {["Cafe", "Restaurant", "Mall"]?.map((item, ind) => (
+                    <div key={ind} className=" px-2">
+                      <h3
+                        className=" flex items-center gap-x-2 text-lg font-medium cursor-pointer"
+                        onClick={() => {
+                          setNearbyAccordion((prev) => {
+                            const newState = [...prev];
+                            newState[ind] = !newState[ind];
+                            return newState;
+                          });
+                        }}
+                      >
+                        {item}{" "}
+                        {nearbyAccordion[ind] ? (
+                          <IoIosArrowDropdownCircle />
+                        ) : (
+                          <IoIosArrowDroprightCircle />
+                        )}
+                      </h3>
+                      {nearbyAccordion[ind] &&
+                        particularProperty?.nearbyLocations?.nearbyLocationName?.map(
+                          (innerItem, index) =>
+                            item ===
+                              particularProperty?.nearbyLocations
+                                ?.nearbyLocationTag[index] && (
+                              <div key={index} className=" flex justify-between text-sm text-neutral-500 px-2 font-medium">
+                                <div>
+                                  {particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl != undefined ? (
+                                    <Link
+                                      href={
+                                        new URL(
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationUrl?.[index] || ""
+                                        )
+                                      }
+                                      target="_blank"
+                                    >
+                                      {" "}
+                                      {
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </Link>
+                                  ) : (
+                                    <p>
+                                      {
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationName[index]
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                                <div>
+                                  {particularProperty?.nearbyLocations
+                                    ?.nearbyLocationDistance[index] >= 1000
+                                    ? (
+                                        particularProperty?.nearbyLocations
+                                          ?.nearbyLocationDistance[index] / 1000
+                                      ).toFixed(1) + " km"
+                                    : particularProperty?.nearbyLocations
+                                        ?.nearbyLocationDistance[index] + " m"}
+                                </div>
+                              </div>
+                            )
+                        )}
+
+                      <div className=" w-full h-0.5 bg-neutral-700 my-2"></div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className=" ml-2">
+                {/* LONG TERM INFO */}
+
+                {particularProperty?.rentalType === "Long Term" && (
+                  <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2 w-full">
+                    <div className=" flex items-center gap-x-2">
+                      <SiLevelsdotfyi />
+                      Number of Levels: {particularProperty?.levels}
+                    </div>
+                    <div className=" flex items-center justify-start gap-x-2">
+                      <MdHomeWork />
+                      Zones: {particularProperty?.zones}
+                    </div>
+
+                    <div className=" flex items-center gap-x-2 ">
+                      <PiStudentBold />
+                      This property is{" "}
+                      {particularProperty?.isSuitableForStudents
+                        ? ""
+                        : "not"}{" "}
+                      suitable for students
+                    </div>
+                    <div className=" flex items-center gap-x-2 ">
+                      <MdConstruction />
+                      Construction Year: {particularProperty?.constructionYear}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      <RiMoneyEuroCircleFill />
+                      Expected Monthly Expenses:{" "}
+                      {particularProperty?.monthlyExpenses}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <FaHotTub />
+                      Type of Heating: {particularProperty?.heatingType}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <IoMdFlame />
+                      Heating Medium: {particularProperty?.heatingMedium}
+                    </div>
+                    <div className=" flex items-center gap-x-2">
+                      {" "}
+                      <MdOutlineEnergySavingsLeaf /> Energy Class:{" "}
+                      {particularProperty?.energyClass}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -907,9 +1089,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       return 0;
     };
 
-    const basePrice = particularProperty?.basePrice[indexId] ?? 0;
+    // const basePrice = particularProperty?.basePrice[indexId] ?? 0;
+    const basePrice =
+      particularProperty?.rentalType === "Short Term"
+        ? particularProperty?.basePrice[indexId]
+        : particularProperty?.basePriceLongTerm[0] || 0;
     const nights = Math.max(numberOfNights, minNights);
-    const totalPrice = basePrice * nights;
+    const totalPrice =
+      particularProperty?.rentalType === "Short Term"
+        ? basePrice * nights
+        : particularProperty?.basePriceLongTerm[0] || 0;
 
     return (
       <div className="listingSectionSidebar__wrap shadow-xl">
@@ -917,7 +1106,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <span className="text-3xl font-semibold">
             € {basePrice}
             <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-              /night
+              /
+              {particularProperty?.rentalType === "Short Term"
+                ? "night"
+                : "month"}
             </span>
           </span>
           <StartRating />
@@ -939,12 +1131,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between text-neutral-600 dark:text-neutral-300">
-            <span>
+            <span className=" flex gap-x-1">
               € {basePrice} *{" "}
-              {minNightStay === undefined
-                ? particularProperty?.night[0]
-                : minNightStay}{" "}
-              nights
+              {particularProperty?.rentalType === "Short Term" ? (
+                <div>
+                  {minNightStay === undefined
+                    ? particularProperty?.night[0]
+                    : minNightStay}{" "}
+                  nights
+                </div>
+              ) : (
+                <div>1 month</div>
+              )}
             </span>
             <span>€ {totalPrice}</span>
           </div>
@@ -976,177 +1174,136 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     );
   };
 
-  let sliderSettings = {
-    dots: true,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 2,
-    slidesToScroll: 1,
-    variableWidth: true,
-  };
-
   const [clicked, setClicked] = useState<boolean[]>(
     Array(portions).fill(false)
   );
 
-  const handleLike = (index: number) => {
-    const newLike = [...clicked];
-    newLike[index] = !clicked[index];
-    setClicked(newLike);
+  const settings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 3, // Adjust the number of cards to show at once
+    slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
   };
+
+  // Custom Arrow Components
+  function SampleNextArrow(props: any) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} slick-next`}
+        onClick={onClick}
+        style={{ display: "block", right: "10px" }}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props: any) {
+    const { className, onClick } = props;
+    return (
+      <div
+        className={`${className} slick-prev z-10`}
+        onClick={onClick}
+        style={{ display: "block", left: "10px" }}
+      />
+    );
+  }
 
   const renderPortionCards = () => {
     return (
-      <Slider {...sliderSettings} className=" h-[440px]">
-        {myArray.map((item, index) => (
-          <div
-            key={index}
-            className=" w-[250px] h-[380px] rounded-3xl first:ml-4 flex-shrink-0 m-4 shadow-sm shadow-slate-400 border-1 border-slate-500"
-          >
-            <div className="h-52 flex justify-center rounded-3xl overflow-hidden flex-wrap relative">
-              {/* {page8?.monthlyDiscount ? ( */}
-              {particularProperty?.monthlyDiscount[index] ? (
-                <div className=" absolute bg-red-600 text-white font-medium rounded-xl mx-4 my-2 text-xs p-1 left-1">
-                  {/* -{page8.monthlyDiscount[index]}% today */}-
-                  {particularProperty?.monthlyDiscount[index]}% today
-                </div>
-              ) : (
-                <div></div>
-              )}
-              <FaHeart
-                className={`absolute text-2xl right-4 top-2 cursor-pointer ${
-                  clicked[index] ? "text-red-500" : ""
-                }`}
-                onClick={(e) => handleLike(index)}
-              />
-              <Link
-                href={{
-                  pathname: "/listing-stay-detail",
-                  query: { id: index },
-                }}
+      <div className=" flex gap-4 property-carousel-container">
+        <Slider {...settings} className="w-full">
+          {Array.from({ length: propertyPortions }, () => 1).map(
+            (item, index) => (
+              <div
+                className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer"
                 key={index}
               >
-                <img
-                  src={
-                    particularProperty?.portionCoverFileUrls[index]
-                      ? particularProperty?.portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt="Portion Image"
-                  className="cover w-56 h-48"
-                />
-                {/* <Image
-                  src={
-                    portionCoverFileUrls[index]
-                      ? portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt=""
-                  width={300}
-                  height={300}
-                  className="fill w-56 h-48"
-                /> */}
-                {/* <Image
-                  src={
-                    particularProperty?.portionCoverFileUrls[index]
-                      ? particularProperty?.portionCoverFileUrls[index]
-                      : ""
-                  }
-                  alt=""
-                  width={300}
-                  height={300}
-                  className="fill w-56 h-48"
-                /> */}
-              </Link>
-            </div>
-            <div className="flex gap-4 justify-center">
-              <div className="flex gap-2 items-center">
-                <FaUser className="text-md" />
-                {/* <h3 className=" text-sm">{page3.guests[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.guests[index]}
-                </h3>
+                <Link
+                  href={{
+                    pathname: `/listing-stay-detail`,
+                    query: {
+                      id: propertyId,
+                      portion: index,
+                    },
+                  }}
+                >
+                  <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
+                    {particularProperty?.portionCoverFileUrls[index] ? (
+                      <img
+                        src={particularProperty?.portionCoverFileUrls[index]}
+                        alt="Portion Image"
+                        className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
+                      />
+                    ) : (
+                      <div className=" w-full h-full flex flex-col justify-center items-center">
+                        <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                        <span className=" text-neutral-600 font-medium">
+                          Image not found
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+                <div className=" flex gap-4 justify-center items-center my-2">
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.beds[index]}
+                    </h2>{" "}
+                    <IoIosBed className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.bathroom[index]}
+                    </h2>{" "}
+                    <FaBath className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.guests[index]}
+                    </h2>{" "}
+                    <FaUser className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.portionSize[index]} sq
+                    </h2>{" "}
+                    <SlSizeFullscreen className="text-md" />
+                  </div>
+                </div>
+                <div className=" px-2 py-4">
+                  <h2 className=" font-semibold text-xl">
+                    Portion {index + 1}
+                  </h2>
+                  <p className=" text-lg font-medium">
+                    € {particularProperty?.basePrice[index]}/night
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-2 items-center">
-                <IoIosBed className="text-md" />
-                {/* <h3 className=" text-sm">{page3.bedrooms[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.bedrooms[index]}
-                </h3>
-              </div>
-              <div className="flex gap-2 items-center">
-                <FaBath className="text-md" />
-                {/* <h3 className=" text-sm">{page3.bathroom[index]}</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.bathroom[index]}
-                </h3>
-              </div>
-              <div className="flex gap-2 items-center">
-                <SlSizeFullscreen className="text-md" />
-                {/* <h3 className=" text-sm">{page3.portionSize[index]} sq</h3> */}
-                <h3 className=" text-sm">
-                  {particularProperty?.portionSize[index]} sq
-                </h3>
-              </div>
-            </div>
-            <div>
-              <h2 className="ml-6 mt-2 text-lg font-medium">
-                Portion {index + 1}
-              </h2>
-            </div>
-            <div className=" h-0.5 w-12 bg-slate-600 rounded-xl ml-4 mt-4"></div>
-            <div>
-              <h2 className="text-xl font-bold ml-4 mt-4">
-                {" "}
-                {/* € {page8.basePrice[index]} /night */}
-                {/* € {particularProperty} */}€{" "}
-                {particularProperty?.basePrice[index]} /night
-              </h2>
-            </div>
-          </div>
-        ))}
-      </Slider>
-    );
-  };
-
-  const allImagesParam: string = searchParams.get("allImages") || "";
-  const imageCarousel = () => {
-    return (
-      <Carousel>
-        {allImages
-          .filter((_, i) => i >= 1)
-          .map((item, index) => (
-            <div key={index}>
-              <img
-                src={item}
-                alt="Carousel Image"
-                className="w-16 h-80 rounded-xl"
-              />
-              {/* <Image
-                src={item}
-                alt=""
-                className="w-16 h-80 rounded-xl"
-                width={300}
-                height={300}
-              /> */}
-            </div>
-          ))}
-      </Carousel>
+            )
+          )}
+        </Slider>
+      </div>
     );
   };
 
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-  const customStyles = {
-    content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "-50%",
-      transform: "translate(-50%, -50%)",
-    },
-  };
-
   const modalImages = () => {
     return (
       <Transition appear show={modalIsOpen} as={Fragment}>
@@ -1196,7 +1353,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   </span>
                 </div>
                 <div className="flex-grow overflow-auto px-8 py-4 text-neutral-700 dark:text-neutral-300">
-                  <div className="flex flex-wrap gap-4 justify-center lg:gap-12">
+                  {/* <div className="flex flex-wrap gap-4 justify-center lg:gap-12">
                     {allImages
                       .filter((_, i) => i >= 1 && i < 1212) // Assuming this is to limit the number of images displayed
                       .map((item, index) => (
@@ -1214,18 +1371,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                                 alt=""
                                 className="w-64 h-64 rounded-xl lg:w-72 lg:h-72"
                               />
-                              {/* <Image
-                                src={item}
-                                alt=""
-                                className="w-64 h-64 rounded-xl lg:w-72 lg:h-72"
-                                width={300}
-                                height={300}
-                              /> */}
                             </a>
                           </div>
                         </div>
                       ))}
-                  </div>
+                  </div> */}
+                  <BentoGridDemo allImages={allImages} />
                 </div>
               </div>
             </Transition.Child>
@@ -1245,41 +1396,41 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   }, [particularProperty?.propertyPictureUrls]);
 
   useEffect(() => {
-    if (
-      particularProperty?.propertyCoverFileUrl &&
-      particularProperty?.propertyPictureUrls &&
-      particularProperty?.portionCoverFileUrls &&
-      particularProperty?.portionPictureUrls
-    ) {
-      const allImagesArray = [
-        particularProperty?.portionCoverFileUrls,
-        particularProperty?.propertyPictureUrls,
-        particularProperty?.portionCoverFileUrls,
-        particularProperty?.portionPictureUrls,
-      ];
-      const arr = allImagesArray
-        .flat(Infinity)
-        .filter((item) => item !== null && item !== "");
-
-      setAllImages(arr);
+    let arr: string[] = [];
+    if (particularProperty?.propertyCoverFileUrl != undefined)
+      arr.push(particularProperty?.propertyCoverFileUrl);
+    if (particularProperty?.propertyPictureUrls != undefined)
+      arr = [...arr, ...particularProperty?.propertyPictureUrls];
+    if (particularProperty?.portionCoverFileUrls != undefined)
+      arr = [...arr, ...particularProperty?.portionCoverFileUrls];
+    if (particularProperty?.portionPictureUrls != undefined) {
+      for (let i = 0; i < particularProperty?.portionPictureUrls.length; i++) {
+        if (particularProperty?.portionPictureUrls[i] != undefined)
+          arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
+      }
     }
-  }, [
-    particularProperty?.propertyCoverFileUrl,
-    particularProperty?.propertyPictureUrls,
-    particularProperty?.portionCoverFileUrls,
-    particularProperty?.portionPictureUrls,
-  ]);
+    arr = arr.filter(item => item!="");
+    setAllImages(arr);
+  }, [particularProperty]);
+
+  const carouselSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: false,
+  };
 
   return (
     // <ProtectedRoute>
     <div
       className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
     >
-      {/*  HEADER */}
-
-      <header className="rounded-md sm:rounded-xl h-[60%]">
-        <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2 ">
-          <div className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+      <header className="rounded-md sm:rounded-xl">
+        {/* Main Grid Layout for larger screens */}
+        <div className="relative  hidden  w-full h-full md:grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
+          <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={
@@ -1287,24 +1438,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                   "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                 }
                 alt="Cover Image"
-                className=" object-cover w-full h-full"
+                className="object-cover h-full w-full"
               />
             ) : (
-              <div className=" w-full h-full flex flex-col justify-center items-center">
-                <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
-                <span className=" text-neutral-600 font-medium">
+              <div className="w-full h-full flex flex-col justify-center items-center">
+                <BsExclamationCircleFill className="w-1/4 h-1/4 mb-2 text-neutral-600" />
+                <span className="text-neutral-600 font-medium">
                   Image not found
                 </span>
               </div>
             )}
-            {/* <Image
-                src={allImages[0]}
-                alt=""
-                className=" object-cover w-full h-full"
-                width={300}
-                height={300}
-              /> */}
           </div>
+
+          {/* Thumbnail images for larger screens */}
           {propertyPicturesTemp
             .filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
@@ -1318,25 +1464,47 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                     "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
                   }
                   alt="Property Picture"
-                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44 "
+                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
                 />
-                {/* <Image
-                    src={allImages[index]}
-                    alt=""
-                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
-                    width={300}
-                    height={300}
-                  /> */}
               </div>
             ))}
           <button
-            className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            className="absolute flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-30"
             onClick={() => setModalIsOpen(true)}
           >
             <Squares2X2Icon className="w-5 h-5" />
             <span className="ml-2 text-neutral-800 text-sm font-medium">
               Show all photos
             </span>
+          </button>
+        </div>
+
+        <div className="block md:hidden  w-full mt-4">
+          <Slider {...carouselSettings}>
+            {[particularProperty?.propertyCoverFileUrl, ...propertyPicturesTemp]
+              .filter((url, i) => i >= 0 && i < 5)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
+                >
+                  <img
+                    src={
+                      item ||
+                      "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
+                    }
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-full h-full"
+                  />
+                </div>
+              ))}
+          </Slider>
+          <button
+            className=" flex mt-10 text-xs items-center gap-x-2 md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+            onClick={() => setModalIsOpen(true)}
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+            Show all photos
           </button>
         </div>
       </header>
@@ -1352,7 +1520,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {renderSection3()}
           {renderSection4()}
           <SectionDateRange />
-          {checkPortion > 0 && renderPortionCards()}
+          {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
           {/* {renderSection7()} */}

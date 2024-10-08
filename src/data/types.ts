@@ -13,7 +13,7 @@ export interface CustomLink {
 export interface TaxonomyType {
   id: string | number;
   name: string;
-  href: Route<string>;
+  href: Route<string> | string;
   count?: number;
   thumbnail?: string;
   desc?: string;

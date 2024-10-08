@@ -3,6 +3,7 @@ import { TaxonomyType } from "@/data/types";
 import convertNumbThousand from "@/utils/convertNumbThousand";
 import Link from "next/link";
 import Image from "next/image";
+import { PathName } from "@/routers/types";
 
 export interface CardCategory6Props {
   className?: string;
@@ -16,7 +17,7 @@ const CardCategory6: FC<CardCategory6Props> = ({
   const { count, name, href = "/", thumbnail } = taxonomy;
   return (
     <Link
-      href={href}
+      href={href as PathName}
       className={`nc-CardCategory6 relative flex w-full group rounded-2xl z-0 overflow-hidden ${className}`}
     >
       <div className="aspect-w-16 aspect-h-10 sm:aspect-h-12 xl:aspect-h-9 w-full h-0"></div>

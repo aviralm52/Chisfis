@@ -14,14 +14,15 @@ const CustomDayPicker: React.FC<CustomDayPickerProps> = ({
     datesPerPortion,
     setDatesPerPortion,
 }) => {
+    console.log(index, datesPerPortion)
     const handleDayClick = (date: Date) => {
         const newDate = date.getTime();
         setDatesPerPortion((prevState) => {
             const updatedPortion = [...prevState];
             const currentDates = updatedPortion[index];
 
-            if (currentDates.includes(newDate)) {
-                updatedPortion[index] = currentDates.filter(
+            if (currentDates?.includes(newDate)) {
+                updatedPortion[index] = currentDates?.filter(
                     (d) => d !== newDate
                 );
             } else {
@@ -32,11 +33,11 @@ const CustomDayPicker: React.FC<CustomDayPickerProps> = ({
         });
     };
 
-    const selectedDates = datesPerPortion[index].map(
+    const selectedDates = datesPerPortion[index]?.map(
         (timestamp) => new Date(timestamp)
     );
 
-    const excludeDates = datesPerPortion[index].map(
+    const excludeDates = datesPerPortion[index]?.map(
         (timestamp) => new Date(timestamp)
     );
 

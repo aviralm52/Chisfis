@@ -1,6 +1,6 @@
 import { MegamenuItem, NavItemType } from "@/shared/Navigation/NavigationItem";
 import ncNanoId from "@/utils/ncNanoId";
-import { Route } from "@/routers/types";
+import { PathName, Route } from "@/routers/types";
 import __megamenu from "./jsons/__megamenu.json";
 
 const megaMenuDemo: MegamenuItem[] = [
@@ -60,7 +60,6 @@ const megaMenuDemo: MegamenuItem[] = [
     })),
   },
 ];
-
 
 const otherPageChildMenus: NavItemType[] = [
   { id: ncNanoId(), href: "/blog", name: "Blog page" },
@@ -157,14 +156,14 @@ export const NAVIGATION_DEMO: NavItemType[] = [
   },
   {
     id: ncNanoId(),
-    href: "/",
+    href: "/signup",
     name: "Owner sign in/sign up",
     type: "megaMenu",
     megaMenu: megaMenuDemo,
   },
   {
     id: ncNanoId(),
-    href: "/",
+    href: "/signup",
     name: "Traveller sign in/ sign up",
     // type: "dropdown",
     // children: demoChildMenus,
@@ -196,8 +195,24 @@ export const NAVIGATION_DEMO: NavItemType[] = [
   },
   {
     id: ncNanoId(),
+    href: "/author",
+    name: "View Profile",
+    // type: "dropdown",
+    // children: demoChildMenus,
+    isNew: true,
+  },
+  {
+    id: ncNanoId(),
     href: "/contact",
     name: "Contact us",
+    // type: "dropdown",
+    // children: demoChildMenus,
+    isNew: true,
+  },
+  {
+    id: ncNanoId(),
+    href: "/author",
+    name: "Logout",
     // type: "dropdown",
     // children: demoChildMenus,
     isNew: true,
@@ -223,7 +238,7 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
       { id: ncNanoId(), href: "/listing-stay", name: "Stay listings" },
       {
         id: ncNanoId(),
-        href: "/listing-stay-map",
+        href: "/listing-stay-map" as PathName,
         name: "Stay listings (map)",
       },
       { id: ncNanoId(), href: "/listing-stay-detail", name: "Stay detail" },
@@ -283,7 +298,7 @@ export const NAVIGATION_DEMO_2: NavItemType[] = [
     type: "dropdown",
     children: templatesChildrenMenus,
   },
- 
+
   //
   {
     id: ncNanoId(),

@@ -20,7 +20,7 @@ export interface GuestsInputProps {
 const GuestsInput: FC<GuestsInputProps> = ({
   fieldClassName = "[ nc-hero-field-padding ]",
   className = "[ nc-flex-1 ]",
-  buttonSubmitHref = "/listing-stay-map",
+  buttonSubmitHref = "/listing-stay-map" as PathName,
   hasButtonSubmit = true,
 }) => {
   const context = useContext(SearchInputContext);

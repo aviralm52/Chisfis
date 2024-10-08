@@ -24,7 +24,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <BackgroundSection />
           <SectionSliderNewCategories
             heading="Explore by types of stays"
-            subHeading="Explore houses based on 10 types of stays"
+            subHeading="Explore houses based on types of stays"
             categoryCardType="card5"
             itemPerRow={5}
             sliderStyle="style2"

@@ -113,20 +113,20 @@ const PageAddListing2: FC = () => {
           <Input
             placeholder="..."
             value={street}
-            onChange={(e) => setStreet(e.target.value)}
+            onChange={(e) => setStreet(e.target.value.trim())}
           />
         </FormItem>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-5">
           <FormItem label="City">
-            <Input value={city} onChange={(e) => setCity(e.target.value)} />
+            <Input value={city} onChange={(e) => setCity(e.target.value.trim())} />
           </FormItem>
           <FormItem label="State">
-            <Input value={state} onChange={(e) => setState(e.target.value)} />
+            <Input value={state} onChange={(e) => setState(e.target.value.trim())} />
           </FormItem>
           <FormItem label="Postal code">
             <Input
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
+              onChange={(e) => setPostalCode(e.target.value.trim())}
             />
           </FormItem>
           <div>

@@ -50,7 +50,8 @@ export async function GET() {
     // } = await Property.find({country: "Greece"});
 
 
-    const shortlistedProperties = await Property.find({ country: "Greece" }); 
+    // const shortlistedProperties = await Property.find({ country: "Greece" }); 
+    const shortlistedProperties = await Property.find({ country: "Greece", isLive: true });
 
     try {
         console.log('inside try')

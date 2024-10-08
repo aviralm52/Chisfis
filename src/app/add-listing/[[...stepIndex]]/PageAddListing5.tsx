@@ -205,7 +205,7 @@ const PageAddListing5: FC<PageAddListing5Props> = () => {
             className="!h-full"
             placeholder="No smoking..."
             value={rulesInput}
-            onChange={(e) => setRulesInput(e.target.value)}
+            onChange={(e) => setRulesInput(e.target.value.trim())}
           />
           <ButtonPrimary
             className="flex-shrink-0"

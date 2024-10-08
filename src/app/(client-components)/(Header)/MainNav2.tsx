@@ -11,6 +11,7 @@ import TemplatesDropdown from "./TemplatesDropdown";
 import { Route } from "@/routers/types";
 
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface MainNav2Props {
   className?: string;

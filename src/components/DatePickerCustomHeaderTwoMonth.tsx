@@ -75,7 +75,7 @@ const DatePickerCustomHeaderTwoMonth = ({
       <button
         aria-label="Previous Month"
         className={`react-datepicker__navigation react-datepicker__navigation--previous absolute -top-1 left-0 flex items-center justify-center p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${
-          isPreviousMonthDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+          isPreviousMonthDisabled() ? 'opacity-100 cursor-not-allowed' : ''
         }`}
         style={customHeaderCount === 1 ? { visibility: "hidden" } : {}}
         onClick={decreaseMonth}

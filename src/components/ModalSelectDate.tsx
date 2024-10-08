@@ -10,9 +10,11 @@ import DatePickerCustomDay from "./DatePickerCustomDay";
 
 interface ModalSelectDateProps {
   renderChildren?: (p: { openModal: () => void }) => React.ReactNode;
+  footerStartDate?: (startDate: Date | null) => void;
+  footerEndDate?: (endDate: Date | null) => void;
 }
 
-const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
+const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren, footerStartDate, footerEndDate }) => {
   const [showModal, setShowModal] = useState(false);
 
   // const [startDate, setStartDate] = useState<Date | null>(
@@ -43,6 +45,8 @@ const ModalSelectDate: FC<ModalSelectDateProps> = ({ renderChildren }) => {
     const [start, end] = dates;
     setStartDate(start);
     setEndDate(end);
+    footerStartDate && footerStartDate(start);
+    footerEndDate && footerEndDate(end);
     console.log('date changed: ', start, end);
   };
 

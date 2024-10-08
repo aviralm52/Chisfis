@@ -3,11 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import React, { FC, useEffect, useRef, useState } from "react";
 import Logo from "@/shared/Logo";
 import useOutsideAlerter from "@/hooks/useOutsideAlerter";
-import NotifyDropdown from "./NotifyDropdown";
-import AvatarDropdown from "./AvatarDropdown";
 import MenuBar from "@/shared/MenuBar";
 import { SearchTab } from "../(HeroSearchForm)/HeroSearchForm";
-import HeroSearchForm2MobileFactory from "../(HeroSearchForm2Mobile)/HeroSearchForm2MobileFactory";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
@@ -30,18 +27,22 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   //
   const [showHeroSearch, setShowHeroSearch] =
     useState<StaySearchFormFields | null>();
-  //
   // const [currentTab, setCurrentTab] = useState<SearchTab>("Stays");
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const token = localStorage.getItem("token") || "";
+  let token = "";
+  const IsServer = typeof window === "undefined";
+  if (!IsServer) {
+    token = window.localStorage.getItem("token") || "";
+  }
+
 
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
     // setCurrentTab("Stays");
     setCurrentTab("Short Term Rentals");
-  });
+  });  
 
   let pathname = usePathname();
   //
@@ -153,18 +154,6 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
       </div>
     );
   };
-
-  // const { isSignedIn } = useUser();
-  // const [isLoggedIn, setIsLoggedIn] = useState(isSignedIn);
-  // useEffect(() => {
-  //   setIsLoggedIn(isSignedIn);
-  // }, [isSignedIn]);
-
-  // const { user } = useUser();
-
-
-
-
   return (
     <>
       <div
@@ -184,23 +173,12 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
             <div className="relative z-10 hidden md:flex flex-1 items-center">
               <Logo />
             </div>
-
-            {/* <div className="flex flex-[2] lg:flex-none mx-auto">
-              <div className="flex-1 hidden lg:flex self-center">
-                {renderButtonOpenHeroSearch()}
-              </div>
-              <div className="self-center flex-1 lg:hidden w-full max-w-lg mx-auto">
-                <HeroSearchForm2MobileFactory />
-              </div>
-              {renderHeroSearch()}
-            </div> */}
-
             {/* NAV */}
             <div className="hidden md:flex relative z-10 flex-1 justify-end text-neutral-700 dark:text-neutral-100">
-              <div className=" flex space-x-1 items-center">
+              <div className=" flex space-x-1 items-center gap-2">
                 <Link
                   href={"/add-listing/1"}
-                  className="self-center hidden xl:inline-flex px-4 py-2 border border-neutral-300 hover:border-neutral-400 dark:border-neutral-700 rounded-full items-center text-sm text-gray-700 dark:text-neutral-300 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+                  className="self-center hidden xl:inline-flex px-4 py-3 border border-neutral-300 hover:border-neutral-400 dark:border-neutral-700 rounded-full items-center text-sm text-gray-700 dark:text-neutral-300 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
                 >
                   List your property
                 </Link>
@@ -218,7 +196,10 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                 </nav> */}
 
                 {token ? (
-                  <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+                  // <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+                  <Link href="/author">
+                  <ButtonPrimary>My Profile</ButtonPrimary>
+                  </Link>
                 ) : (
                   <ButtonPrimary>
                     <Link href="/login">Login</Link>

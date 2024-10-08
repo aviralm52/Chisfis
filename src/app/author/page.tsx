@@ -7,7 +7,6 @@ import { IoHomeOutline } from "react-icons/io5";
 import { format } from "date-fns";
 import { BsPencilSquare } from "react-icons/bs";
 
-
 import StartRating from "@/components/StartRating";
 import { useAuth } from "@/hooks/useAuth";
 import { Properties } from "../page";
@@ -21,7 +20,7 @@ export interface AuthorPageProps {}
 
 const AuthorPage: FC<AuthorPageProps> = ({}) => {
   let [categories] = useState(["Short Term", "Long Term"]);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const imgUrl =
     "https://i.pinimg.com/736x/70/78/6e/70786e80f3eb04dc3f42f6504797be3c.jpg";
 
@@ -126,13 +125,16 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
               </span>
             </div>
           </div>
-          <Link href="/account">
-            <ButtonPrimary>
-              <div className="flex items-center gap-x-1">
-                Edit <HiPencilSquare />
-              </div>
-            </ButtonPrimary>
-          </Link>
+          <div className=" flex justify-between items-center w-full px-4">
+            <Link href="/account">
+              <ButtonPrimary>
+                <div className="flex items-center gap-x-1">
+                  Edit <HiPencilSquare />
+                </div>
+              </ButtonPrimary>
+            </Link>
+            <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
+          </div>
         </div>
       </>
     );
@@ -181,7 +183,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                 <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
                   {loading
                     ? [0, 1, 2, 3].map((n) => (
-                        <>
+                        <div key={n}>
                           <div className="flex flex-col gap-y-2">
                             <div
                               key={n}
@@ -194,21 +196,21 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                               <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
                             </div>
                           </div>
-                        </>
+                        </div>
                       ))
-                    : filteredProperties.map((item) => (
-                        <>
+                    : filteredProperties.map((item, index) => (
+                        <div key={index}>
                           <Link
                             className="    text-primary-6000 "
                             href={{
                               pathname: "/editproperty",
-                              query: { id: item._id },
+                              query: { id: item._id, canAccess: true },
                             }}
                           >
                             <PropertyCard key={item._id} data={item} />
                             <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
                           </Link>
-                        </>
+                        </div>
                       ))}
                 </div>
               </Tab.Panel>
@@ -216,7 +218,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                 <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
                   {loading
                     ? [0, 1, 2, 3].map((n) => (
-                        <>
+                        <div key={n}>
                           <div className="flex flex-col gap-y-2">
                             <div
                               key={n}
@@ -229,15 +231,15 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                               <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
                             </div>
                           </div>
-                        </>
+                        </div>
                       ))
                     : filteredProperties.map((item) => (
                         <>
                           <Link
-                            className="    text-primary-6000 "
+                            className="text-primary-6000 "
                             href={{
                               pathname: "/editproperty",
-                              query: { id: item._id },
+                              query: { id: item._id, canAccess: true },
                             }}
                           >
                             <PropertyCard key={item._id} data={item} />
