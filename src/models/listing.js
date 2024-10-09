@@ -63,6 +63,12 @@ const PropertySchema = new mongoose.Schema(
     weeklyDiscount: [Number],
     currency: String,
 
+    pricePerDay: [[[Number]]],
+    icalLinks:{
+      type: Map,
+      of: String,
+    },
+
     generalAmenities: {
       type: Map,
       of: Boolean,

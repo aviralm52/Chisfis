@@ -184,6 +184,9 @@ export interface Properties {
   monthlyDiscount?: number[];
   currency?: string;
 
+  pricePerDay?: number[][][];
+  icalLinks?: object;
+
   generalAmenities?: object;
   otherAmenities?: object;
   safeAmenities?: object;

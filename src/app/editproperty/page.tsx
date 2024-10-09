@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useRef, Fragment } from "react";
 import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +7,18 @@ import Input from "@/shared/Input";
 import { Properties } from "../page";
 import { MdArrowDropDown, MdArrowRight } from "react-icons/md";
 import { toast, Toaster } from "sonner";
+import Button from "@/shared/Button";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { FaCirclePlus } from "react-icons/fa6";
+import Label from "@/components/Label";
+import { FaCalendarAlt } from "react-icons/fa";
+import { Dialog, Transition } from "@headlessui/react";
+import ButtonClose from "@/shared/ButtonClose";
+import { DateRange, DateRangePicker } from "react-date-range";
+import "react-date-range/dist/styles.css"; // main css file
+import "react-date-range/dist/theme/default.css";
+import { addDays } from "date-fns";
+import StayDatesRangeInput from "../(client-components)/(HeroSearchForm2Mobile)/DatesRangeInput";
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
@@ -31,7 +43,7 @@ const EditPropertyPage: React.FC = () => {
           const response = await axios.post("/api/user/fetchpropertybyuserid", {
             userId: user._id,
           });
-          console.log(response.data);
+          // console.log(response.data);
           const fetchedProperty = response.data.properties.find(
             (prop: Properties) => prop._id === id
           );
@@ -74,6 +86,9 @@ const EditPropertyPage: React.FC = () => {
     basePrice: property?.basePrice,
     weekendPrice: property?.weekendPrice,
     monthlyDiscount: property?.monthlyDiscount,
+
+    pricePerDay: property?.pricePerDay,
+    icalLinks: property?.icalLinks,
 
     generalAmenities: property?.generalAmenities,
     otherAmenities: property?.otherAmenities,
@@ -129,6 +144,9 @@ const EditPropertyPage: React.FC = () => {
         weekendPrice: property.weekendPrice,
         monthlyDiscount: property.monthlyDiscount,
 
+        pricePerDay: property?.pricePerDay,
+        icalLinks: property?.icalLinks,
+
         smoking: property.smoking,
         pet: property.pet,
         party: property.party,
@@ -183,13 +201,126 @@ const EditPropertyPage: React.FC = () => {
     Array.from({ length: numberOfPortions }, () => false)
   );
 
+  const [icalPlatform, setIcalPlatform] = useState<string>("Airbnb");
+  const icalLinkRef = useRef<HTMLInputElement>(null);
+  const handleAddIcalLink = () => {
+    if (icalLinkRef.current?.value == "") return;
+    const newObj = {
+      [icalPlatform]: icalLinkRef.current?.value,
+    };
+    setFormData((prevState) => ({
+      ...prevState,
+      icalLinks: { ...(prevState.icalLinks || {}), ...newObj },
+    }));
+    if (icalLinkRef.current) {
+      icalLinkRef.current.value = "";
+    }
+    setIcalPlatform("");
+  };
+
+  const handleRemoveIcalLink = (platform: string) => {
+    const newObj = { ...formData?.icalLinks } as { [key: string]: string };
+    delete newObj[platform];
+
+    setFormData((prevState) => ({
+      ...prevState,
+      icalLinks: newObj,
+    }));
+  };
+
+  const [date, setDate] = useState([
+    {
+      startDate: new Date(),
+      endDate: addDays(new Date(), 7),
+      key: "selection",
+    },
+  ]);
+
+  const modalCalendar = (index: number) => {
+    return (
+      <Transition appear show={isCalendarOpen[index]} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-50 overflow-y-auto"
+          onClose={() =>
+            setIsCalendarOpen(Array(property?.numberOfPortions).fill(false))
+          }
+        >
+          <div className="min-h-screen px-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-40" />
+            </Transition.Child>
+
+            {/* This element is to trick the browser into centering the modal contents. */}
+            <span
+              className="inline-block h-screen align-middle"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <div className="inline-block py-8 h-screen w-full max-w-4xl">
+                <div className="inline-flex pb-2 flex-col w-full text-left align-middle transition-all transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-700 dark:text-neutral-100 shadow-xl h-full">
+                  <div className="relative flex-shrink-0 px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 text-center">
+                    <h3
+                      className="text-lg font-medium leading-6 text-gray-900"
+                      id="headlessui-dialog-title-70"
+                    >
+                      Amenities
+                    </h3>
+                    <span className="absolute left-3 top-3">
+                      <ButtonClose
+                        onClick={() =>
+                          setIsCalendarOpen(
+                            Array(property?.numberOfPortions).fill(false)
+                          )
+                        }
+                      />
+                    </span>
+                  </div>
+                  <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
+                    <StayDatesRangeInput
+                      className="flex-1"
+                      prices={property?.pricePerDay?.[index] || []}
+                      // onDatesChange={handleDatesChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
+    );
+  };
+
+  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean[]>(
+    Array(property?.numberOfPortions).fill(false)
+  );
+
   return (
     <div className="max-w-6xl mx-auto ">
       <Toaster />
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-x-2 gap-y-4 mt-4">
-          <div className="text-xl dark:text-white font-medium">
-            <label>
+          <div className="text-xl dark:text-white font-medium sm:flex justify-between">
+            <label className=" w-2/6">
               VSID
               <Input
                 type="text"
@@ -199,7 +330,74 @@ const EditPropertyPage: React.FC = () => {
                 disabled
               />
             </label>
+            <div className=" w-3/5">
+              <label htmlFor="">Sync your Calendar with other Platforms</label>
+              <div className=" flex gap-x-2">
+                <select
+                  name="calendar"
+                  id="calendar"
+                  className="dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-2xl p-2"
+                  onChange={(e) => setIcalPlatform(e.target.value)}
+                  value={icalPlatform}
+                >
+                  <option
+                    className=" bg-transparent dark:bg-transparent"
+                    disabled
+                  >
+                    Select Platform
+                  </option>
+                  <option
+                    className=" bg-transparent dark:bg-transparent"
+                    value="Airbnb"
+                  >
+                    Airbnb
+                  </option>
+                  <option
+                    className=" bg-transparent dark:bg-transparent"
+                    value="Booking"
+                  >
+                    Booking.com
+                  </option>
+                </select>
+                <Input
+                  type="text"
+                  name="icalLink"
+                  className=" bg-transparent w-1/2"
+                  ref={icalLinkRef}
+                />
+                <div className=" w-1/12 flex items-center justify-center cursor-pointer">
+                  <FaCirclePlus
+                    className=" h-6 w-6 cursor-pointer"
+                    onClick={handleAddIcalLink}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
+          {formData?.icalLinks && (
+            <h1 className="text-xl font-medium bg-background">Ical links</h1>
+          )}
+          {formData?.icalLinks &&
+            Object.entries(formData?.icalLinks)?.map(([key, value]) => (
+              <div key={key} className="flex items-center justify-around">
+                <Label className=" w-2/12  text-lg font-semibold ml-1 p-2">
+                  {key}
+                </Label>
+                <Input
+                  type="text"
+                  value={value || ""}
+                  className=" w-9/12 p-2 text-base bg-background border rounded-xl disabled:cursor-not-allowed"
+                  disabled
+                />
+
+                <div className=" w-1/12 flex justify-center">
+                  <TrashIcon
+                    className=" w-6 h-6 cursor-pointer"
+                    onClick={() => handleRemoveIcalLink(key)}
+                  />
+                </div>
+              </div>
+            ))}
           <div className=" text-black">
             <h1 className="text-xl dark:text-white font-medium">
               Property Type
@@ -523,25 +721,41 @@ const EditPropertyPage: React.FC = () => {
                 </h1>
                 {isPortionOpen[index] && (
                   <div className=" flex flex-col space-y-4">
-                    <div>
-                      <label htmlFor="portionName">
+                    <div className="w-full">
+                      <label htmlFor="portionName" className=" w-full">
                         Portion&apos;s Name
-                        <Input
-                          type="text"
-                          name="cooking"
-                          value={formData?.portionName?.at(index) || ""}
-                          onChange={(e) => {
-                            const newFormData = { ...formData };
-                            newFormData?.portionName?.splice(
-                              index,
-                              1,
-                              e.target.value
-                            );
-                            setFormData(newFormData);
-                          }}
-                        />
+                        <div className=" flex w-full justify-between items-center">
+                          <Input
+                            type="text"
+                            name="cooking"
+                            value={formData?.portionName?.at(index) || ""}
+                            onChange={(e) => {
+                              const newFormData = { ...formData };
+                              newFormData?.portionName?.splice(
+                                index,
+                                1,
+                                e.target.value
+                              );
+                              setFormData(newFormData);
+                            }}
+                            className="w-8/10"
+                          />
+                          <div className=" w-2/10 p-3">
+                            <FaCalendarAlt
+                              className=" w-6 h-6 cursor-pointer"
+                              onClick={() => {
+                                setIsCalendarOpen((prev) => {
+                                  const newState = [...prev];
+                                  newState[index] = true;
+                                  return newState;
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
                       </label>
                     </div>
+                    {isCalendarOpen[index] && modalCalendar(index)}
 
                     <div className=" flex space-x-4">
                       <div>
