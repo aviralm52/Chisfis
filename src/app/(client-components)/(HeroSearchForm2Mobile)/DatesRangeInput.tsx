@@ -8,19 +8,53 @@ import DatePickerCustomDay from "@/components/DatePickerCustomDay";
 export interface StayDatesRangeInputProps {
   className?: string;
   prices?: number[][];
+  bookedDates?: Date[];
+  externalBookedDates?: Date[];
+  startDate: Date | null;
+  endDate: Date | null;
+  setStartDate: (date: Date | null) => void;
+  setEndDate: (date: Date | null) => void;
 }
 
 const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   className = "",
   prices,
+  bookedDates = [],
+  externalBookedDates = [],
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
 }) => {
-  const [startDate, setStartDate] = useState<Date | null>(
-    new Date("2024/10/10")
-  );
-  const [endDate, setEndDate] = useState<Date | null>(new Date("2024/10/23"));
+  // const [startDate, setStartDate] = useState<Date | null>(new Date());
+  // const [endDate, setEndDate] = useState<Date | null>(new Date());
+
+  const [selectedRange, setSelectedRange] = useState<
+    [Date | null, Date | null]
+  >([startDate, endDate]);
+  const [currentBookedDates, setCurrentBookedDates] =
+    useState<Date[]>(bookedDates);
+
+  useEffect(() => {
+    setCurrentBookedDates([...bookedDates, ...externalBookedDates]);
+  }, []);
+
+  const isAnyDateBooked = (start: Date, end: Date) => {
+    let date = new Date(start);
+    while (date <= end) {
+      if (isBooked(date)) {
+        return true;
+      }
+      date.setDate(date.getDate() + 1);
+    }
+    return false;
+  };
 
   const onChangeDate = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
+    if (start && end && isAnyDateBooked(start, end)) {
+      return;
+    }
     setStartDate(start);
     setEndDate(end);
   };
@@ -30,6 +64,27 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
     const day = date.getDate() - 1; // Day starts from 1, array index starts from 0
 
     return prices?.[month]?.[day] || null; // Return the price if available, otherwise null
+  };
+
+  const isBooked = (date: Date) => {
+    return currentBookedDates.some(
+      (bookedDate) =>
+        bookedDate.getDate() === date.getDate() &&
+        bookedDate.getMonth() === date.getMonth() &&
+        bookedDate.getFullYear() === date.getFullYear()
+    );
+  };
+
+  const handleBookDates = () => {
+    if (startDate && endDate) {
+      const newBookedDates = [];
+      let date = new Date(startDate);
+      while (date <= endDate) {
+        newBookedDates.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+      }
+      setCurrentBookedDates([...currentBookedDates, ...newBookedDates]);
+    }
   };
 
   return (
@@ -55,14 +110,35 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
           // renderDayContents={(day, date) => (
           //   <DatePickerCustomDay dayOfMonth={day} date={date} />
           // )}
+          // renderDayContents={(day, date) => {
+          //   const price = getPriceForDate(date || new Date());
+          //   return (
+          //     <div>
+          //       <DatePickerCustomDay dayOfMonth={day} date={date} />
+          //       {price && (
+          //         <div style={{ fontSize: "0.8rem", color: "green" }}>
+          //           €{price}
+          //         </div>
+          //       )}
+          //     </div>
+          //   );
+          // }}
           renderDayContents={(day, date) => {
             const price = getPriceForDate(date || new Date());
+            const booked = isBooked(date || new Date());
             return (
-              <div>
+              <div
+                style={{
+                  opacity: booked ? 0.4 : 1, // Faded if booked
+                  pointerEvents: booked ? "none" : "auto", // Disable selection if booked
+                  textDecoration: booked ? "line-through" : "none",
+                  color: booked ? "red" : "none",
+                }}
+              >
                 <DatePickerCustomDay dayOfMonth={day} date={date} />
                 {price && (
                   <div style={{ fontSize: "0.8rem", color: "green" }}>
-                    ${price}
+                    €{price}
                   </div>
                 )}
               </div>
@@ -70,6 +146,16 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
           }}
         />
       </div>
+      {startDate && endDate && (
+        <div className="text-center my-4">
+          <button
+            onClick={handleBookDates}
+            className="px-4 py-2 bg-primary-6000 text-white rounded"
+          >
+            Book Selected Dates
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -67,6 +67,8 @@ import { PiMapPinSimpleAreaFill, PiStudentBold } from "react-icons/pi";
 import { SiLevelsdotfyi } from "react-icons/si";
 import { RiMoneyEuroCircleFill } from "react-icons/ri";
 import { BentoGridDemo } from "@/components/BentoGrid";
+import { EventInterface } from "@/app/editproperty/page";
+import dateParser from "@/helper/dateParser";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -138,6 +140,9 @@ interface Properties {
   weekendPrice: number[];
   monthlyDiscount: number[];
   currency: string;
+
+  pricePerDay: number[][][];
+  icalLinks: object;
 
   generalAmenities: object;
   otherAmenities: object;
@@ -248,6 +253,72 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
   }, []);
 
+  // TODO: handle external booked dates
+  const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
+    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
+  ]); //! {start: "YYYY-MM-DD"}
+
+  const fetchAndParseICal = async (url: string) => {
+    try {
+      console.log("url fethced:::: ", url);
+      const response = await axios.post("/api/ical", { url });
+      console.log("response:::: ", response);
+      const parsedData = response.data.data;
+      const bookings = [];
+      for (const eventId in parsedData) {
+        const event = parsedData[eventId];
+        if (event.type === "VEVENT") {
+          const startDate = event.start ? new Date(event.start) : undefined;
+          const endDate = event.end ? new Date(event.end) : undefined;
+
+          bookings.push({
+            startDate,
+            endDate,
+          });
+        }
+      }
+      // console.log("bookings: ", bookings);
+      return bookings;
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchBookedDates = async (url: string) => {
+    // const airbnbBookings = await fetchAndParseICal(
+    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
+    // );
+    console.log("url::: ", url);
+    const airbnbBookings = await fetchAndParseICal(url);
+
+    const eventsFromAirbnb: EventInterface[] = [];
+    airbnbBookings?.forEach((event) => {
+      const stdt = dateParser(event.startDate?.toLocaleString() || "");
+      const nddt = dateParser(event.endDate?.toLocaleString() || "");
+
+      const newObj: EventInterface = {
+        start: stdt,
+        end: nddt,
+        title: "Booked",
+      };
+      eventsFromAirbnb.push(newObj);
+      setBookedDates(eventsFromAirbnb);
+
+      //! adding events from airbnb to already booked dates
+      eventsFromAirbnb.forEach((event) => {
+        const newDates: Date[] = [];
+        let currDt = new Date(event.start!);
+        while (currDt < new Date(event.end!)) {
+          newDates.push(currDt);
+          currDt.setDate(currDt.getDate() + 1);
+        }
+        // console.log()
+        setAlreadyBookedDates((prev) => [...prev, ...newDates]);
+      });
+    });
+  };
+
   useEffect(() => {
     const getProperties = async () => {
       try {
@@ -257,6 +328,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
+          fetchBookedDates(response.data.icalLinks["Airbnb"]);
         }
 
         const languageResponse = await axios.get(
@@ -1125,6 +1197,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             className="flex-1 z-[11]"
             onDatesChange={handleDatesChange}
             minNights={minNights}
+            prices={particularProperty?.pricePerDay[0]}
+            externalBookedDates={alreadyBookedDates}
           />
           <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
           <GuestsInput

@@ -48,6 +48,7 @@
     "express": "^4.19.2",
     "framer-motion": "^10.18.0",
     "google-map-react": "^2.2.1",
+    "ical": "^0.8.0",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
@@ -92,6 +93,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/crypto-js": "^4.2.2",
+    "@types/ical": "^0.8.3",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash.debounce": "^4.0.9",
     "@types/nodemailer": "^6.4.15",

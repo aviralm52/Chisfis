@@ -19,6 +19,20 @@ import "react-date-range/dist/styles.css"; // main css file
 import "react-date-range/dist/theme/default.css";
 import { addDays } from "date-fns";
 import StayDatesRangeInput from "../(client-components)/(HeroSearchForm2Mobile)/DatesRangeInput";
+import dateParser from "@/helper/dateParser";
+
+export interface EventInterface {
+  title: string;
+  date?: string;
+  start?: string;
+  end?: string; // if End is not given then the duration will be the same day as start
+  bookedFrom?: string;
+}
+
+type CustomDateRange = {
+  from: Date | null;
+  to: Date | null;
+};
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
@@ -28,6 +42,7 @@ const EditPropertyPage: React.FC = () => {
   const [property, setProperty] = useState<Properties | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
+  const [refreshState, setRefreshState] = useState<boolean>(false);
 
   useEffect(() => {
     const canAccess = searchParams.get("canAccess");
@@ -57,7 +72,7 @@ const EditPropertyPage: React.FC = () => {
       };
       fetchProperty();
     }
-  }, [id, user?._id]);
+  }, [id, user?._id, refreshState]);
 
   const [formData, setFormData] = useState<Partial<Properties>>({
     VSID: property?.VSID,
@@ -161,6 +176,11 @@ const EditPropertyPage: React.FC = () => {
 
         // isLive: property.isLive,
       });
+      const url = (property.icalLinks as { [key: string]: string })[
+        "Airbnb"
+      ] as string;
+      console.log("url: ", url);
+      fetchBookedDates(url);
     }
   }, [property]);
 
@@ -203,6 +223,10 @@ const EditPropertyPage: React.FC = () => {
 
   const [icalPlatform, setIcalPlatform] = useState<string>("Airbnb");
   const icalLinkRef = useRef<HTMLInputElement>(null);
+  const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
+    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
+  ]); //! {start: "YYYY-MM-DD"}
   const handleAddIcalLink = () => {
     if (icalLinkRef.current?.value == "") return;
     const newObj = {
@@ -228,13 +252,33 @@ const EditPropertyPage: React.FC = () => {
     }));
   };
 
-  const [date, setDate] = useState([
-    {
-      startDate: new Date(),
-      endDate: addDays(new Date(), 7),
-      key: "selection",
-    },
-  ]);
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
+
+  const [date, setDate] = useState<CustomDateRange>({
+    from: startDate,
+    to: endDate,
+  });
+
+  useEffect(() => {
+    setDate({ from: startDate, to: endDate });
+  }, [startDate, endDate]);
+
+  const priceInputRef = useRef<HTMLInputElement>(null);
+  const handleChangePrice = async (portionIndex: number) => {
+    try {
+      const response = await axios.post("/api/editPrices", {
+        propertyId: id,
+        portion: portionIndex,
+        price: priceInputRef.current?.value,
+        dateRange: date,
+      });
+      console.log(response);
+    } catch (err: any) {
+      console.log("error: ", err);
+    }
+    setRefreshState((prev) => !prev);
+  };
 
   const modalCalendar = (index: number) => {
     return (
@@ -275,15 +319,9 @@ const EditPropertyPage: React.FC = () => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="inline-block py-8 h-screen w-full max-w-4xl">
+              <div className="inline-block py-8 h-screen w-full max-w-4xl ">
                 <div className="inline-flex pb-2 flex-col w-full text-left align-middle transition-all transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-700 dark:text-neutral-100 shadow-xl h-full">
-                  <div className="relative flex-shrink-0 px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 text-center">
-                    <h3
-                      className="text-lg font-medium leading-6 text-gray-900"
-                      id="headlessui-dialog-title-70"
-                    >
-                      Amenities
-                    </h3>
+                  <div className="relative flex-shrink-0 px-6 border-b border-neutral-200 dark:border-neutral-800 text-center">
                     <span className="absolute left-3 top-3">
                       <ButtonClose
                         onClick={() =>
@@ -294,12 +332,35 @@ const EditPropertyPage: React.FC = () => {
                       />
                     </span>
                   </div>
-                  <div className="px-8 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
+                  <div className=" px-8 py-4 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
                     <StayDatesRangeInput
                       className="flex-1"
                       prices={property?.pricePerDay?.[index] || []}
+                      externalBookedDates={alreadyBookedDates}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
                       // onDatesChange={handleDatesChange}
                     />
+                    <div className=" flex justify-between items-center gap-x-2 w-full border-none">
+                      <div className=" flex w-1/2 ml-4">
+                        <Label className=" w-2/5 flex items-center">
+                          Enter Price:{" "}
+                        </Label>
+                        <Input
+                          type="number"
+                          className="w-3/5"
+                          ref={priceInputRef}
+                        />
+                      </div>
+                      <Button
+                        className=" p-2 bg-primary-6000 mr-4 cursor-pointer hover:bg-primary-700"
+                        onClick={() => handleChangePrice(index)}
+                      >
+                        Submit
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -313,6 +374,64 @@ const EditPropertyPage: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState<boolean[]>(
     Array(property?.numberOfPortions).fill(false)
   );
+
+  const fetchAndParseICal = async (url: string) => {
+    try {
+      const response = await axios.post("/api/ical", { url });
+      const parsedData = response.data.data;
+      const bookings = [];
+      for (const eventId in parsedData) {
+        const event = parsedData[eventId];
+        if (event.type === "VEVENT") {
+          const startDate = event.start ? new Date(event.start) : undefined;
+          const endDate = event.end ? new Date(event.end) : undefined;
+
+          bookings.push({
+            startDate,
+            endDate,
+          });
+        }
+      }
+      // console.log("bookings: ", bookings);
+      return bookings;
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchBookedDates = async (url: string) => {
+    // const airbnbBookings = await fetchAndParseICal(
+    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
+    // );
+    const airbnbBookings = await fetchAndParseICal(url);
+
+    const eventsFromAirbnb: EventInterface[] = [];
+    airbnbBookings?.forEach((event) => {
+      const stdt = dateParser(event.startDate?.toLocaleString() || "");
+      const nddt = dateParser(event.endDate?.toLocaleString() || "");
+
+      const newObj: EventInterface = {
+        start: stdt,
+        end: nddt,
+        title: "Booked",
+        // bookedFrom: url.includes("airbnb") ? "Airbnb" : "Booking.com",
+      };
+      eventsFromAirbnb.push(newObj);
+      setBookedDates(eventsFromAirbnb);
+
+      //! adding events from airbnb to already booked dates
+      eventsFromAirbnb.forEach((event) => {
+        const newDates: Date[] = [];
+        let currDt = new Date(event.start!);
+        while (currDt < new Date(event.end!)) {
+          newDates.push(currDt);
+          currDt.setDate(currDt.getDate() + 1);
+        }
+
+        setAlreadyBookedDates((prev) => [...prev, ...newDates]);
+      });
+    });
+  };
 
   return (
     <div className="max-w-6xl mx-auto ">
