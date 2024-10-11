@@ -20,6 +20,8 @@ import "react-date-range/dist/theme/default.css";
 import { addDays } from "date-fns";
 import StayDatesRangeInput from "../(client-components)/(HeroSearchForm2Mobile)/DatesRangeInput";
 import dateParser from "@/helper/dateParser";
+import CustomDateRangePrice from "@/components/CustomDateRangePrice";
+import BarLoader from "@/components/BarLoader";
 
 export interface EventInterface {
   title: string;
@@ -266,6 +268,7 @@ const EditPropertyPage: React.FC = () => {
 
   const priceInputRef = useRef<HTMLInputElement>(null);
   const handleChangePrice = async (portionIndex: number) => {
+    setLoading(true);
     try {
       const response = await axios.post("/api/editPrices", {
         propertyId: id,
@@ -278,6 +281,7 @@ const EditPropertyPage: React.FC = () => {
       console.log("error: ", err);
     }
     setRefreshState((prev) => !prev);
+    setLoading(false);
   };
 
   const modalCalendar = (index: number) => {
@@ -333,7 +337,18 @@ const EditPropertyPage: React.FC = () => {
                     </span>
                   </div>
                   <div className=" px-8 py-4 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
-                    <StayDatesRangeInput
+                    {/* <StayDatesRangeInput
+                      className="flex-1"
+                      prices={property?.pricePerDay?.[index] || []}
+                      externalBookedDates={alreadyBookedDates}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
+                      // onDatesChange={handleDatesChange}
+                    /> */}
+                    {loading && <BarLoader />}
+                    <CustomDateRangePrice
                       className="flex-1"
                       prices={property?.pricePerDay?.[index] || []}
                       externalBookedDates={alreadyBookedDates}

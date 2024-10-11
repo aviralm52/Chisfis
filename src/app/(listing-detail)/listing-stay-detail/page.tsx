@@ -69,6 +69,7 @@ import { RiMoneyEuroCircleFill } from "react-icons/ri";
 import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
+import CustomDateRangePrice from "@/components/CustomDateRangePrice";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -254,6 +255,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   }, []);
 
   // TODO: handle external booked dates
+  const [bookedState, setBookedState] = useState<boolean>(false);
   const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
   const [bookedDates, setBookedDates] = useState<EventInterface[]>([
     // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
@@ -261,9 +263,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const fetchAndParseICal = async (url: string) => {
     try {
-      console.log("url fethced:::: ", url);
+      // console.log("url fethced:::: ", url);
       const response = await axios.post("/api/ical", { url });
-      console.log("response:::: ", response);
+      // console.log("response:::: ", response);
       const parsedData = response.data.data;
       const bookings = [];
       for (const eventId in parsedData) {
@@ -289,7 +291,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    console.log("url::: ", url);
+    // console.log("url::: ", url);
     const airbnbBookings = await fetchAndParseICal(url);
 
     const eventsFromAirbnb: EventInterface[] = [];
@@ -313,8 +315,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           newDates.push(currDt);
           currDt.setDate(currDt.getDate() + 1);
         }
-        // console.log()
+        // console.log("newDates: ", newDates);
         setAlreadyBookedDates((prev) => [...prev, ...newDates]);
+        setBookedState(true);
       });
     });
   };
@@ -324,11 +327,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       try {
         const response = await axios.get(`/api/particular/${indexId}`);
         if (response.data) {
+          fetchBookedDates(response.data.icalLinks["Airbnb"]);
           setParticualarProperty(response?.data);
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
-          fetchBookedDates(response.data.icalLinks["Airbnb"]);
         }
 
         const languageResponse = await axios.get(
@@ -1193,13 +1196,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </div>
 
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">
-          <StayDatesRangeInput
-            className="flex-1 z-[11]"
-            onDatesChange={handleDatesChange}
-            minNights={minNights}
-            prices={particularProperty?.pricePerDay[0]}
-            externalBookedDates={alreadyBookedDates}
-          />
+          {bookedState && (
+            <StayDatesRangeInput
+              className="flex-1 z-[11]"
+              onDatesChange={handleDatesChange}
+              minNights={minNights}
+              prices={particularProperty?.pricePerDay[0]}
+              externalBookedDates={alreadyBookedDates}
+            />
+          )}
           <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
           <GuestsInput
             className="flex-1"
@@ -1594,11 +1599,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       <main className=" relative z-10 mt-11 flex flex-col lg:flex-row ">
         {/* CONTENT */}
         <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pr-10">
-          {renderSection1()}
+          {/* {renderSection1()} */}
           {renderSection2()}
           {renderSection3()}
           {renderSection4()}
-          <SectionDateRange />
+          {bookedState && (
+            <SectionDateRange
+              prices={particularProperty?.pricePerDay[0]}
+              externalBookedDates={alreadyBookedDates}
+            />
+          )}
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}

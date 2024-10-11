@@ -127,9 +127,6 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
     );
   };
 
-
-  
-
   const [currentBookedDates, setCurrentBookedDates] =
     useState<Date[]>(bookedDates);
 
@@ -196,6 +193,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
                   renderDayContents={(day, date) => {
                     const price = getPriceForDate(date || new Date());
                     const booked = isBooked(date || new Date());
+                    // console.log("booked: ", booked);
                     return (
                       <div
                         style={{
