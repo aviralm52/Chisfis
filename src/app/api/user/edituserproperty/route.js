@@ -8,7 +8,7 @@ export async function POST(request) {
   try {
     const reqBody = await request.json();
     const { propertyId, updatedData, userId } = reqBody;
-    
+    console.log('updated data: ', updatedData);
     delete updatedData.VSID;
 
     if (!propertyId || !updatedData || !userId) {
@@ -26,6 +26,7 @@ export async function POST(request) {
       { new: true }
     );
 
+    console.log('updated Property: ', property);
     
 
     if (!property) {

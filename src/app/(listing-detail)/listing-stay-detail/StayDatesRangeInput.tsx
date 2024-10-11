@@ -10,8 +10,14 @@ export interface StayDatesRangeInputProps {
   className?: string;
   initialStartDate?: Date | null;
   initialEndDate?: Date | null;
-  onDatesChange?: (dates: { startDate: Date | null; endDate: Date | null }) => void;
+  onDatesChange?: (dates: {
+    startDate: Date | null;
+    endDate: Date | null;
+  }) => void;
   minNights?: number; // Added minNights prop
+  prices?: number[][];
+  bookedDates?: Date[];
+  externalBookedDates?: Date[];
 }
 
 interface DateState {
@@ -25,8 +31,10 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   initialEndDate = null,
   onDatesChange,
   minNights = 1, // Default to 1 if minNights is not provided
+  prices,
+  bookedDates = [],
+  externalBookedDates = [],
 }) => {
-  
   const dt = new Date();
   const edt = new Date(dt);
   // console.log("minNight default: ", minNights);
@@ -34,21 +42,21 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(dt);
   const [endDate, setEndDate] = useState<Date | null>(edt);
   // console.log('date: ', dt.getDate(), minNights)
-  const dt2 = new Date(dt.getDate() + minNights)
-
+  const dt2 = new Date(dt.getDate() + minNights);
 
   useEffect(() => {
     // console.log('minNights input useEffect: ', minNights)
     const savedDate = localStorage.getItem("dates");
     const dt = new Date(Date.now());
-    const newDate = new Date(Date.now() + minNights + 1 )
+    const newDate = new Date(Date.now() + minNights + 1);
     if (savedDate) {
-      const { startDate: savedStartDate, endDate: savedEndDate } = JSON.parse(savedDate);
+      const { startDate: savedStartDate, endDate: savedEndDate } =
+        JSON.parse(savedDate);
       setStartDate(new Date(savedStartDate));
       setEndDate(newDate);
     }
     setStartDate(dt);
-    setEndDate(edt); 
+    setEndDate(edt);
   }, [minNights]);
 
   const onChangeDate = (dates: [Date | null, Date | null]) => {
@@ -77,11 +85,11 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
       onDatesChange({ startDate: start, endDate: end });
     }
   };
-     
+
   const calculateDateDifference = (start: Date | null, end: Date | null) => {
     if (start && end) {
       const timeDiff = end.getTime() - start.getTime();
-      return Math.ceil(timeDiff / (1000 * 3600 * 24)) ; // Adding 1 to include both start and end dates
+      return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
     }
     return 0;
   };
@@ -119,6 +127,29 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
     );
   };
 
+  const [currentBookedDates, setCurrentBookedDates] =
+    useState<Date[]>(bookedDates);
+
+  useEffect(() => {
+    setCurrentBookedDates([...bookedDates, ...externalBookedDates]);
+  }, []);
+
+  const getPriceForDate = (date: Date) => {
+    const month = date.getMonth(); // 0 = January, 11 = December
+    const day = date.getDate() - 1; // Day starts from 1, array index starts from 0
+
+    return prices?.[month]?.[day] || null; // Return the price if available, otherwise null
+  };
+
+  const isBooked = (date: Date) => {
+    return currentBookedDates.some(
+      (bookedDate) =>
+        bookedDate.getDate() === date.getDate() &&
+        bookedDate.getMonth() === date.getMonth() &&
+        bookedDate.getFullYear() === date.getFullYear()
+    );
+  };
+
   return (
     <Popover className={`StayDatesRangeInput z-10 relative flex ${className}`}>
       {({ open }) => (
@@ -146,7 +177,7 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
             <Popover.Panel className="absolute left-auto xl:-right-10 right-0 z-10 mt-3 top-full w-screen max-w-sm px-4 sm:px-0 lg:max-w-3xl">
               <div className="overflow-hidden rounded-3xl shadow-lg ring-1 ring-black ring-opacity-5 bg-white dark:bg-neutral-800 p-8">
                 <DatePicker
-                className=" opacity-100"
+                  className=" opacity-100"
                   selected={startDate}
                   onChange={onChangeDate}
                   startDate={startDate}
@@ -159,9 +190,28 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
                   renderCustomHeader={(p) => (
                     <DatePickerCustomHeaderTwoMonth {...p} />
                   )}
-                  renderDayContents={(day, date) => (
-                    <DatePickerCustomDay dayOfMonth={day} date={date} />
-                  )}
+                  renderDayContents={(day, date) => {
+                    const price = getPriceForDate(date || new Date());
+                    const booked = isBooked(date || new Date());
+                    // console.log("booked: ", booked);
+                    return (
+                      <div
+                        style={{
+                          opacity: booked ? 0.4 : 1, // Faded if booked
+                          pointerEvents: booked ? "none" : "auto", // Disable selection if booked
+                          textDecoration: booked ? "line-through" : "none",
+                          color: booked ? "red" : "none",
+                        }}
+                      >
+                        <DatePickerCustomDay dayOfMonth={day} date={date} />
+                        {price && (
+                          <div style={{ fontSize: "0.8rem", color: "green" }}>
+                            €{price}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }}
                 />
               </div>
             </Popover.Panel>

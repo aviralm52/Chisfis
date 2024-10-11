@@ -233,7 +233,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                           </div>
                         </div>
                       ))
-                    : filteredProperties.map((item) => (
+                    : filteredProperties.map((item, index) => (
                         <>
                           <Link
                             className="text-primary-6000 "
@@ -241,6 +241,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                               pathname: "/editproperty",
                               query: { id: item._id, canAccess: true },
                             }}
+                            key={index}
                           >
                             <PropertyCard key={item._id} data={item} />
                             <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
