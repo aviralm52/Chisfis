@@ -292,6 +292,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
     // console.log("url::: ", url);
+    if (!url) {
+      setBookedState(true);
+      return;
+    }
     const airbnbBookings = await fetchAndParseICal(url);
 
     const eventsFromAirbnb: EventInterface[] = [];
@@ -327,7 +331,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       try {
         const response = await axios.get(`/api/particular/${indexId}`);
         if (response.data) {
-          fetchBookedDates(response.data.icalLinks["Airbnb"]);
+          fetchBookedDates(response.data?.icalLinks?.["Airbnb"]);
           setParticualarProperty(response?.data);
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
