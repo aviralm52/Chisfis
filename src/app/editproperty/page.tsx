@@ -22,6 +22,7 @@ import StayDatesRangeInput from "../(client-components)/(HeroSearchForm2Mobile)/
 import dateParser from "@/helper/dateParser";
 import CustomDateRangePrice from "@/components/CustomDateRangePrice";
 import BarLoader from "@/components/BarLoader";
+import ButtonPrimary from "@/shared/ButtonPrimary";
 
 export interface EventInterface {
   title: string;
@@ -446,6 +447,18 @@ const EditPropertyPage: React.FC = () => {
         setAlreadyBookedDates((prev) => [...prev, ...newDates]);
       });
     });
+  };
+
+  const generateIcal = async () => {
+    try {
+      const response = await axios.post("/api/ical/createIcal", {
+        propertyId: id,
+      });
+      console.log("response:: ", response);
+      console.log("response: ", response.data);
+    } catch (error: any) {
+      console.log("error: ", error);
+    }
   };
 
   return (
@@ -1108,6 +1121,26 @@ const EditPropertyPage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+        <div className=" w-full flex justify-between mt-4 gap-x-2 items-center">
+          <p className=" text-nowrap w-1/6">Your Ical Link: </p>
+          <Input
+            type="text"
+            disabled
+            value={`https://vacationsaga.com/api/ical/${id}`}
+            className=" w-4/6"
+          />
+          <div
+            // onClick={generateIcal}
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `https://vacationsaga.com/api/ical/${id}`
+              );
+            }}
+            className=" w-1/6 bg-primary-6000 hover:bg-primary-700 rounded-3xl px-2 py-3 cursor-pointer font-medium flex justify-center"
+          >
+            Copy Link
+          </div>
         </div>
 
         <div className=" flex justify-center my-4">

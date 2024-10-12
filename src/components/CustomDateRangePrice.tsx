@@ -4,6 +4,9 @@ import DatePicker from "react-datepicker";
 import React, { FC, Fragment, useEffect, useState } from "react";
 import DatePickerCustomHeaderTwoMonth from "@/components/DatePickerCustomHeaderTwoMonth";
 import DatePickerCustomDay from "@/components/DatePickerCustomDay";
+import axios from "axios";
+import { useSearchParams } from "next/navigation";
+import { LuLoader2 } from "react-icons/lu";
 
 export interface StayDatesRangeInputProps {
   className?: string;
@@ -28,6 +31,10 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
 }) => {
   // const [startDate, setStartDate] = useState<Date | null>(new Date());
   // const [endDate, setEndDate] = useState<Date | null>(new Date());
+
+  const params = useSearchParams();
+  const pId = params.get("id");
+  const [bookingLoading, setBookingLoading] = useState<boolean>(false);
 
   const [selectedRange, setSelectedRange] = useState<
     [Date | null, Date | null]
@@ -75,7 +82,20 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
     );
   };
 
-  const handleBookDates = () => {
+  const handleBookDates = async () => {
+    setBookingLoading(true);
+    try {
+      const response = await axios.post("/api/bookings/createBooking", {
+        propertyId: pId,
+        startDate: startDate,
+        endDate: endDate,
+        bookingStatus: "confirmed",
+      });
+      console.log("response: ", response);
+    } catch (error: any) {
+      console.log("Error: ", error);
+    }
+
     if (startDate && endDate) {
       const newBookedDates = [];
       let date = new Date(startDate);
@@ -85,6 +105,7 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
       }
       setCurrentBookedDates([...currentBookedDates, ...newBookedDates]);
     }
+    setBookingLoading(false);
   };
 
   return (
@@ -95,7 +116,9 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
         </span>
       </div>
       <div
-        className={`relative flex-shrink-0 flex justify-center z-10 py-5 ${className} `}
+        className={`relative flex-shrink-0 flex justify-center z-10 py-5 ${className} ${
+          bookingLoading ? "opacity-40" : ""
+        }`}
       >
         <DatePicker
           selected={startDate}
@@ -152,7 +175,13 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
             onClick={handleBookDates}
             className="px-4 py-2 bg-primary-6000 text-white rounded"
           >
-            Book Selected Dates
+            {bookingLoading ? (
+              <p className=" flex gap-x-1 items-center">
+                Booking <LuLoader2 className=" animate-spin" />
+              </p>
+            ) : (
+              "Book Selected Dates"
+            )}
           </button>
         </div>
       )}

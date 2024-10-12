@@ -100,6 +100,15 @@ export interface StayDataType {
   };
 }
 
+export interface BookingDataType{
+  _id: ObjectId;
+  propertyId: ObjectId;
+  userId: ObjectId;
+  startDate: Date;
+  endDate: Date;
+  bookingStatus?: string;
+}
+
 export interface PropertyDataType {
   _id?: string;
   id?: string;
