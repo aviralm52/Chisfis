@@ -499,12 +499,12 @@ const EditPropertyPage: React.FC = () => {
                   >
                     Airbnb
                   </option>
-                  <option
+                  {/* <option
                     className=" bg-transparent dark:bg-transparent"
                     value="Booking"
                   >
                     Booking.com
-                  </option>
+                  </option> */}
                 </select>
                 <Input
                   type="text"

@@ -11,7 +11,7 @@ import HeroSearchFormSmall from "../(HeroSearchFormSmall)/HeroSearchFormSmall";
 import { StaySearchFormFields } from "../type";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import ButtonPrimary from "@/shared/ButtonPrimary";
-
+import { IoExitOutline } from "react-icons/io5";
 
 interface Header3Props {
   className?: string;
@@ -30,6 +30,8 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   // const [currentTab, setCurrentTab] = useState<SearchTab>("Stays");
   const [currentTab, setCurrentTab] = useState<SearchTab>("Short Term Rentals");
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const loginRef = useRef<HTMLDivElement>(null);
 
   let token = "";
   const IsServer = typeof window === "undefined";
@@ -37,12 +39,11 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     token = window.localStorage.getItem("token") || "";
   }
 
-
   useOutsideAlerter(headerInnerRef, () => {
     setShowHeroSearch(null);
     // setCurrentTab("Stays");
     setCurrentTab("Short Term Rentals");
-  });  
+  });
 
   let pathname = usePathname();
   //
@@ -88,7 +89,23 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
     }
   }, [isLoggedIn]);
 
-  //
+  const handleShowLogin = (event: MouseEvent) => {
+    if (loginRef.current && !loginRef.current?.contains(event.target as Node)) {
+      setShowLogin(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log("show login", showLogin);
+    if (showLogin) {
+      console.log("added evenet listener");
+      window.addEventListener("mousedown", handleShowLogin);
+    } else {
+      console.log("removed event listener");
+      window.removeEventListener("mousedown", handleShowLogin);
+    }
+  }, [showLogin]);
+
   const renderHeroSearch = () => {
     return (
       <div
@@ -198,13 +215,48 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
                 {token ? (
                   // <ButtonPrimary onClick={logout}>Logout</ButtonPrimary>
                   <Link href="/author">
-                  <ButtonPrimary>My Profile</ButtonPrimary>
+                    <ButtonPrimary>My Profile</ButtonPrimary>
                   </Link>
                 ) : (
-                  <ButtonPrimary>
-                    <Link href="/login">Login</Link>
+                  <ButtonPrimary onClick={() => setShowLogin((prev) => !prev)}>
+                    Login
                   </ButtonPrimary>
                 )}
+                {/* {showLogin && ( */}
+                <div
+                  className={`flex flex-col gap-y-4 bg-[#142431] rounded-xl p-4 absolute top-24 right-0 transition-all duration-400 ease-in-out transform ${
+                    showLogin ? "opacity-100 scale-100" : "opacity-0 scale-50"
+                  }`}
+                  ref={loginRef}
+                >
+                  <Link
+                    href={{
+                      pathname: "/login",
+                      query: {
+                        role: "Traveller",
+                      },
+                    }}
+                  >
+                    <ButtonPrimary className=" w-52 flex justify-between tracking-tight">
+                      Login as Traveller{" "}
+                      <IoExitOutline className=" text-xl font-extrabold" />
+                    </ButtonPrimary>
+                  </Link>
+                  <Link
+                    href={{
+                      pathname: "/login",
+                      query: {
+                        role: "Owner",
+                      },
+                    }}
+                  >
+                    <ButtonPrimary className=" w-52 flex justify-between tracking-tighter">
+                      Login as Owner{" "}
+                      <IoExitOutline className=" text-xl font-extrabold" />
+                    </ButtonPrimary>
+                  </Link>
+                </div>
+                {/* )} */}
 
                 <MenuBar />
               </div>

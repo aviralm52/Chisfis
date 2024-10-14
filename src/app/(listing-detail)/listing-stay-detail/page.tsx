@@ -1603,7 +1603,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       <main className=" relative z-10 mt-11 flex flex-col lg:flex-row ">
         {/* CONTENT */}
         <div className="w-full lg:w-3/5 xl:w-2/3 space-y-8 lg:space-y-10 lg:pr-10">
-          {/* {renderSection1()} */}
+          {renderSection1()}
           {renderSection2()}
           {renderSection3()}
           {renderSection4()}
