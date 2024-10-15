@@ -46,6 +46,7 @@ const EditPropertyPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
   const [refreshState, setRefreshState] = useState<boolean>(false);
+  const [instantBookingToggle, setInstantBookingToggle] = useState(false);
 
   useEffect(() => {
     const canAccess = searchParams.get("canAccess");
@@ -81,6 +82,7 @@ const EditPropertyPage: React.FC = () => {
     VSID: property?.VSID,
     rentalType: property?.rentalType,
 
+    isInstantBooking: property?.isInstantBooking,
     propertyType: property?.propertyType,
     placeName: property?.placeName,
     rentalForm: property?.rentalForm,
@@ -138,6 +140,7 @@ const EditPropertyPage: React.FC = () => {
         VSID: property.VSID,
         rentalType: property.rentalType,
 
+        isInstantBooking: property.isInstantBooking,
         propertyType: property.propertyType,
         placeName: property.placeName,
         rentalForm: property.rentalForm,
@@ -179,7 +182,8 @@ const EditPropertyPage: React.FC = () => {
 
         // isLive: property.isLive,
       });
-      const url = (property.icalLinks as { [key: string]: string })[
+      setInstantBookingToggle(property?.isInstantBooking || false);
+      const url = (property.icalLinks as { [key: string]: string })?.[
         "Airbnb"
       ] as string;
       console.log("url: ", url);
@@ -545,6 +549,48 @@ const EditPropertyPage: React.FC = () => {
                 </div>
               </div>
             ))}
+          <div className=" flex flex-col sm:flex-row gap-y-2 sm:gap-x-4 items-center">
+            {" "}
+            <h2 className=" text-xl font-medium dark:text-white">
+              Instant Booking :{" "}
+            </h2>
+            <div>
+              <div
+                className=" border-2 border-neutral-800 dark:border-white rounded-3xl w-20 h-10 p-1 flex items-center cursor-pointer relative text-white dark:bg-slate-900"
+                onClick={() => {
+                  setFormData((prev) => {
+                    const newFormData = { ...prev };
+                    newFormData.isInstantBooking = !instantBookingToggle;
+                    return newFormData;
+                  });
+                  setInstantBookingToggle((prev) => !prev);
+                }}
+              >
+                {/* {instantBookingToggle ? ( */}
+                <div
+                  className={` absolute rounded-full w-8 h-8 bg-green-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                    instantBookingToggle
+                      ? "translate-x-9 scale-100 opacity-100"
+                      : " scale-50 opacity-0"
+                  }`}
+                >
+                  ON
+                </div>
+                {/* ) : ( */}
+                <div
+                  className={` absolute rounded-full w-8 h-8 bg-red-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                    instantBookingToggle
+                      ? " scale-50 opacity-0"
+                      : " scale-100 opacity-100"
+                  }`}
+                >
+                  OFF
+                </div>
+                {/* )} */}
+              </div>
+            </div>
+            <p>Instant Booking is {instantBookingToggle ? "ON" : "OFF"}</p>
+          </div>
           <div className=" text-black">
             <h1 className="text-xl dark:text-white font-medium">
               Property Type

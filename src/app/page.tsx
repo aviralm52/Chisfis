@@ -156,6 +156,7 @@ export interface Properties {
   userId?: string;
 
   VSID?:string;
+  isInstantBooking?: boolean;
   rentalType?:string;
   propertyType?: string;
   placeName?: string;

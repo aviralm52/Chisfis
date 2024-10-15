@@ -263,7 +263,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const fetchAndParseICal = async (url: string) => {
     try {
-      // console.log("url fethced:::: ", url);
+      console.log("url fethced:::: ", url);
       const response = await axios.post("/api/ical", { url });
       // console.log("response:::: ", response);
       const parsedData = response.data.data;
@@ -291,12 +291,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    // console.log("url::: ", url);
+    console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
+    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
 
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
@@ -319,11 +320,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           newDates.push(currDt);
           currDt.setDate(currDt.getDate() + 1);
         }
-        // console.log("newDates: ", newDates);
+        console.log("newDates: ", newDates);
         setAlreadyBookedDates((prev) => [...prev, ...newDates]);
-        setBookedState(true);
       });
     });
+    setBookedState(true);
   };
 
   useEffect(() => {
@@ -1546,14 +1547,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
                 key={index}
               >
-                <img
-                  src={
-                    propertyPicturesTemp[index] ||
-                    "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
-                  }
-                  alt="Property Picture"
-                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
-                />
+                {propertyPicturesTemp[index] ? (
+                  <img
+                    src={propertyPicturesTemp[index]}
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
+                  />
+                ) : (
+                  <div className=" flex flex-col justify-center items-center">
+                    <BsExclamationCircleFill className="w-1/2 h-1/2 mb-2 text-neutral-700" />
+                    <p>Image not found!</p>
+                  </div>
+                )}
               </div>
             ))}
           <button

@@ -59,8 +59,31 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
     setEndDate(edt);
   }, [minNights]);
 
+  const isBooked = (date: Date) => {
+    return currentBookedDates.some(
+      (bookedDate) =>
+        bookedDate.getDate() === date.getDate() &&
+        bookedDate.getMonth() === date.getMonth() &&
+        bookedDate.getFullYear() === date.getFullYear()
+    );
+  };
+
+  const isAnyDateBooked = (start: Date, end: Date) => {
+    let date = new Date(start);
+    while (date <= end) {
+      if (isBooked(date)) {
+        return true;
+      }
+      date.setDate(date.getDate() + 1);
+    }
+    return false;
+  };
+
   const onChangeDate = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates;
+    if (start && end && isAnyDateBooked(start, end)) {
+      return;
+    }
     if (start && end) {
       const adjustedEndDate = new Date(start);
       adjustedEndDate.setDate(start.getDate() + minNights - 1);
@@ -139,15 +162,6 @@ const StayDatesRangeInput: FC<StayDatesRangeInputProps> = ({
     const day = date.getDate() - 1; // Day starts from 1, array index starts from 0
 
     return prices?.[month]?.[day] || null; // Return the price if available, otherwise null
-  };
-
-  const isBooked = (date: Date) => {
-    return currentBookedDates.some(
-      (bookedDate) =>
-        bookedDate.getDate() === date.getDate() &&
-        bookedDate.getMonth() === date.getMonth() &&
-        bookedDate.getFullYear() === date.getFullYear()
-    );
   };
 
   return (
