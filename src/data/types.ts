@@ -109,6 +109,14 @@ export interface BookingDataType{
   bookingStatus?: string;
 }
 
+export interface TokenDataType{
+  id: string;
+  name: string;
+  email: string;
+  iat?: number;
+  exp?: number;
+}
+
 export interface PropertyDataType {
   _id?: string;
   id?: string;

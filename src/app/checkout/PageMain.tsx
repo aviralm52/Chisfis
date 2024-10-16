@@ -24,6 +24,9 @@ import { start } from "repl";
 import { Properties } from "../page";
 import { AiFillQuestionCircle } from "react-icons/ai";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { LuLoader2 } from "react-icons/lu";
+import { TokenDataType } from "@/data/types";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
@@ -43,26 +46,31 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   // });
 
   const searchParams = useSearchParams();
-  const param: string = searchParams.get("id") || "0";
+  const param: string = searchParams.get("id")?.split("&")[0] || "0";
   const paramInt: number = parseInt(param, 10);
+  const portion = searchParams.get("portion");
+  const startDateParam = searchParams.get("stdt");
+  const endDateParam = searchParams.get("nddt");
+  const guestsParam = searchParams.get("guests");
+
+  console.log(param, portion, startDateParam, endDateParam, guestsParam);
+
+  const router = useRouter();
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
+  const [paymentToken, setPaymentToken] = useState<string>("");
+  const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
+  const [loggedInUser, setLoggedInUser] = useState<TokenDataType | undefined>();
 
-  useEffect(() => {
-    const getProperty = async () => {
-      const response = await axios.get(`/api/particular/${paramInt}`);
-      if (response.data) {
-        setParticualarProperty(response?.data);
-      }
-    };
-
-    getProperty();
-  }, []);
-
-  // const [startDate, setStartDate] = useState<Date | null>(
-  //   new Date("2023/02/06")
-  // );
-  // const [endDate, setEndDate] = useState<Date | null>(new Date("2023/02/23"));
+  const getLoggedInUser = async () => {
+    try {
+      const response = await axios.post("/api/user/profile");
+      console.log(response.data);
+      setLoggedInUser(response.data);
+    } catch (err: any) {
+      console.log("error in getting logged in user: ", err);
+    }
+  };
 
   const [startDate, setStartDate] = useState<Date | null>(() => {
     const savedDate = localStorage.getItem("dates");
@@ -95,6 +103,24 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       guestInfants: gsts.infants,
     };
   });
+
+  useEffect(() => {
+    const getProperty = async () => {
+      try {
+        const response = await axios.get(`/api/particular/${param}`);
+        if (response.data) {
+          setParticualarProperty(response?.data);
+        }
+      } catch (err: any) {
+        console.log("Property can't be fetched on checkout Page");
+      }
+    };
+
+    getProperty();
+
+    setStartDate(new Date(startDateParam || new Date()));
+    setEndDate(new Date(endDateParam || new Date()));
+  }, []);
 
   const [startone, setStartOne] = useState<Date | null>(null);
   const [endone, setEndOne] = useState<Date | null>(null);
@@ -156,9 +182,52 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     localStorage.setItem("dates", savedDates);
   }, [startDate, endDate]);
 
-  const handlePayment = (amount: string) => {
+  const encryptToken = async (amount: number) => {
+    setSubscribeLoader(true);
+    try {
+      const response = await axios.post("/api/encrypt", { amount });
+      console.log("token response: ", response.data);
+      setSubscribeLoader(false);
+      return response.data.encryptedAmount;
+    } catch (err) {
+      console.log(err);
+      setSubscribeLoader(false);
+    }
+    setSubscribeLoader(false);
+  };
 
-  }
+  const handlePayment = async (amount: string) => {
+    const val = parseInt(amount);
+    const token = await encryptToken(val);
+    console.log("response token: ", token);
+
+    if (token) {
+      router.push(
+        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}`
+      );
+    }
+  };
+
+  useEffect(() => {
+    getLoggedInUser();
+  }, []);
+
+  const handleBookingConfirmation = async () => {
+    if (!loggedInUser || !loggedInUser.email) return;
+    try {
+      const response = await axios.post(`/api/bookings/confirmBooking`, {
+        propertyId: param,
+        user: loggedInUser,
+        portion,
+        startDate,
+        endDate,
+        guests
+      });
+      console.log("Booking Response: ", response.data);
+    } catch (err: any) {
+      console.log("Error in booking confirmation: ", err);
+    }
+  };
 
   const renderSidebar = () => {
     return (
@@ -227,16 +296,16 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </span>
           </div>
           <div className=" w-full flex justify-center mt-2">
-            {particularProperty?.isInstantBooking ? (
-              <ButtonPrimary onClick={() => handlePayment(amount)}>
-                Pay € 6
-              </ButtonPrimary>
-            ) : (
-              <ButtonPrimary>
-                Pay €{" "}
-                {calculateDifferenceBetweenDates(startone, endone) *
-                  (particularProperty?.basePrice?.[0] || 100) +
-                  6}
+            {particularProperty?.isInstantBooking && (
+              <ButtonPrimary
+                disabled={subscribeLoader}
+                onClick={() => handlePayment("6")}
+              >
+                {subscribeLoader ? (
+                  <LuLoader2 className=" animate-spin" />
+                ) : (
+                  "Pay € 6"
+                )}
               </ButtonPrimary>
             )}
           </div>
@@ -255,27 +324,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               ? "Instant booking"
               : "Confirm and Request"}
           </h2>
-          {particularProperty?.isInstantBooking && (
-            <div className=" flex items-center justify-between gap-x-2 w-full">
-              <AiFillQuestionCircle
-                className=" text-xl w-8 h-8 cursor-pointer"
-                onMouseOver={() => {
-                  document
-                    .getElementById("hiddenDiv")
-                    ?.classList.remove("invisible");
-                }}
-                onMouseOut={() =>
-                  document
-                    .getElementById("hiddenDiv")
-                    ?.classList.add("invisible")
-                }
-              />
-              <p id="hiddenDiv" className=" text-sm dark:text-white">
-                ( Only € 6 have to be paid now and rest will be paid directly to
-                Owner )
-              </p>
-            </div>
-          )}
+          <abbr title="Only € 6 have to be paid now and rest will be paid directly to Owner">
+            <AiFillQuestionCircle className="w-8 h-8 cursor-pointer" />
+          </abbr>
         </div>
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
         <div>
@@ -435,9 +486,11 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           {particularProperty?.isInstantBooking ? (
             <ButtonPrimary>Instant Booking</ButtonPrimary>
           ) : (
-            <ButtonPrimary>Confirm and Request</ButtonPrimary>
+            <ButtonPrimary onClick={handleBookingConfirmation}>
+              Confirm and Request
+            </ButtonPrimary>
           )}
-          <ButtonPrimary href={"/pay-done"}>Any Queries?</ButtonPrimary>
+          <ButtonPrimary>Any Queries?</ButtonPrimary>
         </div>
       </div>
       //   </div>

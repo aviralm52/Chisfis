@@ -119,3 +119,43 @@ export const sendContactEmail = async (userDetails) => {
     );
   }
 };
+
+
+export const sendBookingEmail = async (userDetails, ownerEmail) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Confirmation!";
+    const text = `
+        Name: ${userDetails.name}
+        Email: ${userDetails.email}
+        Message: ${userDetails.message}
+      `;
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: ownerEmail,
+      subject: subject,
+      text: text,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
