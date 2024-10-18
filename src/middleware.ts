@@ -45,7 +45,8 @@ export const config = {
     "/account-password",
     "/account-savelists",
     "/editproperty",
-    "/add-listing/:path*"
+    "/add-listing/:path*",
+    "/checkout",
   ],
 };
 

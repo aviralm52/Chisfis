@@ -173,7 +173,7 @@ const CustomDateRangePrice: FC<StayDatesRangeInputProps> = ({
         <div className="text-center my-4">
           <button
             onClick={handleBookDates}
-            className="px-4 py-2 bg-primary-6000 text-white rounded"
+            className="px-4 py-2 bg-primary-6000 hover:bg-primary-700 text-white rounded"
           >
             {bookingLoading ? (
               <p className=" flex gap-x-1 items-center">

@@ -199,7 +199,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const param: string = searchParams.get("id") || "0";
   const paramInt: number = parseInt(param, 10);
-  const indexId: number = paramInt >= 0 && paramInt <= 10 ? paramInt : 0;
+  const indexId: number = parseInt(searchParams.get("portion") || "0") || 0;
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
@@ -218,6 +218,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     longitude: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const today = new Date();
+  const tomorrow = new Date(today.setDate(today.getDate() + 1));
+  const dt1 = today.toISOString().split("T")[0];
+  const dt2 = tomorrow.toISOString().split("T")[0];
+  const [stdt, setStdt] = useState<string>(dt1);
+  const [nddt, setNddt] = useState<string>(dt2);
 
   // TODO: Accessing current Location
   useEffect(() => {
@@ -263,7 +269,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const fetchAndParseICal = async (url: string) => {
     try {
-      // console.log("url fethced:::: ", url);
+      console.log("url fethced:::: ", url);
       const response = await axios.post("/api/ical", { url });
       // console.log("response:::: ", response);
       const parsedData = response.data.data;
@@ -291,12 +297,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    // console.log("url::: ", url);
+    console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
+    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
 
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
@@ -319,11 +326,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           newDates.push(currDt);
           currDt.setDate(currDt.getDate() + 1);
         }
-        // console.log("newDates: ", newDates);
+        console.log("newDates: ", newDates);
         setAlreadyBookedDates((prev) => [...prev, ...newDates]);
-        setBookedState(true);
       });
     });
+    setBookedState(true);
   };
 
   useEffect(() => {
@@ -1163,6 +1170,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       // setTempNight(nights);
       setMinNightStay(nights);
       setNumberOfNights(Math.max(nights, minNights));
+
+      const st = startDate?.toISOString()?.split("T")?.[0];
+      const nd = endDate?.toISOString()?.split("T")?.[0];
+      setStdt(st || dt1);
+      setNddt(nd || dt2);
     };
 
     const calculateDateDifference = (start: Date | null, end: Date | null) => {
@@ -1205,7 +1217,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               className="flex-1 z-[11]"
               onDatesChange={handleDatesChange}
               minNights={minNights}
-              prices={particularProperty?.pricePerDay[0]}
+              prices={particularProperty?.pricePerDay[indexId]}
               externalBookedDates={alreadyBookedDates}
             />
           )}
@@ -1253,6 +1265,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             pathname: "/checkout",
             query: {
               id: propertyId,
+              portion: indexId,
+              stdt,
+              nddt,
+              guests: totalGuests,
             },
           }}
         >
@@ -1477,6 +1493,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>(
     []
   );
+  const [carouselPictures, setCarouselPictures] = useState<string[][]>([]);
   useEffect(() => {
     if (particularProperty?.propertyPictureUrls) {
       setPropertyPicturesTemp(particularProperty?.propertyPictureUrls);
@@ -1495,11 +1512,18 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       for (let i = 0; i < particularProperty?.portionPictureUrls.length; i++) {
         if (particularProperty?.portionPictureUrls[i] != undefined)
           arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
+        setCarouselPictures((prev) => {
+          return [...prev, particularProperty?.portionPictureUrls[i]];
+        });
       }
     }
     arr = arr.filter((item) => item != "");
     setAllImages(arr);
   }, [particularProperty]);
+
+  useEffect(() => {
+    console.log("carousel Pictures: ", carouselPictures);
+  }, [carouselPictures]);
 
   const carouselSettings = {
     dots: true,
@@ -1521,10 +1545,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
-                src={
-                  particularProperty?.propertyCoverFileUrl ||
-                  "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
-                }
+                src={particularProperty?.propertyCoverFileUrl}
                 alt="Cover Image"
                 className="object-cover h-full w-full"
               />
@@ -1539,21 +1560,26 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
 
           {/* Thumbnail images for larger screens */}
-          {propertyPicturesTemp
-            .filter((_, i) => i >= 1 && i < 5)
+          {/* {propertyPicturesTemp */}
+          {carouselPictures?.[indexId]
+            ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
                 className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
                 key={index}
               >
-                <img
-                  src={
-                    propertyPicturesTemp[index] ||
-                    "https://cdn.pixabay.com/photo/2013/07/12/12/56/home-146585_1280.png"
-                  }
-                  alt="Property Picture"
-                  className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
-                />
+                {carouselPictures[indexId][index] ? (
+                  <img
+                    src={carouselPictures[indexId][index]}
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
+                  />
+                ) : (
+                  <div className=" flex flex-col justify-center items-center">
+                    <BsExclamationCircleFill className="w-1/2 h-1/2 mb-2 text-neutral-700" />
+                    <p>Image not found!</p>
+                  </div>
+                )}
               </div>
             ))}
           <button
@@ -1609,7 +1635,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {renderSection4()}
           {bookedState && (
             <SectionDateRange
-              prices={particularProperty?.pricePerDay[0]}
+              prices={particularProperty?.pricePerDay[indexId]}
               externalBookedDates={alreadyBookedDates}
             />
           )}

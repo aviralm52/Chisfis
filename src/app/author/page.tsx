@@ -21,8 +21,7 @@ export interface AuthorPageProps {}
 const AuthorPage: FC<AuthorPageProps> = ({}) => {
   let [categories] = useState(["Short Term", "Long Term"]);
   const { user, logout } = useAuth();
-  const imgUrl =
-    "https://i.pinimg.com/736x/70/78/6e/70786e80f3eb04dc3f42f6504797be3c.jpg";
+  const imgUrl = "https://vacationsaga.b-cdn.net/avatar.png";
 
   const [properties, setProperties] = useState<Properties[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +53,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
   console.log(properties);
 
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Just Created";
+    if (!dateString) return "";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Invalid Date";
     return format(date, "yyyy");
@@ -87,7 +86,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                 )}
               </span>
             </h2>
-            <StartRating className="!text-base" />
+            {/* <StartRating className="!text-base" /> */}
           </div>
           <div className="border-b border-neutral-200 dark:border-neutral-700 w-14"></div>
           <div className="space-y-4">
@@ -119,7 +118,9 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                   <div className="w-56 h-5 bg-primary-50 rounded-lg animate-pulse"></div>
                 ) : (
                   <div>
-                    Joind at {formatDate(user?.createdAt) || "Not Found"}
+                    {formatDate(user?.createdAt)
+                      ? `Joined in ${formatDate(user?.createdAt)}`
+                      : "Not Found"}
                   </div>
                 )}
               </span>

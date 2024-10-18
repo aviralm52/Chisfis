@@ -140,7 +140,7 @@ function Payment() {
           <div className=" flex flex-col gap-8 mt-8 borer-2 dark:border-white">
             <h2 className=" font-semibold text-xl">Continue</h2>
             <p className=" font-light">
-              By Clicking on pay you will purchase the plan of €{amount}
+              By Clicking on pay you will purchase the plan of € {amount}
             </p>
 
             <button

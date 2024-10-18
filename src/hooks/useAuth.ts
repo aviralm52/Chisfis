@@ -80,7 +80,7 @@ export const useAuth = () => {
       // Confirm token removal
       console.log("Token removed:", localStorage.getItem("token") === null);
 
-      router.push("/login");
+      router.push("/login?role=Owner");
     } catch (error) {
       console.error("Logout failed:", error);
     }

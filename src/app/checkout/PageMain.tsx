@@ -21,66 +21,15 @@ import axios from "axios";
 import { ObjectId } from "mongodb";
 import { end } from "@cloudinary/url-gen/qualifiers/textAlignment";
 import { start } from "repl";
+import { Properties } from "../page";
+import { AiFillQuestionCircle } from "react-icons/ai";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { LuLoader2 } from "react-icons/lu";
+import { TokenDataType } from "@/data/types";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
-}
-
-
-
-interface Properties {
-  _id: ObjectId;
-  userId: string;
-  VSID: string;
-
-  propertyType: string;
-  placeName: string;
-  rentalForm: string;
-  numberOfPortions: number;
-
-  street: string;
-  postalCode: string;
-  city: string;
-  state: string;
-  country: string;
-  center: object;
-
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-  childrenAge: number[];
-
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
-  currency: string;
-
-  generalAmenities: object;
-  otherAmenities: object;
-  safeAmenities: object;
-
-  smoking: string;
-  pet: string;
-  party: string;
-  cooking: string;
-  additionalRules: string[];
-
-  reviews: string[];
-
-  propertyCoverFileUrl: string;
-  propertyPictureUrls: string[];
-  portionCoverFileUrls: string[];
-  portionPictureUrls: string[][];
-
-  night: number[];
-  time: number[];
-  datesPerPortion: number[][];
-
-  isLive: boolean;
 }
 
 const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
@@ -97,26 +46,31 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   // });
 
   const searchParams = useSearchParams();
-  const param: string = searchParams.get("id") || "0";
+  const param: string = searchParams.get("id")?.split("&")[0] || "0";
   const paramInt: number = parseInt(param, 10);
+  const portion = searchParams.get("portion");
+  const startDateParam = searchParams.get("stdt");
+  const endDateParam = searchParams.get("nddt");
+  const guestsParam = searchParams.get("guests");
+
+  console.log(param, portion, startDateParam, endDateParam, guestsParam);
+
+  const router = useRouter();
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
+  const [paymentToken, setPaymentToken] = useState<string>("");
+  const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
+  const [loggedInUser, setLoggedInUser] = useState<TokenDataType | undefined>();
 
-  useEffect(() => {
-    const getProperty = async () => {
-      const response = await axios.get(`/api/particular/${paramInt}`);
-      if (response.data) {
-        setParticualarProperty(response?.data);
-      }
-    };
-
-    getProperty();
-  }, []);
-
-  // const [startDate, setStartDate] = useState<Date | null>(
-  //   new Date("2023/02/06")
-  // );
-  // const [endDate, setEndDate] = useState<Date | null>(new Date("2023/02/23"));
+  const getLoggedInUser = async () => {
+    try {
+      const response = await axios.post("/api/user/profile");
+      console.log(response.data);
+      setLoggedInUser(response.data);
+    } catch (err: any) {
+      console.log("error in getting logged in user: ", err);
+    }
+  };
 
   const [startDate, setStartDate] = useState<Date | null>(() => {
     const savedDate = localStorage.getItem("dates");
@@ -150,14 +104,30 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     };
   });
 
-  const [startone , setStartOne] = useState<Date | null>(null);
-  const [endone , setEndOne] = useState<Date | null>(null);
+  useEffect(() => {
+    const getProperty = async () => {
+      try {
+        const response = await axios.get(`/api/particular/${param}`);
+        if (response.data) {
+          setParticualarProperty(response?.data);
+        }
+      } catch (err: any) {
+        console.log("Property can't be fetched on checkout Page");
+      }
+    };
 
+    getProperty();
+
+    setStartDate(new Date(startDateParam || new Date()));
+    setEndDate(new Date(endDateParam || new Date()));
+  }, []);
+
+  const [startone, setStartOne] = useState<Date | null>(null);
+  const [endone, setEndOne] = useState<Date | null>(null);
 
   const [guestAdult, setGuestAdult] = useState<number | undefined>();
   const [guestChildren, setGuestChildren] = useState<number | undefined>();
   const [guestInfants, setGuestInfants] = useState<number | undefined>();
-
 
   const [dateDiff, setDateDiff] = useState<number>(3);
   const calculateDifferenceBetweenDates = (
@@ -172,30 +142,28 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     return 3;
   };
 
-
-  useEffect(()=>{
-      if(!startone){
-        setStartOne(startDate);
-      }
-      if(!endone){
-        setEndOne(endDate);
-      }
-      if(!guestAdult){
-        setGuestAdult(guests.guestAdults);
-      }
-      if(!guestChildren){
-        setGuestChildren(guests.guestChildren);
-      }
-      if(!guestInfants){
-        setGuestInfants(guests.guestInfants);
-      }
-  },[])
+  useEffect(() => {
+    if (!startone) {
+      setStartOne(startDate);
+    }
+    if (!endone) {
+      setEndOne(endDate);
+    }
+    if (!guestAdult) {
+      setGuestAdult(guests.guestAdults);
+    }
+    if (!guestChildren) {
+      setGuestChildren(guests.guestChildren);
+    }
+    if (!guestInfants) {
+      setGuestInfants(guests.guestInfants);
+    }
+  }, []);
 
   useEffect(() => {
     const diff = calculateDifferenceBetweenDates(startDate, endDate);
     setDateDiff(diff);
   }, [startDate, endDate]);
-
 
   useEffect(() => {
     const updatedGuests: GuestsObject = {
@@ -214,6 +182,52 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     localStorage.setItem("dates", savedDates);
   }, [startDate, endDate]);
 
+  const encryptToken = async (amount: number) => {
+    setSubscribeLoader(true);
+    try {
+      const response = await axios.post("/api/encrypt", { amount });
+      console.log("token response: ", response.data);
+      setSubscribeLoader(false);
+      return response.data.encryptedAmount;
+    } catch (err) {
+      console.log(err);
+      setSubscribeLoader(false);
+    }
+    setSubscribeLoader(false);
+  };
+
+  const handlePayment = async (amount: string) => {
+    const val = parseInt(amount);
+    const token = await encryptToken(val);
+    console.log("response token: ", token);
+
+    if (token) {
+      router.push(
+        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}`
+      );
+    }
+  };
+
+  useEffect(() => {
+    getLoggedInUser();
+  }, []);
+
+  const handleBookingConfirmation = async () => {
+    if (!loggedInUser || !loggedInUser.email) return;
+    try {
+      const response = await axios.post(`/api/bookings/confirmBooking`, {
+        propertyId: param,
+        user: loggedInUser,
+        portion,
+        startDate,
+        endDate,
+        guests
+      });
+      console.log("Booking Response: ", response.data);
+    } catch (err: any) {
+      console.log("Error in booking confirmation: ", err);
+    }
+  };
 
   const renderSidebar = () => {
     return (
@@ -240,8 +254,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </div>
             <span className="block  text-sm text-neutral-500 dark:text-neutral-400">
               {/* 2 beds · 2 baths */}
-              {particularProperty?.bedrooms[0]} beds ·{" "}
-              {particularProperty?.bathroom[0]} bath
+              {particularProperty?.bedrooms?.[0]} beds ·{" "}
+              {particularProperty?.bathroom?.[0]} bath
             </span>
             <div className="w-10 border-b border-neutral-200  dark:border-neutral-700"></div>
             <StartRating />
@@ -251,13 +265,17 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <h3 className="text-2xl font-semibold">Price detail</h3>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
-              € {particularProperty?.basePrice[0]} x{" "}
+              € {particularProperty?.basePrice?.[0]} x{" "}
               {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
-              {startone && endone && calculateDifferenceBetweenDates(startone, endone)} days
+              {startone &&
+                endone &&
+                calculateDifferenceBetweenDates(startone, endone)}{" "}
+              days
             </span>
             <span>
-              {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}
-              € {(particularProperty?.basePrice[0] || 100) * calculateDifferenceBetweenDates(startone, endone)}
+              {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}€{" "}
+              {(particularProperty?.basePrice?.[0] || 100) *
+                calculateDifferenceBetweenDates(startone, endone)}
             </span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
@@ -271,8 +289,25 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             <span>
               {/* € {dateDiff * (particularProperty?.basePrice[0] || 100) + 6}
               {" "} */}
-              € {calculateDifferenceBetweenDates(startone, endone) * (particularProperty?.basePrice[0] || 100) + 6}{" "}
+              €{" "}
+              {calculateDifferenceBetweenDates(startone, endone) *
+                (particularProperty?.basePrice?.[0] || 100) +
+                6}{" "}
             </span>
+          </div>
+          <div className=" w-full flex justify-center mt-2">
+            {particularProperty?.isInstantBooking && (
+              <ButtonPrimary
+                disabled={subscribeLoader}
+                onClick={() => handlePayment("6")}
+              >
+                {subscribeLoader ? (
+                  <LuLoader2 className=" animate-spin" />
+                ) : (
+                  "Pay € 6"
+                )}
+              </ButtonPrimary>
+            )}
           </div>
         </div>
       </div>
@@ -282,9 +317,17 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const renderMain = () => {
     return (
       <div className="w-full flex flex-col sm:rounded-2xl sm:border border-neutral-200 dark:border-neutral-700 space-y-8 px-0 sm:p-6 xl:p-8">
-        <h2 className="text-3xl lg:text-4xl font-semibold">
-          Confirm and Request
-        </h2>
+        <div className=" flex gap-x-3 items-center">
+          {" "}
+          <h2 className="text-3xl lg:text-4xl font-semibold whitespace-nowrap">
+            {particularProperty?.isInstantBooking
+              ? "Instant booking"
+              : "Confirm and Request"}
+          </h2>
+          <abbr title="Only € 6 have to be paid now and rest will be paid directly to Owner">
+            <AiFillQuestionCircle className="w-8 h-8 cursor-pointer" />
+          </abbr>
+        </div>
         <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
         <div>
           <div>
@@ -440,8 +483,14 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               </Tab.Panels>
             </Tab.Group> */}
         <div className="pt-8 flex justify-between">
-          <ButtonPrimary href={"/pay-done"}>Confirm and Request</ButtonPrimary>
-          <ButtonPrimary href={"/pay-done"}>Any Queries?</ButtonPrimary>
+          {particularProperty?.isInstantBooking ? (
+            <ButtonPrimary>Instant Booking</ButtonPrimary>
+          ) : (
+            <ButtonPrimary onClick={handleBookingConfirmation}>
+              Confirm and Request
+            </ButtonPrimary>
+          )}
+          <ButtonPrimary>Any Queries?</ButtonPrimary>
         </div>
       </div>
       //   </div>
