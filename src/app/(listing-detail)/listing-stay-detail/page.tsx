@@ -1561,16 +1561,17 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
           {/* Thumbnail images for larger screens */}
 {/*           {carouselPictures?.[indexId] */}
-          {propertyPicturesTemp
+{/*           {propertyPicturesTemp */}
+  {allImages
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
                 className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
                 key={index}
               >
-                {carouselPictures[indexId][index] ? (
+                {allImages[index] ? (
                   <img
-                    src={carouselPictures[indexId][index]}
+                    src={allImages[index]}
                     alt="Property Picture"
                     className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
                   />
