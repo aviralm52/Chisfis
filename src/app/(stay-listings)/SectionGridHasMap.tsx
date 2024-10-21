@@ -18,7 +18,6 @@ import GallerySlider from "@/components/GallerySlider";
 import BtnLikeIcon from "@/components/BtnLikeIcon";
 import SaleOffBadge from "@/components/SaleOffBadge";
 // import ImageCard from "@/components/ImageCard";
-import CustomStayCard from "@/components/CustomStayCard";
 
 const DEMO_STAYS = DEMO_STAY_LISTINGS.filter((_, i) => i < 12);
 export interface SectionGridHasMapProps {}

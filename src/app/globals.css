@@ -12,3 +12,12 @@
     background: #525252; /* Color of the scrollbar */
     border-radius: 10px; 
 }
+
+
+.slick-slide {
+  padding: 0 10px; /* Add horizontal padding to each slide */
+}
+
+.card-container {
+  margin: 0 10px; /* Optional: adjust the margin if necessary */
+}
