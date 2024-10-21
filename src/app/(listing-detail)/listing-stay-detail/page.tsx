@@ -1560,8 +1560,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
 
           {/* Thumbnail images for larger screens */}
-          {/* {propertyPicturesTemp */}
-          {carouselPictures?.[indexId]
+{/*           {carouselPictures?.[indexId] */}
+          {propertyPicturesTemp
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
