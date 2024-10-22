@@ -125,6 +125,7 @@ export interface PropertyDataType {
 
   propertyType?: string;
   placeName?: string;
+  rentalType?: string;
   rentalForm?: string;
   numberOfPortions?: number;
 
@@ -216,6 +217,9 @@ export interface PropertiesDataType {
   monthlyDiscount: number;
   currency: string;
   icalLinks: object;
+  generalAmenities: object;
+  otherAmenities: object;
+  safeAmenities: object;
   smoking: string;
   pet: string;
   party: string;
