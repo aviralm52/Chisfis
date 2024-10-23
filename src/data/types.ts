@@ -189,6 +189,7 @@ export interface PropertiesDataType {
   commonId: string;
   email: string;
   userID: string;
+  portionNo: string;
   rentalType: string;
   isInstantBooking: boolean;
   propertyType: string;

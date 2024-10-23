@@ -44,8 +44,8 @@ module.exports = {
           // 700: customColors("--c-primary-700"),
           800: customColors("--c-primary-800"),
           900: customColors("--c-primary-900"),
-          6000: '#F7951D',
-          700: '#EA580C',
+          6000: "#F7951D",
+          700: "#EA580C",
         },
         secondary: {
           50: customColors("--c-secondary-50"),
@@ -71,8 +71,8 @@ module.exports = {
           800: customColors("--c-neutral-800"),
           900: customColors("--c-neutral-900"),
         },
-        'custom-red': '#f12711',
-        'custom-orange': '#f5af19',
+        "custom-red": "#f12711",
+        "custom-orange": "#f5af19",
       },
     },
   },
@@ -83,5 +83,6 @@ module.exports = {
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
     require("@tailwindcss/aspect-ratio"),
+    require("tailwind-scrollbar-hide"),
   ],
 };
