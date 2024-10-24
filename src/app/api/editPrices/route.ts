@@ -1,17 +1,14 @@
-import { Property } from "@/models/listing";
 import { connectDb } from "@/helper/db";
 import { NextRequest, NextResponse } from "next/server";
+import { Properties } from "@/models/property";
 
 connectDb();
 
 export async function POST(req: NextRequest) {
   const reqBody = await req.json();
-  const { propertyId, portion, price, dateRange } = reqBody;
+  const { propertyId, price, dateRange } = reqBody;
 
-  if (!propertyId || !price || portion == undefined) {
-    console.log("propertyId: ", propertyId);
-    console.log("portion: ", portion);
-    console.log("price: ", price);
+  if (!propertyId || !price || !dateRange.from || !dateRange.to) {
     return NextResponse.json(
       { error: "All fields are required" },
       { status: 400 }
@@ -19,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const property = await Property.findById(propertyId);
+    const property = await Properties.findById(propertyId);
 
     if (!property) {
       return NextResponse.json(
@@ -28,7 +25,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(property);
     const startDate = new Date(dateRange.from);
     const endDate = new Date(dateRange.to);
 
@@ -36,12 +32,13 @@ export async function POST(req: NextRequest) {
     while (st <= endDate) {
       const month = st.getMonth();
       const day = st.getDate();
-      property.pricePerDay[portion][month][day - 1] = price;
+      property.pricePerDay[month][day - 1] = price;
       st.setDate(st.getDate() + 1);
     }
 
     // ! markModified is used when the field is nested inside an object
-    property.markModified(`pricePerDay.${portion}`);
+    // property.markModified(`pricePerDay.${portion}`);
+    property.markModified(`pricePerDay`);
     await property.save();
 
     return NextResponse.json(
@@ -49,7 +46,6 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (err: any) {
-    console.log("error in updating prices: ", err);
     return NextResponse.json(
       { error: "Prices could not be updated" },
       { status: 500 }

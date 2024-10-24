@@ -12,7 +12,6 @@ export async function POST(request) {
   }
 
   try {
-    console.log("commonId: ", commonId);
     const commonIdProperties = await Properties.find({ commonId });
 
     if (!commonIdProperties) {
@@ -21,7 +20,6 @@ export async function POST(request) {
         { status: 200 }
       );
     }
-    console.log("common: ", commonIdProperties);
     return NextResponse.json({ commonIdProperties }, { status: 200 });
   } catch (err) {
     return NextResponse.json(

@@ -24,6 +24,8 @@ import { BlurFade } from "@/components/BlurFade";
 import { NeonGradientCard } from "@/components/NeonCard";
 import Link from "next/link";
 import ButtonPrimary from "@/shared/ButtonPrimary";
+import { LuLoader2 } from "react-icons/lu";
+import { BsExclamationCircleFill } from "react-icons/bs";
 
 export interface EventInterface {
   title: string;
@@ -52,10 +54,9 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   const { user } = useAuth();
   const [property, setProperty] = useState<Properties | null>(null);
   const [properties, setProperties] = useState<PropertiesDataType[]>();
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
-  const [refreshState, setRefreshState] = useState<boolean>(false);
-  const [instantBookingToggle, setInstantBookingToggle] = useState(false);
+  const [refreshState, setRefreshState] = useState(false);
 
   const BlurFadeDemo = (images: string[]) => {
     return (
@@ -65,11 +66,13 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
             <BlurFade key={imageUrl} delay={0.25 + idx * 0.05} inView>
               <Link href={{ pathname: imageUrl }} target="_blank">
                 {/* <NeonGradientCard> */}
-                <img
-                  className="mb-4 size-full rounded-lg object-contain cursor-pointer hover:scale-110 transition ease-in-out duration-500"
-                  src={imageUrl}
-                  alt={`Random stock image ${idx + 1}`}
-                />
+                {imageUrl && (
+                  <img
+                    className="mb-4 size-full rounded-lg object-contain cursor-pointer hover:scale-110 transition ease-in-out duration-500"
+                    src={imageUrl}
+                    alt={`No Image!`}
+                  />
+                )}
                 {/* </NeonGradientCard> */}
               </Link>
             </BlurFade>
@@ -92,12 +95,11 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
         "/api/newProperties/getPropertiesByCommonId",
         { commonId }
       );
-      console.log("response: ", response.data);
       setProperties(response.data.commonIdProperties);
     };
 
     if (commonId) fetchPropertiesByCommonId();
-  }, [commonId]);
+  }, [commonId, refreshState]);
 
   const [formData, setFormData] = useState<Partial<Properties>>({
     VSID: property?.VSID,
@@ -225,7 +227,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
 
         // isLive: property.isLive,
       });
-      setInstantBookingToggle(property?.isInstantBooking || false);
+      // setInstantBookingToggle(property?.isInstantBooking || false);
       const url = (property.icalLinks as { [key: string]: string })?.[
         "Airbnb"
       ] as string;
@@ -264,6 +266,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
           kitchen: properties[i].kitchen,
           childrenAge: properties[i].childrenAge,
           basePrice: properties[i].basePrice,
+          pricePerDay: properties[i].pricePerDay,
           weekendPrice: properties[i].weekendPrice,
           weeklyDiscount: properties[i].weeklyDiscount,
         };
@@ -276,7 +279,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
     const trimmedValue = value.trim();
-    setFormData((prevState) => ({
+    setCommonFields((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : trimmedValue,
     }));
@@ -284,23 +287,31 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     if (!user) {
       console.error("User not authenticated");
       return;
     }
+
+    const Ids = [];
+    for (const propertyData of properties!) Ids.push(propertyData._id);
+
     try {
-      await axios.post("/api/user/edituserproperty", {
-        propertyId: id,
-        updatedData: formData,
-        userId: user._id,
+      await axios.post("/api/newProperties/editProperty", {
+        commonId,
+        Ids,
+        commonFields,
+        portionFields,
       });
       toast.success("Property updated successfully");
+      setLoading(false);
       setTimeout(() => {
         router.push("/author"); // Redirect to the Author page or wherever you want
       }, 2000);
     } catch (error) {
       console.error("Error updating property:", error);
     }
+    setLoading(false);
   };
 
   const [isPortionOpen, setIsPortionOpen] = useState<boolean[]>(() =>
@@ -355,16 +366,16 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
     setLoading(true);
     try {
       const response = await axios.post("/api/editPrices", {
-        propertyId: id,
-        portion: portionIndex,
+        propertyId: properties?.[portionIndex]._id,
         price: priceInputRef.current?.value,
         dateRange: date,
       });
-      console.log(response);
+      toast.success("Prices updated successfully!");
+      setRefreshState((prev) => !prev);
+      if (priceInputRef.current) priceInputRef.current.value = "";
     } catch (err: any) {
-      console.log("error: ", err);
+      toast.error("Prices Not Updated!");
     }
-    setRefreshState((prev) => !prev);
     setLoading(false);
   };
 
@@ -431,10 +442,9 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                       setEndDate={setEndDate}
                       // onDatesChange={handleDatesChange}
                     /> */}
-                    {loading && <BarLoader />}
                     <CustomDateRangePrice
                       className="flex-1"
-                      prices={property?.pricePerDay?.[index] || []}
+                      prices={portionFields?.[index]?.pricePerDay || []}
                       externalBookedDates={alreadyBookedDates}
                       startDate={startDate}
                       endDate={endDate}
@@ -457,7 +467,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                         className=" p-2 bg-primary-6000 mr-4 cursor-pointer hover:bg-primary-700"
                         onClick={() => handleChangePrice(index)}
                       >
-                        Submit
+                        {loading ? "Updating..." : "Submit"}
                       </Button>
                     </div>
                   </div>
@@ -499,9 +509,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   };
 
   const fetchBookedDates = async (url: string) => {
-    // const airbnbBookings = await fetchAndParseICal(
-    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
-    // );
     const airbnbBookings = await fetchAndParseICal(url);
 
     const eventsFromAirbnb: EventInterface[] = [];
@@ -555,15 +562,15 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   return (
     <div className="max-w-6xl mx-auto p-2">
       <Toaster />
-      <div className=" w-full md:flex md:justify-between mt-2">
-        <div className=" w-full md:w-2/5 max-h-screen mt-2 overflow-auto overflow-x-hidden">
+      <div className=" w-full md:flex md:justify-between">
+        <div className=" w-full md:w-2/5 max-h-screen mt-2 overflow-auto overflow-x-hidden p-2">
           {BlurFadeDemo(properties?.[0]?.propertyImages || [])}
         </div>
         <form
           onSubmit={handleSubmit}
           className=" md:w-3/5 border-white overflow-scroll overflow-x-hidden max-h-screen scroll-smooth relative mb-4 px-4 scrollbar-thin"
         >
-          <div className="flex flex-col gap-x-2 gap-y-4 mt-4">
+          <div className="flex flex-col gap-x-2 gap-y-4 ">
             {formData?.icalLinks && (
               <h1 className="text-xl font-medium bg-background">Ical links</h1>
             )}
@@ -601,7 +608,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <Input
                   type="text"
                   name="placeName"
-                  // value={formData?.placeName || ""}
                   value={commonFields?.propertyName}
                   onChange={handleChange}
                 />
@@ -615,7 +621,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <select
                   name="rentalType"
                   id="rentalType"
-                  // value={formData.rentalType}
                   value={commonFields?.rentalType || ""}
                   className=" dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-lg p-2 w-full"
                 >
@@ -640,9 +645,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <select
                   name="propertyType"
                   id="propertyType"
-                  // value={selectedPropertyType}
-                  value={formData.propertyType}
-                  // onChange={(e) => setSelectedPropertyType(e.target.value)}
+                  value={commonFields.propertyType}
                   onChange={(e) => handleChange(e)}
                   className=" dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-2xl w-full"
                 >
@@ -775,7 +778,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <Input
                   type="text"
                   name="rentalForm"
-                  // value={formData?.rentalForm || ""}
                   value={commonFields?.rentalForm || ""}
                   onChange={handleChange}
                   disabled
@@ -790,7 +792,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="country"
-                    // value={formData?.country || ""}
                     value={commonFields?.country || ""}
                     onChange={handleChange}
                   />
@@ -802,7 +803,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="state"
-                    // value={formData?.state || ""}
                     value={commonFields?.state || ""}
                     onChange={handleChange}
                   />
@@ -817,7 +817,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="city"
-                    // value={formData?.city || ""}
                     value={commonFields?.city || ""}
                     onChange={handleChange}
                   />
@@ -832,7 +831,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="street"
-                    // value={formData?.street || ""}
                     value={commonFields?.street || ""}
                     onChange={handleChange}
                   />
@@ -848,7 +846,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <Input
                   type="text"
                   name="postalCode"
-                  // value={formData?.postalCode || ""}
                   value={commonFields?.postalCode || ""}
                   onChange={handleChange}
                 />
@@ -864,7 +861,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="pet"
-                    // value={formData?.pet || ""}
                     value={commonFields?.pet || ""}
                     onChange={handleChange}
                   />
@@ -878,7 +874,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="party"
-                    // value={formData?.party || ""}
                     value={commonFields?.party || ""}
                     onChange={handleChange}
                   />
@@ -895,7 +890,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="cooking"
-                    // value={formData?.cooking || ""}
                     value={commonFields?.cooking || ""}
                     onChange={handleChange}
                   />
@@ -909,73 +903,12 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                   <Input
                     type="text"
                     name="smoking"
-                    // value={formData?.smoking || ""}
                     value={commonFields?.smoking || ""}
                     onChange={handleChange}
                   />
                 </label>
               </div>
             </div>
-
-            <div className=" flex flex-col sm:flex-row gap-y-2 sm:gap-x-4 items-center">
-              {" "}
-              <h2 className=" text-xl font-medium dark:text-white">
-                Instant Booking :{" "}
-              </h2>
-              <div>
-                <div
-                  className=" border-2 border-neutral-800 dark:border-white rounded-3xl w-20 h-10 p-1 flex items-center cursor-pointer relative text-white dark:bg-slate-900"
-                  onClick={() => {
-                    setFormData((prev) => {
-                      const newFormData = { ...prev };
-                      newFormData.isInstantBooking = !instantBookingToggle;
-                      return newFormData;
-                    });
-                    setInstantBookingToggle((prev) => !prev);
-                  }}
-                >
-                  {/* {instantBookingToggle ? ( */}
-                  <div
-                    className={` absolute rounded-full w-8 h-8 bg-green-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
-                      instantBookingToggle
-                        ? "translate-x-9 scale-100 opacity-100"
-                        : " scale-50 opacity-0"
-                    }`}
-                  >
-                    ON
-                  </div>
-                  {/* ) : ( */}
-                  <div
-                    className={` absolute rounded-full w-8 h-8 bg-red-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
-                      instantBookingToggle
-                        ? " scale-50 opacity-0"
-                        : " scale-100 opacity-100"
-                    }`}
-                  >
-                    OFF
-                  </div>
-                  {/* )} */}
-                </div>
-              </div>
-              <p>Instant Booking is {instantBookingToggle ? "ON" : "OFF"}</p>
-            </div>
-
-            {/* <div className=" w-full my-2 flex justify-center">
-              <ButtonPrimary>Save Changes</ButtonPrimary>
-            </div> */}
-
-            {/* <div>
-            <label className=" text-xl flex items-center">
-              <h1 className="text-xl dark:text-white font-medium">Is Live</h1>
-              <input
-                type="checkbox"
-                name="isLive"
-                checked={formData.isLive || false}
-                onChange={handleChange}
-                className="p-2 rounded-md mx-2 cursor-pointer"
-              />
-            </label>
-          </div> */}
 
             <div className=" mt-4">
               <h1 className="text-base sm:text-lg md:text-3xl font-medium mt-2 inline-block border-b-2 border-dashed">
@@ -1011,7 +944,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                           <Input
                             type="text"
                             name="VSID"
-                            // value={formData?.VSID || ""}
                             value={portionFields?.[index]?.VSID || ""}
                             onChange={handleChange}
                             disabled
@@ -1064,7 +996,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                             <Input
                               type="text"
                               name="cooking"
-                              // value={formData?.portionName?.at(index) || ""}
                               value={portionFields?.[index]?.placeName || ""}
                               onChange={(e) => {
                                 const newPortionData = {
@@ -1104,7 +1035,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="portionSize"
-                              // value={formData?.portionSize?.at(index) || ""}
                               value={portionFields?.[index]?.size || ""}
                               onChange={(e) => {
                                 const newPortionData = {
@@ -1128,7 +1058,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="guests"
-                              // value={formData?.guests?.at(index) || ""}
                               value={portionFields?.[index]?.guests || ""}
                               onChange={(e) => {
                                 const newPortionData = {
@@ -1154,7 +1083,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="bedrooms"
-                              // value={formData?.bedrooms?.at(index) || ""}
                               value={portionFields?.[index]?.bedrooms || ""}
                               onChange={(e) => {
                                 const newPortionData = {
@@ -1182,7 +1110,6 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="beds"
-                              // value={formData?.beds?.at(index) || ""}
                               value={portionFields?.[index]?.beds || ""}
                               onChange={(e) => {
                                 const newPortionData = {
@@ -1206,8 +1133,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="bathroom"
-                              // value={formData?.bathroom?.at(index) || ""}
-                              value={properties?.[index]?.bathroom || ""}
+                              value={portionFields?.[index]?.bathroom || ""}
                               onChange={(e) => {
                                 const newPortionData = {
                                   ...portionFields?.[index],
@@ -1232,8 +1158,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="kitchen"
-                              // value={formData?.kitchen?.at(index) || ""}
-                              value={properties?.[index]?.kitchen || ""}
+                              value={portionFields?.[index]?.kitchen || ""}
                               onChange={(e) => {
                                 const newPortionData = {
                                   ...portionFields?.[index],
@@ -1260,8 +1185,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="childrenAge"
-                              // value={formData?.childrenAge?.at(index) || ""}
-                              value={properties?.[index]?.childrenAge || ""}
+                              value={portionFields?.[index]?.childrenAge || ""}
                               onChange={(e) => {
                                 const newPortionData = {
                                   ...portionFields?.[index],
@@ -1286,8 +1210,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="basePrice"
-                              // value={formData?.basePrice?.at(index) || ""}
-                              value={properties?.[index]?.basePrice}
+                              value={portionFields?.[index]?.basePrice || ""}
                               onChange={(e) => {
                                 const newPortionData = {
                                   ...portionFields?.[index],
@@ -1312,8 +1235,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               className=" bg-transparent w-full rounded-2xl"
                               type="number"
                               name="weekendPrice"
-                              // value={formData?.weekendPrice?.at(index) || ""}
-                              value={properties?.[index]?.weekendPrice || ""}
+                              value={portionFields?.[index]?.weekendPrice || ""}
                               onChange={(e) => {
                                 const newPortionData = {
                                   ...portionFields?.[index],
@@ -1368,13 +1290,74 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                           </p>
                         </div>
                       </div>
+
+                      <div className=" flex flex-col sm:flex-row gap-y-2 sm:gap-x-4 items-center">
+                        {" "}
+                        <h2 className=" text-xl font-medium dark:text-white">
+                          Instant Booking :{" "}
+                        </h2>
+                        <div>
+                          <div
+                            className=" border-2 border-neutral-800 dark:border-white rounded-3xl w-20 h-10 p-1 flex items-center cursor-pointer relative text-white dark:bg-slate-900"
+                            onClick={() => {
+                              const newPortionData = {
+                                ...portionFields?.[index],
+                              };
+                              newPortionData.isInstantBooking =
+                                !newPortionData.isInstantBooking;
+                              setPortionFields((prev) => {
+                                const newPortionArray = [...prev];
+                                newPortionArray[index] = newPortionData;
+                                return newPortionArray;
+                              });
+                            }}
+                          >
+                            <div
+                              className={` absolute rounded-full w-8 h-8 bg-green-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                                portionFields?.[index]?.isInstantBooking
+                                  ? "translate-x-9 scale-100 opacity-100"
+                                  : " scale-50 opacity-0"
+                              }`}
+                            >
+                              ON
+                            </div>
+                            {/* ) : ( */}
+                            <div
+                              className={` absolute rounded-full w-8 h-8 bg-red-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                                portionFields?.[index]?.isInstantBooking
+                                  ? " scale-50 opacity-0"
+                                  : " scale-100 opacity-100"
+                              }`}
+                            >
+                              OFF
+                            </div>
+                            {/* )} */}
+                          </div>
+                        </div>
+                        <p>
+                          Instant Booking is{" "}
+                          {portionFields?.[index]?.isInstantBooking
+                            ? "ON"
+                            : "OFF"}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
               );
             })}
             <div className=" w-full flex justify-center">
-              <ButtonPrimary>Save Changes</ButtonPrimary>
+              <ButtonPrimary type="submit">
+                <p>
+                  {loading ? (
+                    <span className=" flex gap-x-2 items-center">
+                      Saving... <LuLoader2 className=" animate-spin" />
+                    </span>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </p>
+              </ButtonPrimary>
             </div>
           </div>
         </form>

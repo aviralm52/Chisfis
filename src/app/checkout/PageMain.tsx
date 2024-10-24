@@ -27,6 +27,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
 import { TokenDataType } from "@/data/types";
+import { toast, Toaster } from "sonner";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
@@ -51,10 +52,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const portion = searchParams.get("portion");
   const startDateParam = searchParams.get("stdt");
   const endDateParam = searchParams.get("nddt");
-  const guestsParam = searchParams.get("guests");
+  const guestsParam = parseInt(searchParams.get("guests") || "0", 10);
 
-  console.log(param, portion, startDateParam, endDateParam, guestsParam);
-
+  // console.log(param, portion, startDateParam, endDateParam, guestsParam);
   const router = useRouter();
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
@@ -65,10 +65,10 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const getLoggedInUser = async () => {
     try {
       const response = await axios.post("/api/user/profile");
-      console.log(response.data);
-      setLoggedInUser(response.data);
+      // console.log(response.data);
+      setLoggedInUser(response.data.data);
     } catch (err: any) {
-      console.log("error in getting logged in user: ", err);
+      toast.error("User Not Found");
     }
   };
 
@@ -78,7 +78,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       return new Date();
     }
     const date = JSON.parse(savedDate);
-    console.log("start date: ", new Date(date.startDate), date.startDate);
+    // console.log("start date: ", new Date(date.startDate), date.startDate);
     return new Date(date.startDate);
   });
 
@@ -105,11 +105,21 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   });
 
   useEffect(() => {
+    setGuests({
+      guestAdults: guestsParam,
+    });
+  }, []);
+
+  useEffect(() => {
     const getProperty = async () => {
       try {
-        const response = await axios.get(`/api/particular/${param}`);
+        const response = await axios.post(
+          "/api/newProperties/getPropertyById",
+          { propertyId: param }
+        );
+        console.log("response: ", response);
         if (response.data) {
-          setParticualarProperty(response?.data);
+          setParticualarProperty(response?.data?.property);
         }
       } catch (err: any) {
         console.log("Property can't be fetched on checkout Page");
@@ -160,10 +170,10 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    const diff = calculateDifferenceBetweenDates(startDate, endDate);
-    setDateDiff(diff);
-  }, [startDate, endDate]);
+  // useEffect(() => {
+  //   const diff = calculateDifferenceBetweenDates(startDate, endDate);
+  //   setDateDiff(diff);
+  // }, [startDate, endDate]);
 
   useEffect(() => {
     const updatedGuests: GuestsObject = {
@@ -180,6 +190,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       endDate: endDate,
     });
     localStorage.setItem("dates", savedDates);
+
+    const diff = calculateDifferenceBetweenDates(startDate, endDate);
+    setDateDiff(diff);
   }, [startDate, endDate]);
 
   const encryptToken = async (amount: number) => {
@@ -213,19 +226,24 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   }, []);
 
   const handleBookingConfirmation = async () => {
+    const bookingStatus = particularProperty?.isInstantBooking
+      ? "confirmed"
+      : "pending";
     if (!loggedInUser || !loggedInUser.email) return;
     try {
-      const response = await axios.post(`/api/bookings/confirmBooking`, {
+      const response = await axios.post(`/api/bookings/createBooking`, {
         propertyId: param,
-        user: loggedInUser,
-        portion,
         startDate,
         endDate,
-        guests
+        guests:
+          (guests?.guestAdults || 1) +
+          (guests?.guestChildren || 0) +
+          (guests?.guestInfants || 0),
+        bookingStatus,
       });
-      console.log("Booking Response: ", response.data);
+      toast.success("Booking requested successfully");
     } catch (err: any) {
-      console.log("Error in booking confirmation: ", err);
+      toast.error(err.response.data.error);
     }
   };
 
@@ -254,8 +272,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </div>
             <span className="block  text-sm text-neutral-500 dark:text-neutral-400">
               {/* 2 beds · 2 baths */}
-              {particularProperty?.bedrooms?.[0]} beds ·{" "}
-              {particularProperty?.bathroom?.[0]} bath
+              {particularProperty?.bedrooms} beds ·{" "}
+              {particularProperty?.bathroom} bath
             </span>
             <div className="w-10 border-b border-neutral-200  dark:border-neutral-700"></div>
             <StartRating />
@@ -265,7 +283,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <h3 className="text-2xl font-semibold">Price detail</h3>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
-              € {particularProperty?.basePrice?.[0]} x{" "}
+              € {particularProperty?.basePrice} x{" "}
               {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
               {startone &&
                 endone &&
@@ -274,7 +292,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </span>
             <span>
               {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}€{" "}
-              {(particularProperty?.basePrice?.[0] || 100) *
+              {Number(particularProperty?.basePrice || 100) *
                 calculateDifferenceBetweenDates(startone, endone)}
             </span>
           </div>
@@ -291,7 +309,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               {" "} */}
               €{" "}
               {calculateDifferenceBetweenDates(startone, endone) *
-                (particularProperty?.basePrice?.[0] || 100) +
+                Number(particularProperty?.basePrice || 100) +
                 6}{" "}
             </span>
           </div>
@@ -500,6 +518,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 
   return (
     <div className={`nc-CheckOutPagePageMain ${className}`}>
+      <Toaster />
       <main className="container mt-11 mb-24 lg:mb-32 flex flex-col-reverse lg:flex-row">
         <div className="w-full lg:w-3/5 xl:w-2/3 lg:pr-10 ">{renderMain()}</div>
         <div className="hidden lg:block flex-grow">{renderSidebar()}</div>

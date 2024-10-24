@@ -16,7 +16,6 @@ import { usePathname, useRouter } from "next/navigation";
 import StayDatesRangeInput from "../StayDatesRangeInput";
 import GuestsInput from "../GuestsInput";
 import SectionDateRange from "../../SectionDateRange";
-import { Route } from "next";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -32,17 +31,12 @@ import {
 } from "react-icons/io";
 import { FaBath } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
-import { FaHeart } from "react-icons/fa";
 import {
-  MdCancel,
   MdConstruction,
   MdHomeWork,
   MdOutlineEnergySavingsLeaf,
 } from "react-icons/md";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from "react-responsive-carousel";
-import { Property } from "@/models/listing";
-import { ObjectId } from "mongodb";
 import axios from "axios";
 import { CiCalendar } from "react-icons/ci";
 import { BiMessageAltDetail, BiSolidArea } from "react-icons/bi";
@@ -65,23 +59,6 @@ export interface ListingStayDetailPageProps {
   params: {
     id: string;
   };
-}
-
-interface Page3State {
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-}
-interface Page8State {
-  currency: string;
-  isPortion: Boolean;
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
 }
 
 interface DateRange {
@@ -392,10 +369,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   function openModalAmenities() {
     setIsOpenModalAmenities(true);
   }
-
-  const handleOpenModalImageGallery = () => {
-    router.push(`${thisPathname}/?modal=PHOTO_TOUR_SCROLLABLE` as Route);
-  };
 
   const [location, setLocation] = useState<string[]>(() => {
     const savedPage = localStorage.getItem("page2") || "";
@@ -1238,7 +1211,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                   <h2 className="text-sm">{commonProperties[index]?.guests}</h2>
                   <FaUser className="text-md" />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap">
                   <h2 className="text-sm">
                     {commonProperties[index]?.size} sq
                   </h2>

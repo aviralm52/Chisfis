@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { BookingTemplate } from "@/app/emailTemplate/email";
 
 export const sendEmail = async ({ email, subject, text, price }) => {
   try {
@@ -120,8 +121,7 @@ export const sendContactEmail = async (userDetails) => {
   }
 };
 
-
-export const sendBookingEmail = async (userDetails, ownerEmail) => {
+export const sendBookingEmail = async (userDetails, emails) => {
   try {
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -135,18 +135,18 @@ export const sendBookingEmail = async (userDetails, ownerEmail) => {
     const text = `
         Name: ${userDetails.name}
         Email: ${userDetails.email}
-        Message: ${userDetails.message}
       `;
+
+    const templateContent = BookingTemplate("aviralm55555@gmail.com");
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: ownerEmail,
+      to: Array.isArray(emails) ? emails.join(", ") : emails,
       subject: subject,
-      text: text,
+      html: templateContent,
     };
-
-    await transporter.sendMail(mailOptions);
-
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log('mail sent: ', mailResponse);
     return NextResponse.json(
       { message: "Confirm Booking Mail sent" },
       { status: 200 }

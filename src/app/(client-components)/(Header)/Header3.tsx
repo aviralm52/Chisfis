@@ -96,12 +96,9 @@ const Header3: FC<Header3Props> = ({ className = "" }) => {
   };
 
   useEffect(() => {
-    console.log("show login", showLogin);
     if (showLogin) {
-      console.log("added evenet listener");
       window.addEventListener("mousedown", handleShowLogin);
     } else {
-      console.log("removed event listener");
       window.removeEventListener("mousedown", handleShowLogin);
     }
   }, [showLogin]);
