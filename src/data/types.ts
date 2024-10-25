@@ -106,6 +106,7 @@ export interface BookingDataType {
   userId: ObjectId;
   startDate: Date;
   endDate: Date;
+  guests: number;
   bookingStatus?: string;
 }
 
@@ -173,7 +174,6 @@ export interface PropertyDataType {
 
   isLive?: boolean;
 }
-
 
 interface nearbyLocationInterface {
   nearbyLocationName: string[];
@@ -284,6 +284,26 @@ export interface ExperiencesDataType {
     lat: number;
     lng: number;
   };
+}
+
+export interface UserDataType {
+  _id: string;
+  name: string;
+  email: string;
+  profilePic: string;
+  nationality: string;
+  gender: string;
+  spokenLanguage: string;
+  bankDetails: object;
+  phone: string;
+  myRequests: string[];
+  myBookings?: string[];
+  myUpcommingRequests: string[];
+  declinedRequests: string[];
+  address: string;
+  role: string;
+  isVerified: boolean;
+  Payment?: object;
 }
 
 //

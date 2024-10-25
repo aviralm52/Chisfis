@@ -65,7 +65,13 @@ export async function POST(request: NextRequest) {
     console.log("Booking Created: ", booking);
 
     try {
-      const bookingEmailResponse = await sendBookingEmail(traveller, [
+      const bookingId = booking._id;
+      if (!bookingId)
+        return NextResponse.json(
+          { error: "Booking not created" },
+          { status: 400 }
+        );
+      const bookingEmailResponse = await sendBookingEmail(bookingId, [
         traveller.email,
         property.email,
         "amantrivedi598@gmail.com",
