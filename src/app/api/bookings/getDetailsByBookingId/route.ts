@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const traveller = await Travellers.findById(booking.userId);
+    const traveller = await Travellers.findById(booking.travellerId);
 
     if (!traveller) {
       return NextResponse.json(

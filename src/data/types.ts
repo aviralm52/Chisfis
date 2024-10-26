@@ -103,7 +103,8 @@ export interface StayDataType {
 export interface BookingDataType {
   _id: ObjectId;
   propertyId: ObjectId;
-  userId: ObjectId;
+  ownerId: ObjectId;
+  travellerId: ObjectId;
   startDate: Date;
   endDate: Date;
   guests: number;

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { TbExternalLink } from "react-icons/tb";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 export interface PageProps {
   params: {
@@ -23,29 +24,9 @@ const Page: FC<PageProps> = ({ params }) => {
   const [property, setProperty] = useState<PropertiesDataType>();
   const [booking, setBooking] = useState<BookingDataType>();
   const [status, setStatus] = useState("pending");
-
-  const handleAccept = () => {
-    setStatus("accepted");
-  };
-
-  const handleDecline = async () => {
-    setStatus("declined");
-
-    if (!booking || !property || !traveller) return;
-
-    try {
-      const response = await axios.post("/api/bookings/cancelBooking", {
-        bookingId: booking?._id,
-        ownerEmail: property?.email,
-        travellerEmail: traveller?.email,
-      });
-      console.log(response);
-      toast.success("Property Status Updated Successfully");
-    } catch (err: any) {
-      console.log("error in updating booking status: ", err);
-      toast.error(err.response.data.error);
-    }
-  };
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentToken, setPaymentToken] = useState();
 
   const calculateNights = (
     startDate: Date | undefined,
@@ -66,7 +47,7 @@ const Page: FC<PageProps> = ({ params }) => {
     const stdt = new Date(startDate);
     const nddt = new Date(endDate);
     let totalPrice = 0;
-    while (stdt <= nddt) {
+    while (stdt < nddt) {
       const month = stdt.getMonth();
       const day = stdt.getDate() - 1;
       totalPrice += property.pricePerDay[month][day];
@@ -75,7 +56,65 @@ const Page: FC<PageProps> = ({ params }) => {
     return totalPrice;
   };
 
-  const getTravellerByBookingId = async () => {
+  const handleDecline = async () => {
+    setStatus("declined");
+
+    if (!booking || !property || !traveller) return;
+
+    try {
+      const response = await axios.post("/api/bookings/cancelBooking", {
+        booking: booking,
+        propertyId: booking?.propertyId,
+        travellerEmail: traveller?.email,
+      });
+      console.log(response);
+      toast.success("Property Status Updated Successfully");
+    } catch (err: any) {
+      console.log("error in updating booking status: ", err);
+      toast.error(err.response.data.error);
+    }
+  };
+
+  const handleAccept = async () => {
+    setModalOpen(true);
+  };
+
+  const handleModalAccept = async () => {
+    setStatus("accepted");
+    setIsLoading(true);
+    let encryptedToken;
+    try {
+      const response = await axios.post("/api/encrypt", { amount: 6 });
+      console.log("token response: ", response.data);
+      encryptedToken = response.data.encryptedAmount;
+      setPaymentToken(response.data.encryptedAmount);
+    } catch (err: any) {
+      console.log("err: ", err);
+      toast.error("Payment Token Not Generated, Please Try again");
+    }
+
+    try {
+      const response = await axios.post("/api/bookings/confirmBooking", {
+        booking: booking,
+        propertyId: booking?.propertyId,
+        travellerEmail: traveller?.email,
+        paymentToken: encryptedToken,
+      });
+      console.log(response);
+      setStatus("accepted");
+    } catch (err: any) {
+      console.log("error in updating booking status: ", err);
+      toast.error(err.response.data.error);
+    }
+    setIsLoading(false);
+    setModalOpen(false);
+  };
+
+  const handleModalDeny = async () => {
+    setModalOpen(false);
+  };
+
+  const getDetailsByBookingId = async () => {
     try {
       const response = await axios.post("/api/bookings/getDetailsByBookingId", {
         bookingId,
@@ -83,14 +122,16 @@ const Page: FC<PageProps> = ({ params }) => {
       setProperty(response.data.property);
       setTraveller(response.data.traveller);
       setBooking(response.data.booking);
+      toast.success("fetched travellerDetails");
     } catch (err: any) {
+      console.log("error: ", err);
       toast.error(err.response.data.error);
     }
   };
 
   useEffect(() => {
     if (bookingId) {
-      getTravellerByBookingId();
+      getDetailsByBookingId();
     }
   }, []);
 
@@ -158,7 +199,10 @@ const Page: FC<PageProps> = ({ params }) => {
             onClick={handleDecline}
             className="px-4 py-2 font-semibold border rounded text-gray-600 hover:bg-gray-200 disabled:opacity-50"
             disabled={
-              status !== "pending" || booking?.bookingStatus === "cancelled"
+              status !== "pending" ||
+              booking?.bookingStatus === "cancelled" ||
+              booking?.bookingStatus === "confirmed" ||
+              !booking
             }
           >
             Decline
@@ -167,12 +211,22 @@ const Page: FC<PageProps> = ({ params }) => {
             onClick={handleAccept}
             className="px-4 py-2 bg-primary-6000 text-white rounded hover:bg-primary-700 disabled:opacity-50"
             disabled={
-              status !== "pending" || booking?.bookingStatus === "cancelled"
+              status !== "pending" ||
+              booking?.bookingStatus === "cancelled" ||
+              booking?.bookingStatus === "confirmed" ||
+              !booking
             }
           >
             Accept
           </button>
         </div>
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          onAccept={handleModalAccept}
+          onDeny={handleModalDeny}
+          isLoading={isLoading}
+        />
       </div>
       {status !== "pending" && (
         <div className="mt-4 text-center">

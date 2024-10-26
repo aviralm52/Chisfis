@@ -5,6 +5,7 @@ import nodemailer from "nodemailer";
 import {
   BookingCancellationTemplate,
   BookingTemplate,
+  TravellerBookingConfirmationTemplate,
 } from "@/app/emailTemplate/email";
 
 export const sendEmail = async ({ email, subject, text, price }) => {
@@ -141,6 +142,142 @@ export const sendBookingEmail = async (bookingId, emails) => {
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
       to: Array.isArray(emails) ? emails.join(", ") : emails,
+      subject: subject,
+      html: templateContent,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingConfirmationEmailToCompany = async (
+  ownerName,
+  ownerEmail,
+  travellerName,
+  travellerEmail,
+  propertyId,
+  propertyVSID
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Confirmation!";
+
+    const html = `
+    Owner ( ${ownerName} - ${ownerEmail} ) <br> has confirmed the Booking for the <br> Property ( VS ID - ${propertyVSID} , Property Id - ${propertyId} ), <br> booked by Traveller ( ${travellerName} - ${travellerEmail} ) 
+    `;
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: "aviralm522@gmail.com",
+      subject: subject,
+      html: html,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingConfirmationEmailToOwner = async (
+  ownerName,
+  ownerEmail
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Confirmation!";
+
+    const text = `
+    Hello ${ownerName}, You had Confirmed the Booking Request!
+    `;
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: ownerEmail,
+      subject: subject,
+      text: text,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingConfirmationEmailToTraveller = async (
+  propertyId,
+  travellerName,
+  travellerEmail,
+  bookingId,
+  startDate,
+  endDate,
+  price,
+  paymentToken
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Confirmation!";
+
+    const templateContent = TravellerBookingConfirmationTemplate(
+      propertyId,
+      travellerName,
+      bookingId,
+      startDate,
+      endDate,
+      price,
+      paymentToken
+    );
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: travellerEmail,
       subject: subject,
       html: templateContent,
     };
