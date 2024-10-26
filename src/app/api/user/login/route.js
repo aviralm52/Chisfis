@@ -3,27 +3,36 @@ import User from "../../../../models/user";
 import { NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import Travellers from "../../../../models/traveller";
 
 connectDb();
 
 export async function POST(request) {
   try {
     const reqBody = await request.json();
-    const { email, password } = reqBody;
-    console.log(reqBody);
+    const { email, password, role } = reqBody;
+    // console.log(reqBody);
 
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
+    if (!role) {
+      return NextResponse.json(
+        { error: "Please Select A Role before Login" },
+        { status: 401 }
+      );
+    }
+
+    const LoginUser =
+      role === "Traveller"
+        ? await Travellers.findOne({ email })
+        : await User.findOne({ email });
+
+    if (!LoginUser) {
       return NextResponse.json(
         { error: "Please Enter valid email or password" },
         { status: 400 }
       );
     }
-    console.log("user exists");
 
-    // Check if user is verified
-    if (!user.isVerified) {
+    if (!LoginUser.isVerified) {
       return NextResponse.json(
         { error: "Please verify your email before logging in" },
         { status: 400 }
@@ -31,21 +40,21 @@ export async function POST(request) {
     }
 
     // Check if password is correct
-    const validPassword = await bcryptjs.compare(password, user.password);
+    const validPassword = await bcryptjs.compare(password, LoginUser.password);
     if (!validPassword) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 400 }
       );
     }
-    console.log(user);
 
     // Create token data
     const tokenData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
+      id: LoginUser._id,
+      name: LoginUser.name,
+      email: LoginUser.email,
     };
+
     // Create token
     const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET, {
       expiresIn: "1d",
@@ -60,7 +69,7 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
     });
-   
+
     return response;
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

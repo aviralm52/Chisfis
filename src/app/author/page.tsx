@@ -9,7 +9,7 @@ import { BsPencilSquare } from "react-icons/bs";
 
 import StartRating from "@/components/StartRating";
 import { useAuth } from "@/hooks/useAuth";
-import { Properties } from "../page";
+import { PropertiesDataType, PropertyDataType } from "@/data/types";
 import React, { FC, Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import ButtonPrimary from "@/shared/ButtonPrimary";
@@ -18,17 +18,23 @@ import PropertyCard from "@/components/PropertyCard";
 
 export interface AuthorPageProps {}
 
+interface CommonPropertyDataType {
+  _id: string;
+  commonId: string;
+  commonProperties: PropertiesDataType[];
+}
+
 const AuthorPage: FC<AuthorPageProps> = ({}) => {
   let [categories] = useState(["Short Term", "Long Term"]);
   const { user, logout } = useAuth();
-  const imgUrl =
-    "https://i.pinimg.com/736x/70/78/6e/70786e80f3eb04dc3f42f6504797be3c.jpg";
+  const imgUrl = "https://vacationsaga.b-cdn.net/avatar.png";
 
-  const [properties, setProperties] = useState<Properties[]>([]);
+  const [properties, setProperties] = useState<CommonPropertyDataType[]>([]);
+  const [filteredProperties, setFilteredProperties] =
+    useState<PropertiesDataType[]>();
   const [loading, setLoading] = useState(true);
 
-  const [selectedRentalType, setSelectedRentalType] =
-    useState<string>("Short Term");
+  const [selectedRentalType, setSelectedRentalType] = useState<string>();
 
   useEffect(() => {
     console.log("user._id: ", user?._id);
@@ -36,9 +42,14 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
       if (user?._id) {
         setLoading(true);
         try {
-          const response = await axios.post("/api/user/fetchpropertybyuserid", {
-            userId: user._id,
-          });
+          // const response = await axios.post("/api/user/fetchpropertybyuserid", {
+          //   userId: user._id,
+          // });
+          const response = await axios.post(
+            "/api/newProperties/getPropertyByUserId",
+            { userId: user._id }
+          );
+          console.log("response: ", response.data.properties);
           setProperties(response.data.properties);
         } catch (error) {
           console.error("Error fetching properties:", error);
@@ -54,15 +65,40 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
   console.log(properties);
 
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Just Created";
+    if (!dateString) return "";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Invalid Date";
     return format(date, "yyyy");
   };
 
-  const filteredProperties = properties.filter(
-    (property) => property?.rentalType === selectedRentalType
+  const intermediateFilteredProperties = properties?.filter(
+    (property) =>
+      property.commonProperties?.[0]?.rentalType === selectedRentalType
   );
+  console.log(
+    "filtered Properties: ",
+    selectedRentalType,
+    intermediateFilteredProperties.length,
+    intermediateFilteredProperties
+  );
+
+  useEffect(() => {
+    const newPropertiesArray: PropertiesDataType[] = [];
+    intermediateFilteredProperties?.forEach((property) => {
+      newPropertiesArray.push(property.commonProperties?.[0]);
+    });
+    setFilteredProperties(newPropertiesArray);
+
+    console.log("filtered Properties: ", filteredProperties);
+  }, [selectedRentalType]);
+
+  useEffect(() => {
+    console.log(
+      "filtered Propertied: ",
+      filteredProperties?.length,
+      filteredProperties
+    );
+  }, [filteredProperties]);
 
   const renderSidebar = () => {
     return (
@@ -87,7 +123,7 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                 )}
               </span>
             </h2>
-            <StartRating className="!text-base" />
+            {/* <StartRating className="!text-base" /> */}
           </div>
           <div className="border-b border-neutral-200 dark:border-neutral-700 w-14"></div>
           <div className="space-y-4">
@@ -119,7 +155,9 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
                   <div className="w-56 h-5 bg-primary-50 rounded-lg animate-pulse"></div>
                 ) : (
                   <div>
-                    Joind at {formatDate(user?.createdAt) || "Not Found"}
+                    {formatDate(user?.createdAt)
+                      ? `Joined in ${formatDate(user?.createdAt)}`
+                      : "Not Found"}
                   </div>
                 )}
               </span>
@@ -156,102 +194,144 @@ const AuthorPage: FC<AuthorPageProps> = ({}) => {
         </div>
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
 
-        <div>
-          <Tab.Group
-            onChange={(index) => setSelectedRentalType(categories[index])}
-          >
-            <Tab.List className="flex space-x-1 overflow-x-auto">
-              {categories.map((item, index) => (
-                <Tab key={index} as={Fragment}>
-                  {({ selected }) => (
-                    <button
-                      className={`flex-shrink-0 block !leading-none font-medium px-5 py-2.5 text-sm sm:text-base sm:px-6 sm:py-3 capitalize rounded-full focus:outline-none ${
-                        selected
-                          ? "bg-secondary-900 text-secondary-50 "
-                          : "text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-100 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                      } `}
-                    >
-                      {item}
-                    </button>
-                  )}
-                </Tab>
-              ))}
-            </Tab.List>
-            <Tab.Panels>
-              {/* First Tab Panel: Short Term */}
-              <Tab.Panel className="">
-                <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
-                  {loading
-                    ? [0, 1, 2, 3].map((n) => (
-                        <div key={n}>
-                          <div className="flex flex-col gap-y-2">
-                            <div
-                              key={n}
-                              className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
-                            ></div>
-                            <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
-                            <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                            <div className="flex items-center justify-between">
-                              <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                              <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+        {selectedRentalType ? (
+          <div>
+            <Tab.Group
+              onChange={(index) => setSelectedRentalType(categories[index])}
+            >
+              <Tab.List className="flex space-x-1 overflow-x-auto">
+                {categories.map((item, index) => (
+                  <Tab key={index} as={Fragment}>
+                    {({ selected }) => (
+                      <button
+                        className={`flex-shrink-0 block !leading-none font-medium px-5 py-2.5 text-sm sm:text-base sm:px-6 sm:py-3 capitalize rounded-full focus:outline-none ${
+                          selected
+                            ? "bg-secondary-900 text-secondary-50 "
+                            : "text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-100 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        } `}
+                      >
+                        {item}
+                      </button>
+                    )}
+                  </Tab>
+                ))}
+              </Tab.List>
+              <Tab.Panels>
+                {/* First Tab Panel: Short Term */}
+                <Tab.Panel className="">
+                  <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
+                    {loading
+                      ? [0, 1, 2, 3].map((n) => (
+                          <div key={n}>
+                            <div className="flex flex-col gap-y-2">
+                              <div
+                                key={n}
+                                className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
+                              ></div>
+                              <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                              <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              <div className="flex items-center justify-between">
+                                <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                                <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
-                    : filteredProperties.map((item, index) => (
-                        <div key={index}>
-                          <Link
-                            className="    text-primary-6000 "
-                            href={{
-                              pathname: "/editproperty",
-                              query: { id: item._id, canAccess: true },
-                            }}
-                          >
-                            <PropertyCard key={item._id} data={item} />
-                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
-                          </Link>
-                        </div>
-                      ))}
-                </div>
-              </Tab.Panel>
-              <Tab.Panel className="">
-                <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
-                  {loading
-                    ? [0, 1, 2, 3].map((n) => (
-                        <div key={n}>
-                          <div className="flex flex-col gap-y-2">
-                            <div
-                              key={n}
-                              className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
-                            ></div>
-                            <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
-                            <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                            <div className="flex items-center justify-between">
-                              <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
-                              <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                        ))
+                      : filteredProperties?.map((item, index: number) => (
+                          <div key={index}>
+                            <Link
+                              className="    text-primary-6000 "
+                              href={{
+                                pathname: `/editproperty/${item._id}/${item.commonId}`,
+                                query: { canAccess: true },
+                              }}
+                            >
+                              <PropertyCard
+                                key={item._id}
+                                data={{
+                                  _id: item._id,
+                                  basePrice: [item.basePrice],
+                                  VSID: item.VSID,
+                                  postalCode: item.postalCode,
+                                  city: item.city,
+                                  country: item.country,
+                                  propertyType: item.propertyType,
+                                  beds: [item.beds],
+                                  propertyCoverFileUrl:
+                                    item.propertyCoverFileUrl,
+                                  propertyPictureUrls: item.propertyPictureUrls,
+                                }}
+                              />
+                              <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
+                            </Link>
+                          </div>
+                        ))}
+                  </div>
+                </Tab.Panel>
+                <Tab.Panel className="">
+                  <div className="mt-8 grid grid-cols-1 gap-6 md:gap-7 sm:grid-cols-2">
+                    {loading
+                      ? [0, 1, 2, 3].map((n) => (
+                          <div key={n}>
+                            <div className="flex flex-col gap-y-2">
+                              <div
+                                key={n}
+                                className="w-full h-64 bg-primary-50 rounded-lg animate-pulse"
+                              ></div>
+                              <div className="w-56 rounded-lg h-3 bg-slate-300 animate-pulse mt-2"></div>
+                              <div className="w-40 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              <div className="flex items-center justify-between">
+                                <div className="w-32 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                                <div className="w-10 rounded-lg h-3 bg-slate-300 animate-pulse mt-1"></div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))
-                    : filteredProperties.map((item) => (
-                        <>
-                          <Link
-                            className="text-primary-6000 "
-                            href={{
-                              pathname: "/editproperty",
-                              query: { id: item._id, canAccess: true },
-                            }}
-                          >
-                            <PropertyCard key={item._id} data={item} />
-                            <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
-                          </Link>
-                        </>
-                      ))}
-                </div>
-              </Tab.Panel>
-            </Tab.Panels>
-          </Tab.Group>
-        </div>
+                        ))
+                      : filteredProperties?.map((item, index) => (
+                          <>
+                            <Link
+                              className="text-primary-6000 "
+                              href={{
+                                pathname: `/editproperty/${item._id}/${item.commonId}`,
+                                query: { canAccess: true },
+                              }}
+                              key={index}
+                            >
+                              <PropertyCard
+                                key={item._id}
+                                data={{
+                                  _id: item._id,
+                                  basePrice: [item.basePrice],
+                                  VSID: item.VSID,
+                                  postalCode: item.postalCode,
+                                  city: item.city,
+                                  country: item.country,
+                                  propertyType: item.propertyType,
+                                  beds: [item.beds],
+                                  propertyCoverFileUrl:
+                                    item.propertyCoverFileUrl,
+                                  propertyPictureUrls: item.propertyPictureUrls,
+                                }}
+                              />
+                              <BsPencilSquare className="  text-primary-6000 mt-2 text-xl rounded-lg" />
+                            </Link>
+                          </>
+                        ))}
+                  </div>
+                </Tab.Panel>
+              </Tab.Panels>
+            </Tab.Group>
+          </div>
+        ) : (
+          <div className=" flex flex-col gap-y-4 items-center">
+            <ButtonPrimary onClick={() => setSelectedRentalType("Short Term")}>
+              Short Term
+            </ButtonPrimary>
+            <ButtonPrimary onClick={() => setSelectedRentalType("Long Term")}>
+              Long Term
+            </ButtonPrimary>
+          </div>
+        )}
       </div>
     );
   };

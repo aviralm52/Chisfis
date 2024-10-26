@@ -4,7 +4,7 @@ import { Toaster, toast } from "sonner";
 import { CgSpinner } from "react-icons/cg";
 import axios from "axios";
 import Input from "@/shared/Input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import Link from "next/link";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
@@ -20,6 +20,9 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const token = Cookies.get("token");
+  const params = useSearchParams();
+
+  const role = params.get("role");
 
   useEffect(() => {
     const { token } = parseCookies();
@@ -35,6 +38,7 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       const response = await axios.post("/api/user/login", {
         email,
         password,
+        role,
       });
       if (response.status === 200) {
         toast.success("Login successful");
@@ -58,9 +62,39 @@ const PageLogin: FC<PageLoginProps> = ({}) => {
       <Toaster />
       <div className={`nc-PageLogin`}>
         <div className="container mb-24 lg:mb-32">
-          <h2 className="my-20 flex items-center text-3xl leading-[115%] md:text-5xl md:leading-[115%] font-semibold text-neutral-900 dark:text-neutral-100 justify-center">
+          <h2 className="my-8 flex items-center text-3xl leading-[115%] md:text-5xl md:leading-[115%] font-semibold text-neutral-900 dark:text-neutral-100 justify-center">
             Welcome Back
           </h2>
+          {
+            <div className="w-full flex justify-center font-medium text-sm sm:text-lg mb-8">
+              Login As &nbsp;{""}
+              {
+                <Link href={{ pathname: "/login", query: { role: "Owner" } }}>
+                  <span
+                    className={` border-b border-dotted ${
+                      role === "Owner" ? "text-primary-500" : ""
+                    }`}
+                  >
+                    Owner
+                  </span>
+                </Link>
+              }{" "}
+              &nbsp;/&nbsp;{" "}
+              {
+                <Link
+                  href={{ pathname: "/login", query: { role: "Traveller" } }}
+                >
+                  <span
+                    className={` border-b border-dotted ${
+                      role === "Traveller" ? "text-primary-500" : ""
+                    }`}
+                  >
+                    Traveller
+                  </span>
+                </Link>
+              }
+            </div>
+          }
           <div className="max-w-md mx-auto space-y-6">
             <form
               className="grid grid-cols-1 gap-6 relative"

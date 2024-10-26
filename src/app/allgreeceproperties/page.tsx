@@ -42,7 +42,6 @@
 
 import React, { FC } from "react";
 import SectionGridFeaturePlaces from "./SectionGridFeaturePlaces";
-// import CustomStayCard from "./CustomStayCard"
 const MainPage: FC = () => {
   return (
     <SectionGridFeaturePlaces />

@@ -156,6 +156,7 @@ export interface Properties {
   userId?: string;
 
   VSID?:string;
+  isInstantBooking?: boolean;
   rentalType?:string;
   propertyType?: string;
   placeName?: string;
@@ -183,6 +184,9 @@ export interface Properties {
   weekendPrice?: number[];
   monthlyDiscount?: number[];
   currency?: string;
+
+  pricePerDay?: number[][][];
+  icalLinks?: object;
 
   generalAmenities?: object;
   otherAmenities?: object;

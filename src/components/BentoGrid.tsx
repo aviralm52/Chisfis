@@ -38,7 +38,11 @@ const Skeleton = ({ url }: { url: string }) => (
       className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl"
     >
       {" "}
-      <img src={url} alt="" className="w-full h-full object-cover rounded-xl hover:scale-125 transition ease-in-out" />
+      <img
+        src={url || "https://vacationsaga.b-cdn.net/placeholder.png"}
+        alt="Placeholder"
+        className="w-full h-full object-cover rounded-xl hover:scale-125 transition ease-in-out"
+      />
     </Link>
   </div>
 );

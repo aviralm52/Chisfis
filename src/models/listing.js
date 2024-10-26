@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import { customAlphabet } from "nanoid";
 
-
-
-
 const generateVSID = (length) => {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -18,9 +15,9 @@ const PropertySchema = new mongoose.Schema(
       type: String,
       default: () => generateVSID(7),
     },
-    email:{
-      type:String,
-      required:true,
+    email: {
+      type: String,
+      required: true,
     },
     rentalType: {
       type: String,
@@ -30,6 +27,10 @@ const PropertySchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
+    },
+    isInstantBooking: {
+      type: Boolean,
+      default: false,
     },
 
     propertyType: String,
@@ -62,6 +63,12 @@ const PropertySchema = new mongoose.Schema(
     weekendPrice: [Number],
     weeklyDiscount: [Number],
     currency: String,
+
+    pricePerDay: [[[Number]]],
+    icalLinks: {
+      type: Map,
+      of: String,
+    },
 
     generalAmenities: {
       type: Map,

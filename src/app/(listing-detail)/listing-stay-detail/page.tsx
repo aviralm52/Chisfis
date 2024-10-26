@@ -67,8 +67,9 @@ import { PiMapPinSimpleAreaFill, PiStudentBold } from "react-icons/pi";
 import { SiLevelsdotfyi } from "react-icons/si";
 import { RiMoneyEuroCircleFill } from "react-icons/ri";
 import { BentoGridDemo } from "@/components/BentoGrid";
-import Heading from "@/shared/Heading";
-import Heading2 from "@/shared/Heading2";
+import { EventInterface } from "@/app/editproperty/page";
+import dateParser from "@/helper/dateParser";
+import CustomDateRangePrice from "@/components/CustomDateRangePrice";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -141,6 +142,9 @@ interface Properties {
   monthlyDiscount: number[];
   currency: string;
 
+  pricePerDay: number[][][];
+  icalLinks: object;
+
   generalAmenities: object;
   otherAmenities: object;
   safeAmenities: object;
@@ -195,7 +199,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const param: string = searchParams.get("id") || "0";
   const paramInt: number = parseInt(param, 10);
-  const indexId: number = paramInt >= 0 && paramInt <= 10 ? paramInt : 0;
+  const indexId: number = parseInt(searchParams.get("portion") || "0") || 0;
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
@@ -214,6 +218,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     longitude: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const today = new Date();
+  const tomorrow = new Date(today.setDate(today.getDate() + 1));
+  const dt1 = today.toISOString().split("T")[0];
+  const dt2 = tomorrow.toISOString().split("T")[0];
+  const [stdt, setStdt] = useState<string>(dt1);
+  const [nddt, setNddt] = useState<string>(dt2);
 
   // TODO: Accessing current Location
   useEffect(() => {
@@ -250,14 +260,85 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
   }, []);
 
-  const [loading, setLoading] = useState(false);
+  // TODO: handle external booked dates
+  const [bookedState, setBookedState] = useState<boolean>(false);
+  const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
+    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
+  ]); //! {start: "YYYY-MM-DD"}
+
+  const fetchAndParseICal = async (url: string) => {
+    try {
+      console.log("url fethced:::: ", url);
+      const response = await axios.post("/api/ical", { url });
+      // console.log("response:::: ", response);
+      const parsedData = response.data.data;
+      const bookings = [];
+      for (const eventId in parsedData) {
+        const event = parsedData[eventId];
+        if (event.type === "VEVENT") {
+          const startDate = event.start ? new Date(event.start) : undefined;
+          const endDate = event.end ? new Date(event.end) : undefined;
+
+          bookings.push({
+            startDate,
+            endDate,
+          });
+        }
+      }
+      // console.log("bookings: ", bookings);
+      return bookings;
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchBookedDates = async (url: string) => {
+    // const airbnbBookings = await fetchAndParseICal(
+    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
+    // );
+    console.log("url::: ", url);
+    if (!url) {
+      setBookedState(true);
+      return;
+    }
+    const airbnbBookings = await fetchAndParseICal(url);
+    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
+
+    const eventsFromAirbnb: EventInterface[] = [];
+    airbnbBookings?.forEach((event) => {
+      const stdt = dateParser(event.startDate?.toLocaleString() || "");
+      const nddt = dateParser(event.endDate?.toLocaleString() || "");
+
+      const newObj: EventInterface = {
+        start: stdt,
+        end: nddt,
+        title: "Booked",
+      };
+      eventsFromAirbnb.push(newObj);
+      setBookedDates(eventsFromAirbnb);
+
+      //! adding events from airbnb to already booked dates
+      eventsFromAirbnb.forEach((event) => {
+        const newDates: Date[] = [];
+        let currDt = new Date(event.start!);
+        while (currDt < new Date(event.end!)) {
+          newDates.push(currDt);
+          currDt.setDate(currDt.getDate() + 1);
+        }
+        console.log("newDates: ", newDates);
+        setAlreadyBookedDates((prev) => [...prev, ...newDates]);
+      });
+    });
+    setBookedState(true);
+  };
 
   useEffect(() => {
     const getProperties = async () => {
       try {
-        setLoading(true);
         const response = await axios.get(`/api/particular/${indexId}`);
         if (response.data) {
+          fetchBookedDates(response.data?.icalLinks?.["Airbnb"]);
           setParticualarProperty(response?.data);
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
@@ -280,10 +361,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           (item, index) => item[1] === true
         );
         setAllAmenities(filteredAllAmen);
-        setLoading(false);
       } catch (err) {
         console.log(err);
-        setLoading(false);
       }
     };
     getProperties();
@@ -928,7 +1007,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             particularProperty?.nearbyLocations?.nearbyLocationName?.length >
               0 ? (
               <>
-                {" "}
                 <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
                   Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
                 </h2>
@@ -1088,17 +1166,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       // setTempNight(nights);
       setMinNightStay(nights);
       setNumberOfNights(Math.max(nights, minNights));
+
+      const st = startDate?.toISOString()?.split("T")?.[0];
+      const nd = endDate?.toISOString()?.split("T")?.[0];
+      setStdt(st || dt1);
+      setNddt(nd || dt2);
     };
 
     const calculateDateDifference = (start: Date | null, end: Date | null) => {
       if (start && end) {
         const timeDiff = end.getTime() - start.getTime();
-        return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
+        return Math.ceil(timeDiff / (1000 * 3600 * 24));
       }
       return 0;
     };
-
-    // const basePrice = particularProperty?.basePrice[indexId] ?? 0;
     const basePrice =
       particularProperty?.rentalType === "Short Term"
         ? particularProperty?.basePrice[indexId]
@@ -1125,11 +1206,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         </div>
 
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl">
-          <StayDatesRangeInput
-            className="flex-1 z-[11]"
-            onDatesChange={handleDatesChange}
-            minNights={minNights}
-          />
+          {bookedState && (
+            <StayDatesRangeInput
+              className="flex-1 z-[11]"
+              onDatesChange={handleDatesChange}
+              minNights={minNights}
+              prices={particularProperty?.pricePerDay[indexId]}
+              externalBookedDates={alreadyBookedDates}
+            />
+          )}
           <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
           <GuestsInput
             className="flex-1"
@@ -1174,6 +1259,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             pathname: "/checkout",
             query: {
               id: propertyId,
+              portion: indexId,
+              stdt,
+              nddt,
+              guests: totalGuests,
             },
           }}
         >
@@ -1399,6 +1488,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>(
     []
   );
+
   useEffect(() => {
     if (particularProperty?.propertyPictureUrls) {
       setPropertyPicturesTemp(particularProperty?.propertyPictureUrls);
@@ -1456,18 +1546,25 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             )}
           </div>
           {/* Thumbnail images for larger screens */}
-          {propertyPicturesTemp
-            .filter((_, i) => i >= 1 && i < 5)
+          {allImages
+            ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
                 className="w-full aspect-w-4 aspect-h-3 max-h-[60vh] rounded-xl overflow-hidden"
                 key={index}
               >
-                <img
-                  src={propertyPicturesTemp[index]}
-                  alt="Property Picture"
-                  className="object-cover w-full h-full"
-                />
+                {allImages[index] ? (
+                  <img
+                    src={allImages[index]}
+                    alt="Property Picture"
+                    className="object-cover rounded-xl sm:rounded-xl w-44 h-44"
+                  />
+                ) : (
+                  <div className=" flex flex-col justify-center items-center">
+                    <BsExclamationCircleFill className="w-1/2 h-1/2 mb-2 text-neutral-700" />
+                    <p>Image not found!</p>
+                  </div>
+                )}
               </div>
             ))}
           <button
@@ -1521,7 +1618,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {renderSection2()}
           {renderSection3()}
           {renderSection4()}
-          <SectionDateRange />
+          {bookedState && (
+            <SectionDateRange
+              prices={particularProperty?.pricePerDay[indexId]}
+              externalBookedDates={alreadyBookedDates}
+            />
+          )}
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}

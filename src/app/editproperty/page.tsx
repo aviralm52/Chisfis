@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, useRef, Fragment } from "react";
 import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +7,35 @@ import Input from "@/shared/Input";
 import { Properties } from "../page";
 import { MdArrowDropDown, MdArrowRight } from "react-icons/md";
 import { toast, Toaster } from "sonner";
+import Button from "@/shared/Button";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { FaCirclePlus } from "react-icons/fa6";
+import Label from "@/components/Label";
+import { FaCalendarAlt } from "react-icons/fa";
+import { Dialog, Transition } from "@headlessui/react";
+import ButtonClose from "@/shared/ButtonClose";
+import { DateRange, DateRangePicker } from "react-date-range";
+import "react-date-range/dist/styles.css"; // main css file
+import "react-date-range/dist/theme/default.css";
+import { addDays } from "date-fns";
+import StayDatesRangeInput from "../(client-components)/(HeroSearchForm2Mobile)/DatesRangeInput";
+import dateParser from "@/helper/dateParser";
+import CustomDateRangePrice from "@/components/CustomDateRangePrice";
+import BarLoader from "@/components/BarLoader";
+import ButtonPrimary from "@/shared/ButtonPrimary";
+
+export interface EventInterface {
+  title: string;
+  date?: string;
+  start?: string;
+  end?: string; // if End is not given then the duration will be the same day as start
+  bookedFrom?: string;
+}
+
+type CustomDateRange = {
+  from: Date | null;
+  to: Date | null;
+};
 
 const EditPropertyPage: React.FC = () => {
   const router = useRouter();
@@ -16,6 +45,8 @@ const EditPropertyPage: React.FC = () => {
   const [property, setProperty] = useState<Properties | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
+  const [refreshState, setRefreshState] = useState<boolean>(false);
+  const [instantBookingToggle, setInstantBookingToggle] = useState(false);
 
   useEffect(() => {
     const canAccess = searchParams.get("canAccess");
@@ -31,7 +62,7 @@ const EditPropertyPage: React.FC = () => {
           const response = await axios.post("/api/user/fetchpropertybyuserid", {
             userId: user._id,
           });
-          console.log(response.data);
+          // console.log(response.data);
           const fetchedProperty = response.data.properties.find(
             (prop: Properties) => prop._id === id
           );
@@ -45,12 +76,13 @@ const EditPropertyPage: React.FC = () => {
       };
       fetchProperty();
     }
-  }, [id, user?._id]);
+  }, [id, user?._id, refreshState]);
 
   const [formData, setFormData] = useState<Partial<Properties>>({
     VSID: property?.VSID,
     rentalType: property?.rentalType,
 
+    isInstantBooking: property?.isInstantBooking,
     propertyType: property?.propertyType,
     placeName: property?.placeName,
     rentalForm: property?.rentalForm,
@@ -74,6 +106,9 @@ const EditPropertyPage: React.FC = () => {
     basePrice: property?.basePrice,
     weekendPrice: property?.weekendPrice,
     monthlyDiscount: property?.monthlyDiscount,
+
+    pricePerDay: property?.pricePerDay,
+    icalLinks: property?.icalLinks,
 
     generalAmenities: property?.generalAmenities,
     otherAmenities: property?.otherAmenities,
@@ -105,6 +140,7 @@ const EditPropertyPage: React.FC = () => {
         VSID: property.VSID,
         rentalType: property.rentalType,
 
+        isInstantBooking: property.isInstantBooking,
         propertyType: property.propertyType,
         placeName: property.placeName,
         rentalForm: property.rentalForm,
@@ -129,6 +165,9 @@ const EditPropertyPage: React.FC = () => {
         weekendPrice: property.weekendPrice,
         monthlyDiscount: property.monthlyDiscount,
 
+        pricePerDay: property?.pricePerDay,
+        icalLinks: property?.icalLinks,
+
         smoking: property.smoking,
         pet: property.pet,
         party: property.party,
@@ -143,6 +182,12 @@ const EditPropertyPage: React.FC = () => {
 
         // isLive: property.isLive,
       });
+      setInstantBookingToggle(property?.isInstantBooking || false);
+      const url = (property.icalLinks as { [key: string]: string })?.[
+        "Airbnb"
+      ] as string;
+      console.log("url: ", url);
+      fetchBookedDates(url);
     }
   }, [property]);
 
@@ -183,13 +228,250 @@ const EditPropertyPage: React.FC = () => {
     Array.from({ length: numberOfPortions }, () => false)
   );
 
+  const [icalPlatform, setIcalPlatform] = useState<string>("Airbnb");
+  const icalLinkRef = useRef<HTMLInputElement>(null);
+  const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
+    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
+  ]); //! {start: "YYYY-MM-DD"}
+  const handleAddIcalLink = () => {
+    if (icalLinkRef.current?.value == "") return;
+    const newObj = {
+      [icalPlatform]: icalLinkRef.current?.value,
+    };
+    setFormData((prevState) => ({
+      ...prevState,
+      icalLinks: { ...(prevState.icalLinks || {}), ...newObj },
+    }));
+    if (icalLinkRef.current) {
+      icalLinkRef.current.value = "";
+    }
+    setIcalPlatform("");
+  };
+
+  const handleRemoveIcalLink = (platform: string) => {
+    const newObj = { ...formData?.icalLinks } as { [key: string]: string };
+    delete newObj[platform];
+
+    setFormData((prevState) => ({
+      ...prevState,
+      icalLinks: newObj,
+    }));
+  };
+
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
+
+  const [date, setDate] = useState<CustomDateRange>({
+    from: startDate,
+    to: endDate,
+  });
+
+  useEffect(() => {
+    setDate({ from: startDate, to: endDate });
+  }, [startDate, endDate]);
+
+  const priceInputRef = useRef<HTMLInputElement>(null);
+  const handleChangePrice = async (portionIndex: number) => {
+    setLoading(true);
+    try {
+      const response = await axios.post("/api/editPrices", {
+        propertyId: id,
+        portion: portionIndex,
+        price: priceInputRef.current?.value,
+        dateRange: date,
+      });
+      console.log(response);
+    } catch (err: any) {
+      console.log("error: ", err);
+    }
+    setRefreshState((prev) => !prev);
+    setLoading(false);
+  };
+
+  const modalCalendar = (index: number) => {
+    return (
+      <Transition appear show={isCalendarOpen[index]} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-50 overflow-y-auto"
+          onClose={() =>
+            setIsCalendarOpen(Array(property?.numberOfPortions).fill(false))
+          }
+        >
+          <div className="min-h-screen px-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-40" />
+            </Transition.Child>
+
+            {/* This element is to trick the browser into centering the modal contents. */}
+            <span
+              className="inline-block h-screen align-middle"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <div className="inline-block py-8 h-screen w-full max-w-4xl ">
+                <div className="inline-flex pb-2 flex-col w-full text-left align-middle transition-all transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 dark:border dark:border-neutral-700 dark:text-neutral-100 shadow-xl h-full">
+                  <div className="relative flex-shrink-0 px-6 border-b border-neutral-200 dark:border-neutral-800 text-center">
+                    <span className="absolute left-3 top-3">
+                      <ButtonClose
+                        onClick={() =>
+                          setIsCalendarOpen(
+                            Array(property?.numberOfPortions).fill(false)
+                          )
+                        }
+                      />
+                    </span>
+                  </div>
+                  <div className=" px-8 py-4 overflow-auto text-neutral-700 dark:text-neutral-300 divide-y divide-neutral-200">
+                    {/* <StayDatesRangeInput
+                      className="flex-1"
+                      prices={property?.pricePerDay?.[index] || []}
+                      externalBookedDates={alreadyBookedDates}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
+                      // onDatesChange={handleDatesChange}
+                    /> */}
+                    {loading && <BarLoader />}
+                    <CustomDateRangePrice
+                      className="flex-1"
+                      prices={property?.pricePerDay?.[index] || []}
+                      externalBookedDates={alreadyBookedDates}
+                      startDate={startDate}
+                      endDate={endDate}
+                      setStartDate={setStartDate}
+                      setEndDate={setEndDate}
+                      // onDatesChange={handleDatesChange}
+                    />
+                    <div className=" flex justify-between items-center gap-x-2 w-full border-none">
+                      <div className=" flex w-1/2 ml-4">
+                        <Label className=" w-2/5 flex items-center">
+                          Enter Price:{" "}
+                        </Label>
+                        <Input
+                          type="number"
+                          className="w-3/5"
+                          ref={priceInputRef}
+                        />
+                      </div>
+                      <Button
+                        className=" p-2 bg-primary-6000 mr-4 cursor-pointer hover:bg-primary-700"
+                        onClick={() => handleChangePrice(index)}
+                      >
+                        Submit
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
+    );
+  };
+
+  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean[]>(
+    Array(property?.numberOfPortions).fill(false)
+  );
+
+  const fetchAndParseICal = async (url: string) => {
+    try {
+      const response = await axios.post("/api/ical", { url });
+      const parsedData = response.data.data;
+      const bookings = [];
+      for (const eventId in parsedData) {
+        const event = parsedData[eventId];
+        if (event.type === "VEVENT") {
+          const startDate = event.start ? new Date(event.start) : undefined;
+          const endDate = event.end ? new Date(event.end) : undefined;
+
+          bookings.push({
+            startDate,
+            endDate,
+          });
+        }
+      }
+      // console.log("bookings: ", bookings);
+      return bookings;
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  const fetchBookedDates = async (url: string) => {
+    // const airbnbBookings = await fetchAndParseICal(
+    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
+    // );
+    const airbnbBookings = await fetchAndParseICal(url);
+
+    const eventsFromAirbnb: EventInterface[] = [];
+    airbnbBookings?.forEach((event) => {
+      const stdt = dateParser(event.startDate?.toLocaleString() || "");
+      const nddt = dateParser(event.endDate?.toLocaleString() || "");
+
+      const newObj: EventInterface = {
+        start: stdt,
+        end: nddt,
+        title: "Booked",
+        // bookedFrom: url.includes("airbnb") ? "Airbnb" : "Booking.com",
+      };
+      eventsFromAirbnb.push(newObj);
+      setBookedDates(eventsFromAirbnb);
+
+      //! adding events from airbnb to already booked dates
+      eventsFromAirbnb.forEach((event) => {
+        const newDates: Date[] = [];
+        let currDt = new Date(event.start!);
+        while (currDt < new Date(event.end!)) {
+          newDates.push(currDt);
+          currDt.setDate(currDt.getDate() + 1);
+        }
+
+        setAlreadyBookedDates((prev) => [...prev, ...newDates]);
+      });
+    });
+  };
+
+  const generateIcal = async () => {
+    try {
+      const response = await axios.post("/api/ical/createIcal", {
+        propertyId: id,
+      });
+      console.log("response:: ", response);
+      console.log("response: ", response.data);
+    } catch (error: any) {
+      console.log("error: ", error);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto ">
       <Toaster />
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-x-2 gap-y-4 mt-4">
-          <div className="text-xl dark:text-white font-medium">
-            <label>
+          <div className="text-xl dark:text-white font-medium sm:flex justify-between">
+            <label className=" w-2/6">
               VSID
               <Input
                 type="text"
@@ -199,6 +481,115 @@ const EditPropertyPage: React.FC = () => {
                 disabled
               />
             </label>
+            <div className=" w-3/5">
+              <label htmlFor="">Sync your Calendar with other Platforms</label>
+              <div className=" flex gap-x-2">
+                <select
+                  name="calendar"
+                  id="calendar"
+                  className="dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-2xl p-2"
+                  onChange={(e) => setIcalPlatform(e.target.value)}
+                  value={icalPlatform}
+                >
+                  <option
+                    className=" bg-transparent dark:bg-transparent"
+                    disabled
+                  >
+                    Select Platform
+                  </option>
+                  <option
+                    className=" bg-transparent dark:bg-transparent"
+                    value="Airbnb"
+                  >
+                    Airbnb
+                  </option>
+                  {/* <option
+                    className=" bg-transparent dark:bg-transparent"
+                    value="Booking"
+                  >
+                    Booking.com
+                  </option> */}
+                </select>
+                <Input
+                  type="text"
+                  name="icalLink"
+                  className=" bg-transparent w-1/2"
+                  ref={icalLinkRef}
+                />
+                <div className=" w-1/12 flex items-center justify-center cursor-pointer">
+                  <FaCirclePlus
+                    className=" h-6 w-6 cursor-pointer"
+                    onClick={handleAddIcalLink}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {formData?.icalLinks && (
+            <h1 className="text-xl font-medium bg-background">Ical links</h1>
+          )}
+          {formData?.icalLinks &&
+            Object.entries(formData?.icalLinks)?.map(([key, value]) => (
+              <div key={key} className="flex items-center justify-around">
+                <Label className=" w-2/12  text-lg font-semibold ml-1 p-2">
+                  {key}
+                </Label>
+                <Input
+                  type="text"
+                  value={value || ""}
+                  className=" w-9/12 p-2 text-base bg-background border rounded-xl disabled:cursor-not-allowed"
+                  disabled
+                />
+
+                <div className=" w-1/12 flex justify-center">
+                  <TrashIcon
+                    className=" w-6 h-6 cursor-pointer"
+                    onClick={() => handleRemoveIcalLink(key)}
+                  />
+                </div>
+              </div>
+            ))}
+          <div className=" flex flex-col sm:flex-row gap-y-2 sm:gap-x-4 items-center">
+            {" "}
+            <h2 className=" text-xl font-medium dark:text-white">
+              Instant Booking :{" "}
+            </h2>
+            <div>
+              <div
+                className=" border-2 border-neutral-800 dark:border-white rounded-3xl w-20 h-10 p-1 flex items-center cursor-pointer relative text-white dark:bg-slate-900"
+                onClick={() => {
+                  setFormData((prev) => {
+                    const newFormData = { ...prev };
+                    newFormData.isInstantBooking = !instantBookingToggle;
+                    return newFormData;
+                  });
+                  setInstantBookingToggle((prev) => !prev);
+                }}
+              >
+                {/* {instantBookingToggle ? ( */}
+                <div
+                  className={` absolute rounded-full w-8 h-8 bg-green-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                    instantBookingToggle
+                      ? "translate-x-9 scale-100 opacity-100"
+                      : " scale-50 opacity-0"
+                  }`}
+                >
+                  ON
+                </div>
+                {/* ) : ( */}
+                <div
+                  className={` absolute rounded-full w-8 h-8 bg-red-600 font-semibold text-xs flex justify-center items-center transition-all duration-700 ease-in-out transform ${
+                    instantBookingToggle
+                      ? " scale-50 opacity-0"
+                      : " scale-100 opacity-100"
+                  }`}
+                >
+                  OFF
+                </div>
+                {/* )} */}
+              </div>
+            </div>
+            <p>Instant Booking is {instantBookingToggle ? "ON" : "OFF"}</p>
           </div>
           <div className=" text-black">
             <h1 className="text-xl dark:text-white font-medium">
@@ -523,25 +914,41 @@ const EditPropertyPage: React.FC = () => {
                 </h1>
                 {isPortionOpen[index] && (
                   <div className=" flex flex-col space-y-4">
-                    <div>
-                      <label htmlFor="portionName">
+                    <div className="w-full">
+                      <label htmlFor="portionName" className=" w-full">
                         Portion&apos;s Name
-                        <Input
-                          type="text"
-                          name="cooking"
-                          value={formData?.portionName?.at(index) || ""}
-                          onChange={(e) => {
-                            const newFormData = { ...formData };
-                            newFormData?.portionName?.splice(
-                              index,
-                              1,
-                              e.target.value
-                            );
-                            setFormData(newFormData);
-                          }}
-                        />
+                        <div className=" flex w-full justify-between items-center">
+                          <Input
+                            type="text"
+                            name="cooking"
+                            value={formData?.portionName?.at(index) || ""}
+                            onChange={(e) => {
+                              const newFormData = { ...formData };
+                              newFormData?.portionName?.splice(
+                                index,
+                                1,
+                                e.target.value
+                              );
+                              setFormData(newFormData);
+                            }}
+                            className="w-8/10"
+                          />
+                          <div className=" w-2/10 p-3">
+                            <FaCalendarAlt
+                              className=" w-6 h-6 cursor-pointer"
+                              onClick={() => {
+                                setIsCalendarOpen((prev) => {
+                                  const newState = [...prev];
+                                  newState[index] = true;
+                                  return newState;
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
                       </label>
                     </div>
+                    {isCalendarOpen[index] && modalCalendar(index)}
 
                     <div className=" flex space-x-4">
                       <div>
@@ -760,6 +1167,26 @@ const EditPropertyPage: React.FC = () => {
               </div>
             );
           })}
+        </div>
+        <div className=" w-full flex justify-between mt-4 gap-x-2 items-center">
+          <p className=" text-nowrap w-1/6">Your Ical Link: </p>
+          <Input
+            type="text"
+            disabled
+            value={`https://vacationsaga.com/api/ical/${id}`}
+            className=" w-4/6"
+          />
+          <div
+            // onClick={generateIcal}
+            onClick={() => {
+              navigator.clipboard.writeText(
+                `https://vacationsaga.com/api/ical/${id}`
+              );
+            }}
+            className=" w-1/6 bg-primary-6000 hover:bg-primary-700 rounded-3xl px-2 py-3 cursor-pointer font-medium flex justify-center"
+          >
+            Copy Link
+          </div>
         </div>
 
         <div className=" flex justify-center my-4">
