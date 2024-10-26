@@ -6,22 +6,43 @@ import Travellers from "@/models/traveller";
 import { NextRequest, NextResponse } from "next/server";
 import { sendBookingEmail } from "@/helper/gmailMailer";
 import Users from "@/models/user";
+import { UserDataType } from "@/data/types";
 
 connectDb();
 
 export async function POST(request: NextRequest) {
   try {
-    const { propertyId, startDate, endDate, guests, bookingStatus } =
-      await request.json();
+    const {
+      propertyId,
+      ownerEmail,
+      startDate,
+      endDate,
+      guests,
+      price,
+      bookingStatus,
+    } = await request.json();
 
-    const userId = getDataFromToken(request);
+    const travellerId = getDataFromToken(request);
+
+    const owner: UserDataType | null = await Users.findOne({
+      email: ownerEmail,
+    });
+    const ownerId = owner?._id;
+    const ownerName = owner?.name;
+
+    if (!owner) {
+      return NextResponse.json({ error: "Owner not found!" }, { status: 401 });
+    }
 
     if (
       !propertyId ||
-      !userId ||
+      !ownerId ||
+      !ownerName ||
+      !travellerId ||
       !startDate ||
       !endDate ||
       !guests ||
+      !price ||
       !bookingStatus
     ) {
       return NextResponse.json(
@@ -38,7 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const traveller = await Travellers.findById(userId);
+    const traveller = await Travellers.findById(travellerId);
     if (!traveller) {
       return NextResponse.json(
         { error: "You are not a traveller! Please login as a Traveller" },
@@ -48,10 +69,12 @@ export async function POST(request: NextRequest) {
 
     const booking = await Bookings.create({
       propertyId,
-      userId,
+      ownerId,
+      travellerId,
       startDate,
       endDate,
       guests,
+      price,
       bookingStatus,
     });
 
@@ -95,7 +118,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const updateTraveller = await Travellers.findByIdAndUpdate(userId, {
+      const updateTraveller = await Travellers.findByIdAndUpdate(travellerId, {
         $push: { myUpcommingRequests: booking._id },
       });
     } catch (err) {

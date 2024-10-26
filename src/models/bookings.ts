@@ -7,7 +7,12 @@ const bookingsSchema = new mongoose.Schema(
       ref: "Property",
       required: true,
     },
-    userId: {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true,
+    },
+    travellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
       required: true,
@@ -21,6 +26,10 @@ const bookingsSchema = new mongoose.Schema(
       required: true,
     },
     guests: {
+      type: Number,
+      required: true,
+    },
+    price: {
       type: Number,
       required: true,
     },
