@@ -22,21 +22,27 @@ function Payment() {
   const router = useRouter();
   const params = useSearchParams();
   const amount = parseInt(params.get("amount") || "49");
-  const paymentToken = params.get("paymentToken");
+  const paymentToken = params.get("paymentToken")?.replace(/ /g, "+");
   const pId = params.get("pId");
+  const bookingId = params.get("bookingId");
 
   const decryptToken = async () => {
     try {
-      console.log(paymentToken);
       const response = await axios.post("api/decrypt", {
         amount: amount,
         encryptedAmount: paymentToken,
       });
-      console.log(response.data);
       toast.success(response.data.message);
+      try {
+        const emailRepsonse = await axios.post(
+          "/api/bookings/detailsExchange",
+          { bookingId: bookingId }
+        );
+      } catch (err) {
+        toast.error("Error in Exchanging details. Please try again");
+      }
       return true;
     } catch (err) {
-      console.log(err);
       setLoading(false);
       alert("Invalid Payment Token");
       return false;
@@ -49,11 +55,12 @@ function Payment() {
         amount: amount * 100,
         currency: currency,
       });
-      console.log("orderId response: ",response);
-      console.log(response.data.orderId);
+      // console.log("orderId response: ", response);
+      // console.log(response.data.orderId);
       return response.data.orderId;
     } catch (error) {
-      console.error("There was a problem with your fetch operation:", error);
+      // console.error("There was a problem with your fetch operation:", error);
+      toast.error("Prolbem in placing order. Please try again");
     }
   };
 
@@ -61,7 +68,6 @@ function Payment() {
     e.preventDefault();
 
     setLoading(true);
-
     if (!amount) {
       // router.replace("/");
       alert("Invalid Amount");
@@ -72,7 +78,7 @@ function Payment() {
 
     try {
       const orderId = await createOrderId();
-      console.log(orderId);
+      // console.log(orderId);
       const options = {
         key: process.env.RAZORPAY_API_KEY,
         amount: amount * 100,
@@ -90,15 +96,21 @@ function Payment() {
             razorpaySignature: response.razorpay_signature,
           };
 
-          console.log("option data: ", data);
+          // console.log("option data: ", data);
 
           try {
-            console.log("here");
             const result = await axios.post("/api/verify", { data: data });
-            console.log(result);
+
+            // const emailRepsonse = await axios.post(
+            //   "/api/bookings/detailsExchange",
+            //   { bookingId: bookingId }
+            // );
+            // console.log("emailResponse: ", emailRepsonse);
+
             alert("Payment Successful");
           } catch (err) {
-            console.log("error in payment: ", err);
+            toast.error("Error in Payment!. Please try again");
+            // console.log("error in payment: ", err);
           }
         },
         prefill: {
@@ -110,10 +122,10 @@ function Payment() {
         },
       };
       const paymentObject = new window.Razorpay(options);
-      console.log(paymentObject);
+      // console.log(paymentObject);
       paymentObject.on("payment.failed", function (response: any) {
-        console.log(response.error);
-        console.log(response.error.description);
+        // console.log("response error: ", response.error);
+        // console.log(response.error.description);
         alert(response.error.description);
       });
       setLoading(false);
@@ -130,7 +142,7 @@ function Payment() {
         id="razorpay-checkout-js"
         src="https://checkout.razorpay.com/v1/checkout.js"
       />
-      <Toaster/>
+      <Toaster />
       <section className=" min-h-[94vh] flex flex-col gap-6 h-14 mx-5 sm:mx-10 2xl:mx-auto 2xl:w-[1400px] items-center pt-36 ">
         <h1 className=" text-4xl font-bold ">Checkout</h1>
         <form

@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
         propertyId,
         property.VSID
       );
-      console.log("company email response: ", companyEmailResponse);
     } catch (err: any) {
       return NextResponse.json(
         { error: "Booking Confirmation Email not sent to company" },
@@ -107,6 +106,11 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    return NextResponse.json(
+      { message: "Email sent successfully" },
+      { status: 200 }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: "Error in confirming booking" },

@@ -67,10 +67,10 @@ const Page: FC<PageProps> = ({ params }) => {
         propertyId: booking?.propertyId,
         travellerEmail: traveller?.email,
       });
-      console.log(response);
+      // console.log(response);
       toast.success("Property Status Updated Successfully");
     } catch (err: any) {
-      console.log("error in updating booking status: ", err);
+      // console.log("error in updating booking status: ", err);
       toast.error(err.response.data.error);
     }
   };
@@ -85,13 +85,14 @@ const Page: FC<PageProps> = ({ params }) => {
     let encryptedToken;
     try {
       const response = await axios.post("/api/encrypt", { amount: 6 });
-      console.log("token response: ", response.data);
+      // console.log("token response: ", response.data);
       encryptedToken = response.data.encryptedAmount;
       setPaymentToken(response.data.encryptedAmount);
     } catch (err: any) {
-      console.log("err: ", err);
+      // console.log("err: ", err);
       toast.error("Payment Token Not Generated, Please Try again");
     }
+    // console.log("encrypted Token: ", encryptedToken);
 
     try {
       const response = await axios.post("/api/bookings/confirmBooking", {
@@ -100,10 +101,10 @@ const Page: FC<PageProps> = ({ params }) => {
         travellerEmail: traveller?.email,
         paymentToken: encryptedToken,
       });
-      console.log(response);
+      // console.log(response);
       setStatus("accepted");
     } catch (err: any) {
-      console.log("error in updating booking status: ", err);
+      // console.log("error in updating booking status: ", err);
       toast.error(err.response.data.error);
     }
     setIsLoading(false);
@@ -124,7 +125,7 @@ const Page: FC<PageProps> = ({ params }) => {
       setBooking(response.data.booking);
       toast.success("fetched travellerDetails");
     } catch (err: any) {
-      console.log("error: ", err);
+      // console.log("error: ", err);
       toast.error(err.response.data.error);
     }
   };
