@@ -3,8 +3,9 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import {
-  BookingCancellationTemplate,
-  BookingTemplate,
+  OwnerBookingTemplate,
+  sendBookingCancellationEmailToTravellerTemplate,
+  TravellerBookignTemplate,
   DetailsExchangeTemplate,
   TravellerBookingConfirmationTemplate,
 } from "@/app/emailTemplate/email";
@@ -112,7 +113,6 @@ export const sendContactEmail = async (userDetails) => {
     };
 
     await transporter.sendMail(mailOptions);
-
     return NextResponse.json(
       { message: "Your query has been delievered to the company" },
       { status: 200 }
@@ -126,7 +126,12 @@ export const sendContactEmail = async (userDetails) => {
   }
 };
 
-export const sendBookingEmail = async (bookingId, emails) => {
+export const sendBookingEmailToCompany = async (
+  ownerEmail,
+  travellerEmail,
+  propertyId,
+  propertyVSID
+) => {
   try {
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -138,7 +143,62 @@ export const sendBookingEmail = async (bookingId, emails) => {
 
     const subject = "Booking Confirmation!";
 
-    const templateContent = BookingTemplate(bookingId);
+    const text = `
+      Owner Email: ${ownerEmail},
+      Traveller Email: ${travellerEmail},
+      Property Id: ${propertyId},
+      Property VSID: ${propertyVSID},
+    `;
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: "amantrivedi598@gmail.com",
+      subject: subject,
+      text: text,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingEmailToOwner = async (
+  propertyId,
+  ownerName,
+  bookingId,
+  startDate,
+  endDate,
+  price,
+  emails
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Confirmation!";
+
+    const templateContent = OwnerBookingTemplate(
+      propertyId,
+      ownerName,
+      bookingId,
+      startDate,
+      endDate,
+      price
+    );
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
@@ -161,99 +221,12 @@ export const sendBookingEmail = async (bookingId, emails) => {
   }
 };
 
-export const sendBookingConfirmationEmailToCompany = async (
-  ownerName,
-  ownerEmail,
-  travellerName,
-  travellerEmail,
-  propertyId,
-  propertyVSID
-) => {
-  try {
-    let transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "zairo.developer@gmail.com",
-        pass: "gwlz rnrv gpio uzcp",
-      },
-    });
-
-    const subject = "Booking Confirmation!";
-
-    const html = `
-    Owner ( ${ownerName} - ${ownerEmail} ) <br> has confirmed the Booking for the <br> Property ( VS ID - ${propertyVSID} , Property Id - ${propertyId} ), <br> booked by Traveller ( ${travellerName} - ${travellerEmail} ) 
-    `;
-
-    const mailOptions = {
-      from: `No Reply <no-reply@yourdomain.com>`,
-      to: "aviralm522@gmail.com",
-      subject: subject,
-      html: html,
-    };
-    const mailResponse = await transporter.sendMail(mailOptions);
-    console.log("mail sent: ", mailResponse);
-    return NextResponse.json(
-      { message: "Confirm Booking Mail sent" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error sending user details to company email:", error);
-    return NextResponse.json(
-      { error: "Could not send user contact details to company email" },
-      { status: 400 }
-    );
-  }
-};
-
-export const sendBookingConfirmationEmailToOwner = async (
-  ownerName,
-  ownerEmail
-) => {
-  try {
-    let transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "zairo.developer@gmail.com",
-        pass: "gwlz rnrv gpio uzcp",
-      },
-    });
-
-    const subject = "Booking Confirmation!";
-
-    const text = `
-    Hello ${ownerName}, You had Confirmed the Booking Request!
-    `;
-
-    const mailOptions = {
-      from: `No Reply <no-reply@yourdomain.com>`,
-      to: ownerEmail,
-      subject: subject,
-      text: text,
-    };
-    const mailResponse = await transporter.sendMail(mailOptions);
-    console.log("mail sent: ", mailResponse);
-    return NextResponse.json(
-      { message: "Confirm Booking Mail sent" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error sending user details to company email:", error);
-    return NextResponse.json(
-      { error: "Could not send user contact details to company email" },
-      { status: 400 }
-    );
-  }
-};
-
-export const sendBookingConfirmationEmailToTraveller = async (
-  propertyId,
-  travellerName,
-  travellerEmail,
-  bookingId,
+export const sendBookingEmailToTraveller = async (
   startDate,
   endDate,
   price,
-  paymentToken
+  travellerName,
+  emails
 ) => {
   try {
     let transporter = nodemailer.createTransport({
@@ -266,21 +239,104 @@ export const sendBookingConfirmationEmailToTraveller = async (
 
     const subject = "Booking Confirmation!";
 
-    const templateContent = TravellerBookingConfirmationTemplate(
-      propertyId,
-      travellerName,
-      bookingId,
+    const templateContent = TravellerBookignTemplate(
       startDate,
       endDate,
       price,
-      paymentToken
+      travellerName
     );
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: travellerEmail,
+      to: Array.isArray(emails) ? emails.join(", ") : emails,
       subject: subject,
       html: templateContent,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingCancellationEmailToTraveller = async (
+  travellerName,
+  bookingId,
+  emails
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Cancellation!";
+
+    const templateContent = sendBookingCancellationEmailToTravellerTemplate(
+      bookingId,
+      travellerName
+    );
+
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: Array.isArray(emails) ? emails.join(", ") : emails,
+      subject: subject,
+      html: templateContent,
+    };
+    const mailResponse = await transporter.sendMail(mailOptions);
+    console.log("mail sent: ", mailResponse);
+    return NextResponse.json(
+      { message: "Confirm Booking Mail sent" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error sending user details to company email:", error);
+    return NextResponse.json(
+      { error: "Could not send user contact details to company email" },
+      { status: 400 }
+    );
+  }
+};
+
+export const sendBookingCancellationEmailToCompany = async (
+  ownerEmail,
+  travellerEmail,
+  bookingId,
+  cancellationReason
+) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "zairo.developer@gmail.com",
+        pass: "gwlz rnrv gpio uzcp",
+      },
+    });
+
+    const subject = "Booking Cancellation!";
+
+    const text = `
+      Owner Email: ${ownerEmail},
+      Traveller Email: ${travellerEmail},
+      Booking Id: ${bookingId},
+      Cancellation Reason: ${cancellationReason},
+    `;
+    const mailOptions = {
+      from: `No Reply <no-reply@yourdomain.com>`,
+      to: "amantrivedi598@gmail.com",
+      subject: subject,
+      text: text,
     };
     const mailResponse = await transporter.sendMail(mailOptions);
     console.log("mail sent: ", mailResponse);

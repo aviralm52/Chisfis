@@ -4,9 +4,13 @@ import { Bookings } from "@/models/bookings";
 import { Properties } from "@/models/property";
 import Travellers from "@/models/traveller";
 import { NextRequest, NextResponse } from "next/server";
-import { sendBookingEmail } from "@/helper/gmailMailer";
 import Users from "@/models/user";
 import { UserDataType } from "@/data/types";
+import {
+  sendBookingEmailToOwner,
+  sendBookingEmailToCompany,
+  sendBookingEmailToTraveller,
+} from "@/helper/gmailMailer";
 
 connectDb();
 
@@ -21,19 +25,15 @@ export async function POST(request: NextRequest) {
       price,
       bookingStatus,
     } = await request.json();
-
     const travellerId = getDataFromToken(request);
-
     const owner: UserDataType | null = await Users.findOne({
       email: ownerEmail,
     });
     const ownerId = owner?._id;
     const ownerName = owner?.name;
-
     if (!owner) {
       return NextResponse.json({ error: "Owner not found!" }, { status: 401 });
     }
-
     if (
       !propertyId ||
       !ownerId ||
@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-
     const property = await Properties.findById(propertyId);
     if (!property) {
       return NextResponse.json(
@@ -58,7 +57,6 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
-
     const traveller = await Travellers.findById(travellerId);
     if (!traveller) {
       return NextResponse.json(
@@ -66,7 +64,6 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
-
     const booking = await Bookings.create({
       propertyId,
       ownerId,
@@ -77,7 +74,6 @@ export async function POST(request: NextRequest) {
       price,
       bookingStatus,
     });
-
     if (!booking) {
       return NextResponse.json(
         { error: "Booking not created" },
@@ -87,6 +83,7 @@ export async function POST(request: NextRequest) {
 
     // console.log("Booking Created: ", booking);
 
+    console.log("Booking Created: ", booking);
     try {
       const bookingId = booking._id;
       if (!bookingId)
@@ -94,16 +91,41 @@ export async function POST(request: NextRequest) {
           { error: "Booking not created" },
           { status: 400 }
         );
-      const bookingEmailResponse = await sendBookingEmail(bookingId, [
-        traveller.email,
-        property.email,
-        "amantrivedi598@gmail.com",
-      ]);
-      // console.log("bookingEmailResponse: ", bookingEmailResponse);
+
+      try {
+        const bookingEmailResponse = await sendBookingEmailToCompany(
+          ownerEmail,
+          traveller.email,
+          propertyId,
+          property.VSID
+        );
+      } catch (error: any) {
+        console.log("Error in sending email: ", error);
+      }
+
+      try {
+        const sendBookingResponse = await sendBookingEmailToTraveller(
+          startDate,
+          endDate,
+          price,
+          traveller.name,
+          traveller.email
+        );
+      } catch (error: any) {
+        console.log("Error in sending email: ", error);
+      }
+      const bookingEmailResponse = await sendBookingEmailToOwner(
+        propertyId,
+        ownerName,
+        bookingId,
+        startDate,
+        endDate,
+        price,
+        ownerEmail
+      );
     } catch (err) {
       return NextResponse.json({ error: "Email not sent!" }, { status: 400 });
     }
-
     try {
       const updateUser = await Users.findOneAndUpdate(
         { email: property.email },
@@ -116,7 +138,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
     try {
       const updateTraveller = await Travellers.findByIdAndUpdate(travellerId, {
         $push: { myUpcommingRequests: booking._id },

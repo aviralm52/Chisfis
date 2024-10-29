@@ -1,5 +1,4 @@
 "use client";
-
 import React, { FC, Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowRightIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
@@ -36,7 +35,7 @@ import {
   MdHomeWork,
   MdOutlineEnergySavingsLeaf,
 } from "react-icons/md";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import axios from "axios";
 import { CiCalendar } from "react-icons/ci";
 import { BiMessageAltDetail, BiSolidArea } from "react-icons/bi";
@@ -52,7 +51,6 @@ import { RiMoneyEuroCircleFill } from "react-icons/ri";
 import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
-import CustomDateRangePrice from "@/components/CustomDateRangePrice";
 import { PropertiesDataType, PropertyDataType } from "@/data/types";
 
 export interface ListingStayDetailPageProps {
@@ -60,7 +58,6 @@ export interface ListingStayDetailPageProps {
     id: string;
   };
 }
-
 interface DateRange {
   startDate: Date | null;
   endDate: Date | null;
@@ -75,9 +72,7 @@ interface nearbyLocationInterface {
 
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const { user } = useAuth();
-
   const router = useRouter();
-
   const thisPathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -87,7 +82,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const [particularProperty, setParticularProperty] =
     useState<PropertiesDataType>();
   const [allImages, setAllImages] = useState<any[]>([]);
-
   const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfProperty, setUserIdOfProperty] = useState<string>("");
@@ -112,13 +106,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
 
   // TODO: Accessing current Location
   useEffect(() => {
-    // Check if the browser supports Geolocation API
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
       return;
     }
-
-    // Success callback
     const handleSuccess = (position: GeolocationPosition) => {
       const { latitude, longitude } = position.coords;
       setCurrentLocation({ latitude, longitude });
@@ -140,23 +131,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           setError("An unknown error occurred");
       }
     };
-
-    // Get the current position
     navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
   }, []);
 
   // TODO: handle external booked dates
   const [bookedState, setBookedState] = useState<boolean>(false);
   const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
-  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
-    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
-  ]); //! {start: "YYYY-MM-DD"}
-
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([]);
   const fetchAndParseICal = async (url: string) => {
     try {
-      // console.log("url fethced:::: ", url);
       const response = await axios.post("/api/ical", { url });
-      // console.log("response:::: ", response);
       const parsedData = response.data.data;
       const bookings = [];
       for (const eventId in parsedData) {
@@ -171,7 +155,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           });
         }
       }
-      // console.log("bookings: ", bookings);
       return bookings;
     } catch (error) {
       console.log("Error: ", error);
@@ -179,17 +162,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   };
 
   const fetchBookedDates = async (url: string) => {
-    // const airbnbBookings = await fetchAndParseICal(
-    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
-    // );
-    // console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
     console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
-
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
       const stdt = dateParser(event.startDate?.toLocaleString() || "");
@@ -202,7 +180,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
       };
       eventsFromAirbnb.push(newObj);
       setBookedDates(eventsFromAirbnb);
-
       //! adding events from airbnb to already booked dates
       eventsFromAirbnb.forEach((event) => {
         const newDates: Date[] = [];
@@ -843,14 +820,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
             </div>
           </div>
 
-          {/* // TODO: Right Half */}
-          {/* // ! data according to Short Term and Long Term */}
           <div className=" w-full md:w-1/2 md:ml-3">
             {particularProperty?.rentalType === "Short Term" &&
             particularProperty?.nearbyLocations?.nearbyLocationName?.length >
               0 ? (
               <>
-                {" "}
                 <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
                   Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
                 </h2>
@@ -896,7 +870,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                                       }
                                       target="_blank"
                                     >
-                                      {" "}
                                       {
                                         particularProperty?.nearbyLocations
                                           ?.nearbyLocationName[index]

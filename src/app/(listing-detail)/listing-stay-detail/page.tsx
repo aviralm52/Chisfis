@@ -344,7 +344,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
         }
-
         const languageResponse = await axios.get(
           `https://restcountries.com/v3.1/name/${response?.data?.country}`
         );
@@ -363,7 +362,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         );
         setAllAmenities(filteredAllAmen);
       } catch (err) {
-        console.log("error: ", err);
+        console.log(err);
       }
     };
     getProperties();
@@ -507,7 +506,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-2">
+      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-4">
         <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
@@ -1008,7 +1007,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             particularProperty?.nearbyLocations?.nearbyLocationName?.length >
               0 ? (
               <>
-                {" "}
                 <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
                   Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
                 </h2>
@@ -1090,8 +1088,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               </>
             ) : (
               <div className=" ml-2">
-                {/* LONG TERM INFO */}
-
                 {particularProperty?.rentalType === "Long Term" && (
                   <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2 w-full">
                     <div className=" flex items-center gap-x-2">
@@ -1180,12 +1176,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     const calculateDateDifference = (start: Date | null, end: Date | null) => {
       if (start && end) {
         const timeDiff = end.getTime() - start.getTime();
-        return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
+        return Math.ceil(timeDiff / (1000 * 3600 * 24));
       }
       return 0;
     };
-
-    // const basePrice = particularProperty?.basePrice[indexId] ?? 0;
     const basePrice =
       particularProperty?.rentalType === "Short Term"
         ? particularProperty?.basePrice[indexId]
@@ -1286,7 +1280,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     dots: true,
     infinite: false,
     speed: 500,
-    slidesToShow: 3, // Adjust the number of cards to show at once
+    slidesToShow: 3,
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
@@ -1331,79 +1325,80 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderPortionCards = () => {
     return (
-      <div className=" flex gap-4 property-carousel-container">
-        <Slider {...settings} className="w-full">
-          {Array.from({ length: propertyPortions }, () => 1).map(
-            (item, index) => (
-              <div
-                className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer"
-                key={index}
-              >
-                <Link
-                  href={{
-                    pathname: `/listing-stay-detail`,
-                    query: {
-                      id: propertyId,
-                      portion: index,
-                    },
-                  }}
-                >
-                  <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
-                    {particularProperty?.portionCoverFileUrls[index] ? (
-                      <img
-                        src={particularProperty?.portionCoverFileUrls[index]}
-                        alt="Portion Image"
-                        className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
-                      />
-                    ) : (
-                      <div className=" w-full h-full flex flex-col justify-center items-center">
-                        <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
-                        <span className=" text-neutral-600 font-medium">
-                          Image not found
-                        </span>
-                      </div>
-                    )}
+      <>
+        <div className=" border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
+          <div className="ml-2 mb-2">
+            <h2 className="text-2xl font-semibold">Portions</h2>
+            <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
+              {` Details about the portions`}
+            </span>
+          </div>
+          <Slider {...settings} className="">
+            {Array.from({ length: propertyPortions }, () => 1).map(
+              (item, index) => (
+                <div className="flex  items-center px-2  " key={index}>
+                  <Link
+                    href={{
+                      pathname: `/listing-stay-detail`,
+                      query: {
+                        id: propertyId,
+                        portion: index,
+                      },
+                    }}
+                  >
+                    <div className="lg:h-48 md:h-44 sm:h-40 h-36 w-full bg-white rounded-xl shadow-md">
+                      {particularProperty?.portionCoverFileUrls[index] ? (
+                        <img
+                          src={particularProperty?.portionCoverFileUrls[index]}
+                          alt="Portion Image"
+                          className="h-full w-full rounded-xl object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col justify-center items-center">
+                          <BsExclamationCircleFill className="w-1/4 h-1/4 mb-2 text-neutral-600" />
+                          <span className="text-neutral-600 font-medium">
+                            Image not found
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="flex items-center px-2 gap-x-2">
+                    <div className="flex items-center">
+                      <h2 className="">{particularProperty?.beds[index]}</h2>
+                      <IoIosBed className="text-sm" />
+                    </div>
+                    <div className="flex items-center">
+                      <h2 className="">
+                        {particularProperty?.bathroom[index]}
+                      </h2>
+                      <FaBath className="text-sm" />
+                    </div>
+                    <div className="flex items-center">
+                      <h2 className="text-lg">
+                        {particularProperty?.guests[index]}
+                      </h2>
+                      <FaUser className="text-xs" />
+                    </div>
+                    <div className="flex items-center">
+                      <h2 className="">
+                        {particularProperty?.portionSize[index]}sq
+                      </h2>
+                      <SlSizeFullscreen className="text-xs" />
+                    </div>
                   </div>
-                </Link>
-                <div className=" flex gap-4 justify-center items-center my-2">
-                  <div className=" flex items-center gap-2 ">
-                    <h2 className=" text-sm">
-                      {particularProperty?.beds[index]}
-                    </h2>{" "}
-                    <IoIosBed className="text-md" />
-                  </div>
-                  <div className=" flex items-center gap-2 ">
-                    <h2 className=" text-sm">
-                      {particularProperty?.bathroom[index]}
-                    </h2>{" "}
-                    <FaBath className="text-md" />
-                  </div>
-                  <div className=" flex items-center gap-2 ">
-                    <h2 className=" text-sm">
-                      {particularProperty?.guests[index]}
-                    </h2>{" "}
-                    <FaUser className="text-md" />
-                  </div>
-                  <div className=" flex items-center gap-2 ">
-                    <h2 className=" text-sm">
-                      {particularProperty?.portionSize[index]} sq
-                    </h2>{" "}
-                    <SlSizeFullscreen className="text-md" />
+                  <div className="flex px-2 items-center justify-between">
+                    <p className="line-clamp-1">Portion {index + 1}</p>
+                    <p className="line-clamp-1">
+                      € {particularProperty?.basePrice[index]}/night
+                    </p>
                   </div>
                 </div>
-                <div className=" px-2 py-4">
-                  <h2 className=" font-semibold text-xl">
-                    Portion {index + 1}
-                  </h2>
-                  <p className=" text-lg font-medium">
-                    € {particularProperty?.basePrice[index]}/night
-                  </p>
-                </div>
-              </div>
-            )
-          )}
-        </Slider>
-      </div>
+              )
+            )}
+          </Slider>
+        </div>
+      </>
     );
   };
 
@@ -1518,7 +1513,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setAllImages(arr);
   }, [particularProperty]);
 
-
   const carouselSettings = {
     dots: true,
     infinite: true,
@@ -1533,15 +1527,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     <div
       className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
     >
-      <header className="rounded-md sm:rounded-xl">
-        {/* Main Grid Layout for larger screens */}
+      <header className="rounded-md md:max-h-[60vh] sm:rounded-xl">
         <div className="relative  hidden  w-full h-full md:grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-          <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+          <div className="col-span-2   row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={particularProperty?.propertyCoverFileUrl}
                 alt="Cover Image"
-                className="object-cover h-full w-full"
+                className=" object-fill h-full w-full"
               />
             ) : (
               <div className="w-full h-full flex flex-col justify-center items-center">
@@ -1552,13 +1545,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               </div>
             )}
           </div>
-
           {/* Thumbnail images for larger screens */}
           {allImages
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
-                className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
+                className="w-full aspect-w-4 aspect-h-3 max-h-[60vh] rounded-xl overflow-hidden"
                 key={index}
               >
                 {allImages[index] ? (

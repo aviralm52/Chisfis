@@ -1,6 +1,7 @@
 "use client";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import React, { FC, Fragment, useState, useEffect } from "react";
+import { BiLoaderAlt } from "react-icons/bi";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import StartRating from "@/components/StartRating";
 import NcModal from "@/shared/NcModal";
@@ -10,7 +11,6 @@ import ModalSelectGuests from "@/components/ModalSelectGuests";
 import { GuestsObject } from "../(client-components)/type";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { Properties } from "../page";
 import { AiFillQuestionCircle } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
@@ -20,6 +20,7 @@ import {
   TokenDataType,
 } from "@/data/types";
 import { toast, Toaster } from "sonner";
+import calculatePrice from "@/helper/calculatePrice";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
@@ -37,7 +38,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   //   const dates = JSON.parse(savedDates);
   //   return [dates.startDate, dates.endDate];
   // });
-
   const searchParams = useSearchParams();
   const param: string = searchParams.get("id")?.split("&")[0] || "0";
   const paramInt: number = parseInt(param, 10);
@@ -185,7 +185,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       endDate: endDate,
     });
     localStorage.setItem("dates", savedDates);
-
     const diff = calculateDifferenceBetweenDates(startDate, endDate);
     setDateDiff(diff);
   }, [startDate, endDate]);
@@ -203,7 +202,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     }
     setSubscribeLoader(false);
   };
-
   const handlePayment = async (amount: string) => {
     const val = parseInt(amount);
     const token = await encryptToken(val);
@@ -215,10 +213,11 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       );
     }
   };
-
   useEffect(() => {
     getLoggedInUser();
   }, []);
+
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleBookingConfirmation = async () => {
     setLoading(true);
@@ -230,6 +229,17 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       return;
     }
     try {
+      setLoading(true);
+      const Price = calculatePrice(
+        startDate,
+        endDate,
+        particularProperty?.pricePerDay
+      );
+      if (Price) setTotalPrice(Price);
+      const savedDates = JSON.stringify({
+        startDate: startDate,
+        endDate: endDate,
+      });
       const response = await axios.post(`/api/bookings/createBooking`, {
         propertyId: param,
         ownerEmail: particularProperty?.email,
@@ -239,7 +249,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           (guests?.guestAdults || 1) +
           (guests?.guestChildren || 0) +
           (guests?.guestInfants || 0),
-        price: totalPrice,
+        price: Price,
         bookingStatus,
       });
       setBooking(response.data.booking);
@@ -247,6 +257,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       setLoading(false);
     } catch (err: any) {
       toast.error(err.response.data.error);
+      setLoading(false);
     }
     setLoading(false);
   };
@@ -288,7 +299,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
               € {particularProperty?.basePrice} x{" "}
-              {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
               {startone &&
                 endone &&
                 calculateDifferenceBetweenDates(startone, endone)}{" "}
@@ -428,10 +438,16 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           ) : (
             <ButtonPrimary
               onClick={handleBookingConfirmation}
-              disabled={!particularProperty || !loggedInUser}
-              className=" disabled:opacity-50"
+              disabled={!particularProperty || !loggedInUser || loading}
+              className={`disabled:opacity-50 ${loading ? "cursor-wait" : ""}`}
             >
-              Confirm and Request
+              {loading ? (
+                <span className=" flex items-center">
+                  Requesting... <BiLoaderAlt className="animate-spin" />
+                </span>
+              ) : (
+                "Confirm and Request"
+              )}
             </ButtonPrimary>
           )}
           <ButtonPrimary>Any Queries?</ButtonPrimary>

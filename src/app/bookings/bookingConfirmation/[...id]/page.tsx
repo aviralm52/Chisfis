@@ -1,5 +1,4 @@
 "use client";
-
 import {
   BookingDataType,
   PropertiesDataType,
@@ -8,8 +7,11 @@ import {
 import axios from "axios";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { TbExternalLink } from "react-icons/tb";
+import { BiLoaderAlt } from "react-icons/bi";
+import ButtonSecondary from "@/shared/ButtonSecondary";
+import ButtonPrimary from "@/shared/ButtonPrimary";
 import ConfirmationModal from "@/components/ConfirmationModal";
 
 export interface PageProps {
@@ -17,7 +19,6 @@ export interface PageProps {
     id: string;
   };
 }
-
 const Page: FC<PageProps> = ({ params }) => {
   const bookingId = params.id[0];
   const [traveller, setTraveller] = useState<UserDataType>();
@@ -28,6 +29,38 @@ const Page: FC<PageProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentToken, setPaymentToken] = useState();
 
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const handleAccept = () => {
+    setStatus("accepted");
+  };
+  const handleDecline = async () => {
+    if (!cancellationReason) {
+      toast.error("Please enter a reason for cancellation.");
+      return;
+    }
+    setStatus("declined");
+    if (!booking || !property || !traveller) return;
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/bookings/cancelBooking", {
+        travellerName: traveller.name,
+        bookingId: booking?._id,
+        ownerEmail: property?.email,
+        travellerEmail: traveller?.email,
+        cancellationReason,
+      });
+      console.log(response);
+      toast.success("Property Status Updated Successfully");
+      setLoading(false);
+    } catch (err: any) {
+      console.log("Error in updating booking status: ", err);
+      toast.error(err.response.data.error);
+      setLoading(false);
+    }
+    setShowReasonModal(false);
+  };
   const calculateNights = (
     startDate: Date | undefined,
     endDate: Date | undefined
@@ -43,7 +76,6 @@ const Page: FC<PageProps> = ({ params }) => {
     endDate: Date | undefined
   ) => {
     if (!startDate || !endDate || !property) return;
-
     const stdt = new Date(startDate);
     const nddt = new Date(endDate);
     let totalPrice = 0;
@@ -54,29 +86,6 @@ const Page: FC<PageProps> = ({ params }) => {
       stdt.setDate(stdt.getDate() + 1);
     }
     return totalPrice;
-  };
-
-  const handleDecline = async () => {
-    setStatus("declined");
-
-    if (!booking || !property || !traveller) return;
-
-    try {
-      const response = await axios.post("/api/bookings/cancelBooking", {
-        booking: booking,
-        propertyId: booking?.propertyId,
-        travellerEmail: traveller?.email,
-      });
-      // console.log(response);
-      toast.success("Property Status Updated Successfully");
-    } catch (err: any) {
-      // console.log("error in updating booking status: ", err);
-      toast.error(err.response.data.error);
-    }
-  };
-
-  const handleAccept = async () => {
-    setModalOpen(true);
   };
 
   const handleModalAccept = async () => {
@@ -129,7 +138,6 @@ const Page: FC<PageProps> = ({ params }) => {
       toast.error(err.response.data.error);
     }
   };
-
   useEffect(() => {
     if (bookingId) {
       getDetailsByBookingId();
@@ -195,8 +203,52 @@ const Page: FC<PageProps> = ({ params }) => {
             </p>
           </div>
         </div>
-        <div className="p-4 flex justify-between border-t">
-          <button
+        <div className="p-2 flex justify-between border-t">
+          <div className="container mx-auto">
+            <ButtonSecondary
+              onClick={() => setShowReasonModal(true)}
+              disabled={
+                status !== "pending" || booking?.bookingStatus === "cancelled"
+              }
+            >
+              Decline
+            </ButtonSecondary>
+
+            {showReasonModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className=" p-4 rounded-lg shadow-lg z-50 bg-slate-800 max-w-sm w-full">
+                  <h3 className="text-lg font-semibold mb-2">
+                    Reason for Cancellation
+                  </h3>
+                  <textarea
+                    className="w-full p-2 text-slate-800 border rounded-lg"
+                    rows={4}
+                    value={cancellationReason}
+                    onChange={(e) => setCancellationReason(e.target.value)}
+                    placeholder="Please share a reason to help us improve our service."
+                  />
+                  <div className="flex justify-end mt-4">
+                    <ButtonSecondary
+                      onClick={() => setShowReasonModal(false)}
+                      className="px-4 py-2 mr-2 border rounded hover:bg-gray-200"
+                    >
+                      Close
+                    </ButtonSecondary>
+                    <ButtonPrimary onClick={handleDecline} disabled={loading}>
+                      {loading ? (
+                        <span className="flex items-center gap-x-1">
+                          Canceling... <BiLoaderAlt className="animate-spin" />{" "}
+                        </span>
+                      ) : (
+                        "Continue"
+                      )}
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* <button
             onClick={handleDecline}
             className="px-4 py-2 font-semibold border rounded text-gray-600 hover:bg-gray-200 disabled:opacity-50"
             disabled={
@@ -207,10 +259,9 @@ const Page: FC<PageProps> = ({ params }) => {
             }
           >
             Decline
-          </button>
-          <button
+          </button> */}
+          <ButtonPrimary
             onClick={handleAccept}
-            className="px-4 py-2 bg-primary-6000 text-white rounded hover:bg-primary-700 disabled:opacity-50"
             disabled={
               status !== "pending" ||
               booking?.bookingStatus === "cancelled" ||
@@ -219,7 +270,7 @@ const Page: FC<PageProps> = ({ params }) => {
             }
           >
             Accept
-          </button>
+          </ButtonPrimary>
         </div>
         <ConfirmationModal
           isOpen={isModalOpen}
