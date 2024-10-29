@@ -217,8 +217,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     getLoggedInUser();
   }, []);
 
-  const [loading, setLoading] = useState<boolean>(false);
-
   const handleBookingConfirmation = async () => {
     setLoading(true);
     const bookingStatus = particularProperty?.isInstantBooking
