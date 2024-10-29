@@ -12,12 +12,20 @@ connectDb();
 export async function POST(request: NextRequest) {
   try {
     const { bookingId } = await request.json();
+    // console.log(bookingId);
 
     const travellerId = await getDataFromToken(request);
+    if (!travellerId) {
+      return NextResponse.json(
+        { error: "You must login as a traveller for Payment" },
+        { status: 401 }
+      );
+    }
+    // console.log(travellerId);
 
     if (!bookingId) {
       return NextResponse.json(
-        { error: "Error in exhnagin gdetails of owner  " },
+        { error: "Error in exchanging in details of owner  " },
         { status: 400 }
       );
     }
@@ -50,6 +58,8 @@ export async function POST(request: NextRequest) {
 
     const owner = await Users.findOne({ email: ownerEmail });
 
+    // console.log(bookingId, owner, traveller);
+
     try {
       const detailsExchangeEmailResponse = await sendDetailsExchangeMail(
         owner,
@@ -68,6 +78,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (err: any) {
+    console.log("err: ", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

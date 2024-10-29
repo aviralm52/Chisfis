@@ -5,6 +5,10 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
 import { toast, Toaster } from "sonner";
+import StayCard from "@/components/StayCard";
+import { BookingDataType, PropertiesDataType } from "@/data/types";
+import PropertyCardH from "@/components/PropertyCardH";
+import ButtonPrimary from "@/shared/ButtonPrimary";
 
 declare global {
   interface Window {
@@ -26,6 +30,33 @@ function Payment() {
   const pId = params.get("pId");
   const bookingId = params.get("bookingId");
 
+  const [particularProperty, setParticularProperty] =
+    useState<PropertiesDataType>();
+  const [booking, setBooking] = useState<BookingDataType>();
+
+  const getPropertyById = async () => {
+    try {
+      // const response = await axios.post("/api/newProperties/getPropertyById", {
+      //   propertyId: pId,
+      // });
+      // console.log("response: ", response.data);
+      // setParticularProperty(response?.data?.property);
+      const response = await axios.post("/api/bookings/getDetailsByBookingId", {
+        bookingId,
+      });
+      setParticularProperty(response?.data?.property);
+      setBooking(response?.data?.booking);
+    } catch (err: any) {
+      toast.error("Error in fetching property");
+    }
+  };
+
+  useEffect(() => {
+    if (pId) {
+      getPropertyById();
+    }
+  }, []);
+
   const decryptToken = async () => {
     try {
       const response = await axios.post("api/decrypt", {
@@ -33,14 +64,6 @@ function Payment() {
         encryptedAmount: paymentToken,
       });
       toast.success(response.data.message);
-      try {
-        const emailRepsonse = await axios.post(
-          "/api/bookings/detailsExchange",
-          { bookingId: bookingId }
-        );
-      } catch (err) {
-        toast.error("Error in Exchanging details. Please try again");
-      }
       return true;
     } catch (err) {
       setLoading(false);
@@ -75,7 +98,7 @@ function Payment() {
     }
     const result = await decryptToken();
     if (!result) return;
-
+    setLoading(false);
     try {
       const orderId = await createOrderId();
       // console.log(orderId);
@@ -101,11 +124,15 @@ function Payment() {
           try {
             const result = await axios.post("/api/verify", { data: data });
 
-            // const emailRepsonse = await axios.post(
-            //   "/api/bookings/detailsExchange",
-            //   { bookingId: bookingId }
-            // );
-            // console.log("emailResponse: ", emailRepsonse);
+            try {
+              const emailRepsonse = await axios.post(
+                "/api/bookings/detailsExchange",
+                { bookingId: bookingId }
+              );
+              toast.success("Email sent successfully");
+            } catch (err: any) {
+              toast.error(err.response.data.error);
+            }
 
             alert("Payment Successful");
           } catch (err) {
@@ -143,13 +170,13 @@ function Payment() {
         src="https://checkout.razorpay.com/v1/checkout.js"
       />
       <Toaster />
-      <section className=" min-h-[94vh] flex flex-col gap-6 h-14 mx-5 sm:mx-10 2xl:mx-auto 2xl:w-[1400px] items-center pt-36 ">
+      <section className=" min-h-[94vh] flex flex-col gap-6 h-14 mx-5 sm:mx-10 2xl:mx-auto 2xl:w-[1400px] items-center pt-36">
         <h1 className=" text-4xl font-bold ">Checkout</h1>
         <form
-          className="flex flex-col gap-6 w-full sm:w-80 border border-neutral-600 px-4 py-8 rounded-xl"
+          className="flex flex-col gap-6 sm:w-80 md:w-1/2  px-4 py-8 rounded-xl "
           onSubmit={processPayment}
         >
-          <div className=" flex flex-col gap-8 mt-8 borer-2 dark:border-white">
+          {/* <div className=" flex flex-col gap-8 mt-8 borer-2 dark:border-white">
             <h2 className=" font-semibold text-xl">Continue</h2>
             <p className=" font-light">
               By Clicking on pay you will purchase the plan of € {amount}
@@ -165,7 +192,34 @@ function Payment() {
                 "Pay"
               )}
             </button>
-          </div>
+          </div> */}
+          {particularProperty ? (
+            <>
+              <PropertyCardH
+                key={particularProperty?._id}
+                data={particularProperty}
+                booking={booking}
+                className="h-full"
+              />
+              <div className=" border p-2 rounded-xl border-neutral-700 flex justify-between items-center px-2">
+                <div className="">
+                  Pay the Platform charges to get the owner&apos; details
+                </div>
+                <ButtonPrimary
+                  type="submit"
+                  className="whitespace-nowrap end-0"
+                >
+                  {loading ? (
+                    <LuLoader2 className=" animate-spin" />
+                  ) : (
+                    "PAY € 6"
+                  )}
+                </ButtonPrimary>
+              </div>
+            </>
+          ) : (
+            <LuLoader2 className=" animate-spin mx-auto text-2xl font-bold" />
+          )}
         </form>
       </section>
     </>

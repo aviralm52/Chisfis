@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Booking Created: ", booking);
+    // console.log("Booking Created: ", booking);
 
     try {
       const bookingId = booking._id;
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         property.email,
         "amantrivedi598@gmail.com",
       ]);
-      console.log("bookingEmailResponse: ", bookingEmailResponse);
+      // console.log("bookingEmailResponse: ", bookingEmailResponse);
     } catch (err) {
       return NextResponse.json({ error: "Email not sent!" }, { status: 400 });
     }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Booking Done Successfully" },
+      { message: "Booking Done Successfully", booking: booking },
       { status: 201 }
     );
   } catch (error: any) {

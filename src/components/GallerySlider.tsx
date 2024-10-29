@@ -75,6 +75,7 @@ export default function GallerySlider({
         <div className={`w-full overflow-hidden ${galleryClass}`}>
           <Link
             href={href}
+            target="_blank"
             className={`relative flex items-center justify-center ${ratioClass}`}
           >
             <AnimatePresence initial={false} custom={direction}>
@@ -105,7 +106,7 @@ export default function GallerySlider({
           {/* Buttons */}
           {loaded && navigation && (
             <div className="opacity-0 group-hover/cardGallerySlider:opacity-100 transition-opacity ">
-              {index > 0 && (
+              {/* {index > 0 && (
                 <button
                   className="absolute w-8 h-8 left-3 top-[calc(50%-16px)] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-6000 dark:hover:border-neutral-500 rounded-full flex items-center justify-center hover:border-neutral-300 focus:outline-none"
                   style={{ transform: "translate3d(0, 0, 0)" }}
@@ -113,8 +114,8 @@ export default function GallerySlider({
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
                 </button>
-              )}
-              {index + 1 < images.length && (
+              )} */}
+              {/* {index + 1 < images.length && (
                 <button
                   className="absolute w-8 h-8 right-3 top-[calc(50%-16px)] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-6000 dark:hover:border-neutral-500 rounded-full flex items-center justify-center hover:border-neutral-300 focus:outline-none"
                   style={{ transform: "translate3d(0, 0, 0)" }}
@@ -122,13 +123,13 @@ export default function GallerySlider({
                 >
                   <ChevronRightIcon className="h-4 w-4" />
                 </button>
-              )}
+              )} */}
             </div>
           )}
 
           {/* Bottom Nav bar */}
           <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-neutral-900 opacity-50 rounded-b-lg"></div>
-          <div className="flex items-center justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2 space-x-1.5">
+          {/* <div className="flex items-center justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2 space-x-1.5">
             {images.map((_, i) => (
               <button
                 className={`w-1.5 h-1.5 rounded-full ${
@@ -138,7 +139,7 @@ export default function GallerySlider({
                 key={i}
               />
             ))}
-          </div>
+          </div> */}
         </>
       </div>
     </MotionConfig>

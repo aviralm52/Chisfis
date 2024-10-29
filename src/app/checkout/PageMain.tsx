@@ -14,7 +14,11 @@ import { Properties } from "../page";
 import { AiFillQuestionCircle } from "react-icons/ai";
 import { useRouter } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
-import { PropertiesDataType, TokenDataType } from "@/data/types";
+import {
+  BookingDataType,
+  PropertiesDataType,
+  TokenDataType,
+} from "@/data/types";
 import { toast, Toaster } from "sonner";
 
 export interface CheckOutPagePageMainProps {
@@ -42,7 +46,6 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const endDateParam = searchParams.get("nddt");
   const guestsParam = parseInt(searchParams.get("guests") || "0", 10);
 
-  // console.log(param, portion, startDateParam, endDateParam, guestsParam);
   const router = useRouter();
 
   const [particularProperty, setParticualarProperty] =
@@ -51,6 +54,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
   const [loggedInUser, setLoggedInUser] = useState<TokenDataType | undefined>();
   const [totalPrice, setTotalPrice] = useState(6);
+  const [booking, setBooking] = useState<BookingDataType>();
+  const [loading, setLoading] = useState(false);
 
   const getLoggedInUser = async () => {
     try {
@@ -107,7 +112,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           "/api/newProperties/getPropertyById",
           { propertyId: param }
         );
-        console.log("response: ", response);
+        // console.log("response: ", response);
         if (response.data) {
           setParticualarProperty(response?.data?.property);
         }
@@ -189,11 +194,11 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     setSubscribeLoader(true);
     try {
       const response = await axios.post("/api/encrypt", { amount });
-      console.log("token response: ", response.data);
+      // console.log("token response: ", response.data);
       setSubscribeLoader(false);
       return response.data.encryptedAmount;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       setSubscribeLoader(false);
     }
     setSubscribeLoader(false);
@@ -202,11 +207,11 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const handlePayment = async (amount: string) => {
     const val = parseInt(amount);
     const token = await encryptToken(val);
-    console.log("response token: ", token);
+    // console.log("response token: ", token);
 
     if (token) {
       router.push(
-        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}`
+        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}&bookingId=${booking?._id}`
       );
     }
   };
@@ -216,6 +221,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   }, []);
 
   const handleBookingConfirmation = async () => {
+    setLoading(true);
     const bookingStatus = particularProperty?.isInstantBooking
       ? "confirmed"
       : "pending";
@@ -236,10 +242,13 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         price: totalPrice,
         bookingStatus,
       });
+      setBooking(response.data.booking);
       toast.success("Booking requested successfully");
+      setLoading(false);
     } catch (err: any) {
       toast.error(err.response.data.error);
     }
+    setLoading(false);
   };
 
   const renderSidebar = () => {
@@ -309,7 +318,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </span>
           </div>
           <div className=" w-full flex justify-center mt-2">
-            {particularProperty?.isInstantBooking && (
+            {particularProperty?.isInstantBooking && !!booking && (
               <ButtonPrimary
                 disabled={subscribeLoader}
                 onClick={() => handlePayment("6")}
@@ -409,7 +418,13 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
 
         <div className="pt-8 flex justify-between">
           {particularProperty?.isInstantBooking ? (
-            <ButtonPrimary>Instant Booking</ButtonPrimary>
+            <ButtonPrimary
+              className=" flex items-center gap-x-1"
+              onClick={handleBookingConfirmation}
+            >
+              Instant Booking{" "}
+              {loading && <LuLoader2 className=" animate-spin" />}
+            </ButtonPrimary>
           ) : (
             <ButtonPrimary
               onClick={handleBookingConfirmation}
