@@ -1,5 +1,8 @@
 import { connectDb } from "@/helper/db";
-import { sendBookingCancellationEmail } from "@/helper/gmailMailer";
+import {
+  sendBookingCancellationEmailToCompany,
+  sendBookingCancellationEmailToTraveller,
+} from "@/helper/gmailMailer";
 import { Bookings } from "@/models/bookings";
 import Travellers from "@/models/traveller";
 import Users from "@/models/user";
@@ -8,8 +11,16 @@ connectDb();
 
 export async function POST(request: NextRequest) {
   try {
-    const { bookingId, ownerEmail, travellerEmail, cancellationReason } =
-      await request.json();
+    const {
+      travellerName,
+      bookingId,
+      ownerEmail,
+      travellerEmail,
+      cancellationReason,
+    } = await request.json();
+
+    console.log(bookingId, ownerEmail, travellerEmail, cancellationReason);
+
     const booking = await Bookings.findOneAndUpdate(
       { _id: bookingId },
       { $set: { bookingStatus: "cancelled" } }
@@ -19,24 +30,33 @@ export async function POST(request: NextRequest) {
       {
         $pull: { myUpcommingRequests: bookingId },
         $push: { declinedRequests: { bookingId, reason: cancellationReason } },
-      }
+      },
+      { new: true }
     );
-    await Travellers.updateOne(
-      { email: travellerEmail },
-      {
-        $pull: { myUpcommingRequests: bookingId },
-        $push: { declinedRequests: { bookingId, reason: cancellationReason } },
-      }
-    );
+
     try {
-      await sendBookingCancellationEmail([
-        ownerEmail,
-        travellerEmail,
-        "amantrivedi598@gmail.com",
-      ]);
-    } catch (err) {
-      return NextResponse.json({ error: "Email not sent!" }, { status: 400 });
+      const cancellationResponseToCompany =
+        await sendBookingCancellationEmailToCompany(
+          ownerEmail,
+          travellerEmail,
+          bookingId,
+          cancellationReason
+        );
+    } catch (error: any) {
+      console.log("Something went wrong while sending a email", error);
     }
+
+    try {
+      const cancellationResponseToTraveller =
+        await sendBookingCancellationEmailToTraveller(
+          travellerName,
+          bookingId,
+          travellerEmail
+        );
+    } catch (error: any) {
+      console.log("Something went wrong while sending a email", error);
+    }
+
     return NextResponse.json(
       { message: "Booking Status Updated Successfully!" },
       { status: 200 }

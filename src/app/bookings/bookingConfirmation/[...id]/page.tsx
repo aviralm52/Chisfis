@@ -18,7 +18,6 @@ export interface PageProps {
     id: string;
   };
 }
-
 const Page: FC<PageProps> = ({ params }) => {
   const bookingId = params.id[0];
   const [traveller, setTraveller] = useState<UserDataType>();
@@ -41,6 +40,7 @@ const Page: FC<PageProps> = ({ params }) => {
     try {
       setLoading(true);
       const response = await axios.post("/api/bookings/cancelBooking", {
+        travellerName: traveller.name,
         bookingId: booking?._id,
         ownerEmail: property?.email,
         travellerEmail: traveller?.email,
