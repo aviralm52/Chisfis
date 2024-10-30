@@ -1,7 +1,6 @@
 import { connectDb } from "../../../helper/db";
 import { NextResponse } from "next/server";
 import { Property } from "@/models/listing";
-import { sendEmail } from "../user/newauth/route";
 import { sendUserDetailsToCompany } from "../../../helper/gmailMailer";
 connectDb();
 
