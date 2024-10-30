@@ -2757,7 +2757,7 @@ export const OwnerBookingTemplate = (
 														<!--[if (gte mso 9)|(IE)]><table border="0" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
 														<table width="255" border="0" cellpadding="0" cellspacing="0" align="left" class="row" style="width:255px;max-width:255px;">
 															<tr>
-																<td align="left" valign="middle" class="center-text" style="font-family:'Poppins', sans-serif;color:#191919;font-size:22px;line-height:32px;font-weight:600;letter-spacing:0px;">Esstimated Rent&nbsp;</td>
+																<td align="left" valign="middle" class="center-text" style="font-family:'Poppins', sans-serif;color:#191919;font-size:22px;line-height:32px;font-weight:600;letter-spacing:0px;">Estimated Rent&nbsp;</td>
 															</tr>
 														</table>
 														<!--[if (gte mso 9)|(IE)]></td><td><![endif]-->
@@ -2903,7 +2903,7 @@ export const OwnerBookingTemplate = (
 	`;
 };
 
-export const TravellerBookignTemplate = (
+export const TravellerBookingTemplate = (
   startDate,
   endDate,
   price,
@@ -3716,7 +3716,7 @@ export const TravellerBookignTemplate = (
 														<!--[if (gte mso 9)|(IE)]><table border="0" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
 														<table width="255" border="0" cellpadding="0" cellspacing="0" align="left" class="row" style="width:255px;max-width:255px;">
 															<tr>
-																<td align="left" valign="middle" class="center-text" style="font-family:'Poppins', sans-serif;color:#191919;font-size:22px;line-height:32px;font-weight:600;letter-spacing:0px;">Esstimated Rent&nbsp;</td>
+																<td align="left" valign="middle" class="center-text" style="font-family:'Poppins', sans-serif;color:#191919;font-size:22px;line-height:32px;font-weight:600;letter-spacing:0px;">Estimated Rent&nbsp;</td>
 															</tr>
 														</table>
 														<!--[if (gte mso 9)|(IE)]></td><td><![endif]-->
@@ -6953,7 +6953,7 @@ export const TravellerBookingConfirmationTemplate = (
                                       letter-spacing: 0px;
                                     "
                                   >
-                                    Esstimated Rent&nbsp;
+                                    Estimated Rent&nbsp;
                                   </td>
                                 </tr>
                               </table>

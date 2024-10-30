@@ -33,7 +33,7 @@ const Page: FC<PageProps> = ({ params }) => {
   const [cancellationReason, setCancellationReason] = useState("");
   const [loading, setLoading] = useState(false);
   const handleAccept = () => {
-    setStatus("accepted");
+    setModalOpen(true);
   };
   const handleDecline = async () => {
     if (!cancellationReason) {

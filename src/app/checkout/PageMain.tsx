@@ -68,22 +68,22 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   };
 
   const [startDate, setStartDate] = useState<Date | null>(() => {
-    const savedDate = localStorage.getItem("dates");
-    if (!savedDate) {
-      return new Date();
-    }
-    const date = JSON.parse(savedDate);
+    // const savedDate = localStorage.getItem("dates");
+    // if (!savedDate) {
+    //   return new Date();
+    // }
+    // const date = JSON.parse(savedDate);
     // console.log("start date: ", new Date(date.startDate), date.startDate);
-    return new Date(date.startDate);
+    return new Date(startDateParam || new Date());
   });
 
   const [endDate, setEndDate] = useState<Date | null>(() => {
-    const savedDate = localStorage.getItem("dates");
-    if (!savedDate) {
-      return new Date();
-    }
-    const date = JSON.parse(savedDate);
-    return new Date(date.endDate);
+    // const savedDate = localStorage.getItem("dates");
+    // if (!savedDate) {
+    //   return new Date();
+    // }
+    // const date = JSON.parse(savedDate);
+    return new Date(endDateParam || new Date());
   });
 
   const [guests, setGuests] = useState<GuestsObject>(() => {
