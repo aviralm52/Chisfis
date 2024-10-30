@@ -5,10 +5,9 @@ import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
 import { toast, Toaster } from "sonner";
-import StayCard from "@/components/StayCard";
 import { BookingDataType, PropertiesDataType } from "@/data/types";
-import PropertyCardH from "@/components/PropertyCardH";
 import ButtonPrimary from "@/shared/ButtonPrimary";
+import CheckoutCard from "@/components/CheckoutCard";
 
 declare global {
   interface Window {
@@ -195,7 +194,7 @@ function Payment() {
           </div> */}
           {particularProperty ? (
             <>
-              <PropertyCardH
+              <CheckoutCard
                 key={particularProperty?._id}
                 data={particularProperty}
                 booking={booking}
