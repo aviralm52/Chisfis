@@ -208,6 +208,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
+  const [languages, setLanguages] = useState("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
   const [propertyPortions, setPropertyPortions] = useState<number>(0);
   const [nearbyAccordion, setNearbyAccordion] = useState<boolean[]>(() =>
@@ -297,13 +298,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
-    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
+    // console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
 
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
@@ -372,19 +372,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   useEffect(() => {
     const getUsername = async () => {
       try {
-        const response = await axios.get(
-          `/api/getUsername/${userIdOfPorperty}`
-        );
+        const response = await axios.post("/api/getUsername", {
+          userId: userIdOfPorperty,
+        });
         if (response.data) {
           const tempName = response.data.name;
           const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
           setUsername(name);
+          setLanguages(response.data.spokenLanguage);
         }
       } catch (err) {
         console.log("error: ", err);
       }
     };
-    getUsername();
+    if (userIdOfPorperty) getUsername();
   }, [userIdOfPorperty]);
 
   let portions = 0;
@@ -861,7 +862,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center gap-3">
             <IoLanguageOutline className=" text-lg md:text-xl" />
             <span className="text-sm md:text-base">
-              Language spoken - English, {language}
+              Language spoken - {languages ? languages : `English, ${language}`}
             </span>
           </div>
         </div>
@@ -977,12 +978,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                   <span>Check-in</span>
                   {/* <span>{time[0]}:00 am</span> */}
-                  <span>{particularProperty?.time[0]}:00 am</span>
+                  <span>{particularProperty?.time[0]}:00 </span>
                 </div>
                 <div className="flex space-x-10 justify-between p-3">
                   <span>Check-out</span>
                   {/* <span>{time[1]}:00 pm</span> */}
-                  <span>{particularProperty?.time[1]}:00 pm</span>
+                  <span>{particularProperty?.time[1]}:00 </span>
                 </div>
               </div>
             </div>
@@ -1521,10 +1522,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setAllImages(arr);
   }, [particularProperty]);
 
-  useEffect(() => {
-    console.log("carousel Pictures: ", carouselPictures);
-  }, [carouselPictures]);
-
   const carouselSettings = {
     dots: true,
     infinite: true,
@@ -1560,9 +1557,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
 
           {/* Thumbnail images for larger screens */}
-{/*           {carouselPictures?.[indexId] */}
-{/*           {propertyPicturesTemp */}
-  {allImages
+          {/*           {carouselPictures?.[indexId] */}
+          {/*           {propertyPicturesTemp */}
+          {allImages
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div

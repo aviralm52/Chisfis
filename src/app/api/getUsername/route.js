@@ -1,11 +1,11 @@
-import Users from "@/models/user";
-import { NextResponse } from 'next/server';
+import Users from "../../../models/user";
+import { NextResponse } from "next/server";
+import { connectDb } from "../../../helper/db";
 
-export async function GET(request) {
-  const url = new URL(request.url);
-  const urlPathList = url.href.split('/');
-  const userId = urlPathList[urlPathList.length - 1];
+connectDb();
 
+export async function POST(request) {
+  const { userId } = await request.json();
   if (!userId) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
