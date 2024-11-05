@@ -1045,12 +1045,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                               >
                                 <div>
                                   {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl != undefined ? (
+                                    ?.nearbyLocationUrl[index] != undefined &&
+                                  particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl[index] != "" ? (
                                     <Link
                                       href={
                                         new URL(
-                                          particularProperty?.nearbyLocations
-                                            ?.nearbyLocationUrl?.[index] || ""
+                                          particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
+                                            index
+                                          ]
                                         )
                                       }
                                       target="_blank"
