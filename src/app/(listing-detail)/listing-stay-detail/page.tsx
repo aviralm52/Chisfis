@@ -188,6 +188,11 @@ interface Properties {
   isLive: boolean;
 }
 
+interface CenterDataType {
+  lat: number;
+  lng: number;
+}
+
 // const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({card}) => {
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const { user } = useAuth();
@@ -203,7 +208,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
-
+  const [center, setCenter] = useState<CenterDataType>();
   const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
@@ -343,6 +348,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
+          setCenter(response.data.center);
         }
 
         const languageResponse = await axios.get(
@@ -933,7 +939,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=Eiffel+Tower,Paris+France"
+              // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
+              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
             ></iframe>
           </div>
         </div>
@@ -1643,7 +1650,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {/* {renderSection7()} */}
+          {center && center?.lat != 0 && center?.lng != 0 && renderSection7()}
           {renderSection8()}
         </div>
 
