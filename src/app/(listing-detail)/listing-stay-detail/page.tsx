@@ -940,7 +940,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
               // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
-              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
             ></iframe>
           </div>
         </div>
