@@ -70,6 +70,9 @@ import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
 import CustomDateRangePrice from "@/components/CustomDateRangePrice";
+import { useLoadScript } from "@react-google-maps/api";
+import Script from "next/script";
+import MapWithCircle from "@/components/MapWithCircle";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -230,6 +233,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const dt2 = tomorrow.toISOString().split("T")[0];
   const [stdt, setStdt] = useState<string>(dt1);
   const [nddt, setNddt] = useState<string>(dt2);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Set your API key here
+  });
 
   // TODO: Accessing current Location
   useEffect(() => {
@@ -933,6 +939,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         {/* MAP */}
         <div className="aspect-w-5 aspect-h-5 sm:aspect-h-3 ring-1 ring-black/10 rounded-xl z-0">
           <div className="rounded-xl overflow-hidden z-0">
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+              strategy="beforeInteractive"
+            />
+            {center && <MapWithCircle center={center} radius={3000} />}
             <iframe
               width="100%"
               height="100%"
@@ -1650,7 +1661,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {center && center?.lat != 0 && center?.lng != 0 && renderSection7()}
+          {center &&
+            center?.lat != 0 &&
+            center?.lng != 0 &&
+            isLoaded &&
+            renderSection7()}
           {renderSection8()}
         </div>
 
