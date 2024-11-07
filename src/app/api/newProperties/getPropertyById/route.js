@@ -23,7 +23,6 @@ export async function POST(request) {
         { status: 404 }
       );
     }
-    console.log("property: ", property);
     return NextResponse.json({ property }, { status: 200 });
   } catch (err) {
     return NextResponse.json(

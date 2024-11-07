@@ -103,9 +103,11 @@ export interface StayDataType {
 export interface BookingDataType {
   _id: ObjectId;
   propertyId: ObjectId;
-  userId: ObjectId;
+  ownerId: ObjectId;
+  travellerId: ObjectId;
   startDate: Date;
   endDate: Date;
+  guests: number;
   bookingStatus?: string;
 }
 
@@ -166,6 +168,7 @@ export interface PropertyDataType {
   propertyPictureUrls?: string[];
   portionCoverFileUrls?: string[];
   portionPictureUrls?: string[][];
+  propertyImages?: string[];
 
   night?: number[];
   time?: number[];
@@ -173,7 +176,6 @@ export interface PropertyDataType {
 
   isLive?: boolean;
 }
-
 
 interface nearbyLocationInterface {
   nearbyLocationName: string[];
@@ -189,6 +191,7 @@ export interface PropertiesDataType {
   commonId: string;
   email: string;
   userID: string;
+  portionNo: string;
   rentalType: string;
   isInstantBooking: boolean;
   propertyType: string;
@@ -283,6 +286,26 @@ export interface ExperiencesDataType {
     lat: number;
     lng: number;
   };
+}
+
+export interface UserDataType {
+  _id: string;
+  name: string;
+  email: string;
+  profilePic: string;
+  nationality: string;
+  gender: string;
+  spokenLanguage: string;
+  bankDetails: object;
+  phone: string;
+  myRequests: string[];
+  myBookings?: string[];
+  myUpcommingRequests: string[];
+  declinedRequests: string[];
+  address: string;
+  role: string;
+  isVerified: boolean;
+  Payment?: object;
 }
 
 //

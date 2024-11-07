@@ -1515,7 +1515,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>(
     []
   );
-
+  const [carouselPictures, setCarouselPictures] = useState<string[][]>([]);
   useEffect(() => {
     if (particularProperty?.propertyPictureUrls) {
       setPropertyPicturesTemp(particularProperty?.propertyPictureUrls);
@@ -1534,6 +1534,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       for (let i = 0; i < particularProperty?.portionPictureUrls.length; i++) {
         if (particularProperty?.portionPictureUrls[i] != undefined)
           arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
+        setCarouselPictures((prev) => {
+          return [...prev, particularProperty?.portionPictureUrls[i]];
+        });
       }
     }
     arr = arr.filter((item) => item != "");

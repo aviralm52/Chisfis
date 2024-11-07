@@ -1,5 +1,4 @@
 "use client";
-
 import React, { FC, Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowRightIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
@@ -16,7 +15,6 @@ import { usePathname, useRouter } from "next/navigation";
 import StayDatesRangeInput from "../StayDatesRangeInput";
 import GuestsInput from "../GuestsInput";
 import SectionDateRange from "../../SectionDateRange";
-import { Route } from "next";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -32,17 +30,12 @@ import {
 } from "react-icons/io";
 import { FaBath } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
-import { FaHeart } from "react-icons/fa";
 import {
-  MdCancel,
   MdConstruction,
   MdHomeWork,
   MdOutlineEnergySavingsLeaf,
 } from "react-icons/md";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import { Carousel } from "react-responsive-carousel";
-import { Property } from "@/models/listing";
-import { ObjectId } from "mongodb";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import axios from "axios";
 import { CiCalendar } from "react-icons/ci";
 import { BiMessageAltDetail, BiSolidArea } from "react-icons/bi";
@@ -58,32 +51,16 @@ import { RiMoneyEuroCircleFill } from "react-icons/ri";
 import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
-import CustomDateRangePrice from "@/components/CustomDateRangePrice";
 import { PropertiesDataType, PropertyDataType } from "@/data/types";
+import { useLoadScript } from "@react-google-maps/api";
+import MapWithCircle from "@/components/MapWithCircle";
+import Script from "next/script";
 
 export interface ListingStayDetailPageProps {
   params: {
     id: string;
   };
 }
-
-interface Page3State {
-  portionName: string[];
-  portionSize: number[];
-  guests: number[];
-  bedrooms: number[];
-  beds: number[];
-  bathroom: number[];
-  kitchen: number[];
-}
-interface Page8State {
-  currency: string;
-  isPortion: Boolean;
-  basePrice: number[];
-  weekendPrice: number[];
-  monthlyDiscount: number[];
-}
-
 interface DateRange {
   startDate: Date | null;
   endDate: Date | null;
@@ -96,11 +73,14 @@ interface nearbyLocationInterface {
   nearbyLocationUrl: string[];
 }
 
+interface CenterDataType {
+  lat: number;
+  lng: number;
+}
+
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const { user } = useAuth();
-
   const router = useRouter();
-
   const thisPathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -110,7 +90,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const [particularProperty, setParticularProperty] =
     useState<PropertiesDataType>();
   const [allImages, setAllImages] = useState<any[]>([]);
-
+  const [center, setCenter] = useState<CenterDataType>();
   const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfProperty, setUserIdOfProperty] = useState<string>("");
@@ -133,15 +113,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const [stdt, setStdt] = useState<string>(dt1);
   const [nddt, setNddt] = useState<string>(dt2);
 
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Set your API key here
+  });
+
   // TODO: Accessing current Location
   useEffect(() => {
-    // Check if the browser supports Geolocation API
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
       return;
     }
-
-    // Success callback
     const handleSuccess = (position: GeolocationPosition) => {
       const { latitude, longitude } = position.coords;
       setCurrentLocation({ latitude, longitude });
@@ -163,23 +144,16 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           setError("An unknown error occurred");
       }
     };
-
-    // Get the current position
     navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
   }, []);
 
   // TODO: handle external booked dates
   const [bookedState, setBookedState] = useState<boolean>(false);
   const [alreadyBookedDates, setAlreadyBookedDates] = useState<Date[]>([]);
-  const [bookedDates, setBookedDates] = useState<EventInterface[]>([
-    // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
-  ]); //! {start: "YYYY-MM-DD"}
-
+  const [bookedDates, setBookedDates] = useState<EventInterface[]>([]);
   const fetchAndParseICal = async (url: string) => {
     try {
-      // console.log("url fethced:::: ", url);
       const response = await axios.post("/api/ical", { url });
-      // console.log("response:::: ", response);
       const parsedData = response.data.data;
       const bookings = [];
       for (const eventId in parsedData) {
@@ -194,7 +168,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           });
         }
       }
-      // console.log("bookings: ", bookings);
       return bookings;
     } catch (error) {
       console.log("Error: ", error);
@@ -202,17 +175,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   };
 
   const fetchBookedDates = async (url: string) => {
-    // const airbnbBookings = await fetchAndParseICal(
-    //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
-    // );
-    // console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
     console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
-
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
       const stdt = dateParser(event.startDate?.toLocaleString() || "");
@@ -225,7 +193,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
       };
       eventsFromAirbnb.push(newObj);
       setBookedDates(eventsFromAirbnb);
-
       //! adding events from airbnb to already booked dates
       eventsFromAirbnb.forEach((event) => {
         const newDates: Date[] = [];
@@ -253,7 +220,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           setParticularProperty(response?.data?.property);
           setUserIdOfProperty(response?.data?.property?.userId);
           setPropertyId(response?.data?.property?._id);
-
+          setCenter(response?.data?.property?.center);
           try {
             const commonPropertyResponse = await axios.post(
               "/api/newProperties/getPropertiesByCommonId",
@@ -392,10 +359,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   function openModalAmenities() {
     setIsOpenModalAmenities(true);
   }
-
-  const handleOpenModalImageGallery = () => {
-    router.push(`${thisPathname}/?modal=PHOTO_TOUR_SCROLLABLE` as Route);
-  };
 
   const [location, setLocation] = useState<string[]>(() => {
     const savedPage = localStorage.getItem("page2") || "";
@@ -815,13 +778,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         {/* MAP */}
         <div className="aspect-w-5 aspect-h-5 sm:aspect-h-3 ring-1 ring-black/10 rounded-xl z-0">
           <div className="rounded-xl overflow-hidden z-0">
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+              strategy="beforeInteractive"
+            />
+            {center && <MapWithCircle center={center} radius={3000} />}
             <iframe
               width="100%"
               height="100%"
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=Eiffel+Tower,Paris+France"
+              // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
             ></iframe>
           </div>
         </div>
@@ -870,8 +839,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
             </div>
           </div>
 
-          {/* // TODO: Right Half */}
-          {/* // ! data according to Short Term and Long Term */}
           <div className=" w-full md:w-1/2 md:ml-3">
             {particularProperty?.rentalType === "Short Term" &&
             particularProperty?.nearbyLocations?.nearbyLocationName?.length >
@@ -903,7 +870,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                       </h3>
                       {nearbyAccordion[ind] &&
                         particularProperty?.nearbyLocations?.nearbyLocationName?.map(
-                          (_, index: number) =>
+                          (innerItem, index) =>
                             item ===
                               particularProperty?.nearbyLocations
                                 ?.nearbyLocationTag[index] && (
@@ -913,12 +880,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                               >
                                 <div>
                                   {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl != undefined ? (
+                                    ?.nearbyLocationUrl[index] != undefined &&
+                                  particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl[index] != "" ? (
                                     <Link
                                       href={
                                         new URL(
-                                          particularProperty?.nearbyLocations
-                                            ?.nearbyLocationUrl?.[index] || ""
+                                          particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
+                                            index
+                                          ]
                                         )
                                       }
                                       target="_blank"
@@ -1238,7 +1208,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                   <h2 className="text-sm">{commonProperties[index]?.guests}</h2>
                   <FaUser className="text-md" />
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap">
                   <h2 className="text-sm">
                     {commonProperties[index]?.size} sq
                   </h2>
@@ -1337,7 +1307,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
     if (particularProperty?.propertyImages != undefined)
       arr = [...arr, ...particularProperty?.propertyImages];
     arr = arr.filter((item) => item != "");
-    console.log("arr: ", arr);
     setAllImages(arr);
   }, [particularProperty]);
 
@@ -1453,10 +1422,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
               externalBookedDates={alreadyBookedDates}
             />
           )}
-          {(commonProperties?.length || 0) >= 1 && renderPortionCards()}
+          {(commonProperties?.length || 0) > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {/* {renderSection7()} */}
+          {center &&
+            center?.lat != 0 &&
+            center?.lng != 0 &&
+            isLoaded &&
+            renderSection7()}
           {renderSection8()}
         </div>
 

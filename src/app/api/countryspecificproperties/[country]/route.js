@@ -1,6 +1,7 @@
 import { connectDb } from "@/helper/db";
 import { NextResponse } from "next/server";
 import { Property } from "@/models/listing";
+import { Properties } from "@/models/property";
 
 connectDb();
 
@@ -18,7 +19,7 @@ export async function GET(req) {
   const skip = (page - 1) * limit;
 
   try {
-    const searchedProperties = await Property.find({
+    const searchedProperties = await Properties.find({
       $and: [
         {
           $or: [
@@ -27,7 +28,7 @@ export async function GET(req) {
             { state: searchRegex },
           ],
         },
-        { "guests.0": { $gte: guestsCount } },
+        { guests: { $gte: guestsCount } },
         { isLive: true },
       ],
     })

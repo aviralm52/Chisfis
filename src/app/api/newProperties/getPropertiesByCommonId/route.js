@@ -20,7 +20,6 @@ export async function POST(request) {
         { status: 200 }
       );
     }
-
     return NextResponse.json({ commonIdProperties }, { status: 200 });
   } catch (err) {
     return NextResponse.json(

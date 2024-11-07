@@ -1,32 +1,26 @@
 "use client";
-
-import { Tab } from "@headlessui/react";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import React, { FC, Fragment, useState, useEffect } from "react";
-import visaPng from "@/images/vis.png";
-import mastercardPng from "@/images/mastercard.svg";
-import Input from "@/shared/Input";
-import Label from "@/components/Label";
-import Textarea from "@/shared/Textarea";
+import { BiLoaderAlt } from "react-icons/bi";
 import ButtonPrimary from "@/shared/ButtonPrimary";
 import StartRating from "@/components/StartRating";
 import NcModal from "@/shared/NcModal";
 import ModalSelectDate from "@/components/ModalSelectDateTwo";
 import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalSelectGuests from "@/components/ModalSelectGuests";
-import Image from "next/image";
 import { GuestsObject } from "../(client-components)/type";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
-import { ObjectId } from "mongodb";
-import { end } from "@cloudinary/url-gen/qualifiers/textAlignment";
-import { start } from "repl";
-import { Properties } from "../page";
 import { AiFillQuestionCircle } from "react-icons/ai";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LuLoader2 } from "react-icons/lu";
-import { TokenDataType } from "@/data/types";
+import {
+  BookingDataType,
+  PropertiesDataType,
+  TokenDataType,
+} from "@/data/types";
+import { toast, Toaster } from "sonner";
+import calculatePrice from "@/helper/calculatePrice";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
@@ -44,51 +38,52 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   //   const dates = JSON.parse(savedDates);
   //   return [dates.startDate, dates.endDate];
   // });
-
   const searchParams = useSearchParams();
   const param: string = searchParams.get("id")?.split("&")[0] || "0";
   const paramInt: number = parseInt(param, 10);
   const portion = searchParams.get("portion");
   const startDateParam = searchParams.get("stdt");
   const endDateParam = searchParams.get("nddt");
-  const guestsParam = searchParams.get("guests");
-
-  console.log(param, portion, startDateParam, endDateParam, guestsParam);
+  const guestsParam = parseInt(searchParams.get("guests") || "0", 10);
 
   const router = useRouter();
 
-  const [particularProperty, setParticualarProperty] = useState<Properties>();
+  const [particularProperty, setParticualarProperty] =
+    useState<PropertiesDataType>();
   const [paymentToken, setPaymentToken] = useState<string>("");
   const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
   const [loggedInUser, setLoggedInUser] = useState<TokenDataType | undefined>();
+  const [totalPrice, setTotalPrice] = useState(6);
+  const [booking, setBooking] = useState<BookingDataType>();
+  const [loading, setLoading] = useState(false);
 
   const getLoggedInUser = async () => {
     try {
       const response = await axios.post("/api/user/profile");
-      console.log(response.data);
-      setLoggedInUser(response.data);
+      // console.log(response.data);
+      setLoggedInUser(response.data.data);
     } catch (err: any) {
-      console.log("error in getting logged in user: ", err);
+      toast.error("User Not Found");
     }
   };
 
   const [startDate, setStartDate] = useState<Date | null>(() => {
-    const savedDate = localStorage.getItem("dates");
-    if (!savedDate) {
-      return new Date();
-    }
-    const date = JSON.parse(savedDate);
-    console.log("start date: ", new Date(date.startDate), date.startDate);
-    return new Date(date.startDate);
+    // const savedDate = localStorage.getItem("dates");
+    // if (!savedDate) {
+    //   return new Date();
+    // }
+    // const date = JSON.parse(savedDate);
+    // console.log("start date: ", new Date(date.startDate), date.startDate);
+    return new Date(startDateParam || new Date());
   });
 
   const [endDate, setEndDate] = useState<Date | null>(() => {
-    const savedDate = localStorage.getItem("dates");
-    if (!savedDate) {
-      return new Date();
-    }
-    const date = JSON.parse(savedDate);
-    return new Date(date.endDate);
+    // const savedDate = localStorage.getItem("dates");
+    // if (!savedDate) {
+    //   return new Date();
+    // }
+    // const date = JSON.parse(savedDate);
+    return new Date(endDateParam || new Date());
   });
 
   const [guests, setGuests] = useState<GuestsObject>(() => {
@@ -105,11 +100,21 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   });
 
   useEffect(() => {
+    setGuests({
+      guestAdults: guestsParam,
+    });
+  }, []);
+
+  useEffect(() => {
     const getProperty = async () => {
       try {
-        const response = await axios.get(`/api/particular/${param}`);
+        const response = await axios.post(
+          "/api/newProperties/getPropertyById",
+          { propertyId: param }
+        );
+        // console.log("response: ", response);
         if (response.data) {
-          setParticualarProperty(response?.data);
+          setParticualarProperty(response?.data?.property);
         }
       } catch (err: any) {
         console.log("Property can't be fetched on checkout Page");
@@ -160,10 +165,10 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    const diff = calculateDifferenceBetweenDates(startDate, endDate);
-    setDateDiff(diff);
-  }, [startDate, endDate]);
+  // useEffect(() => {
+  //   const diff = calculateDifferenceBetweenDates(startDate, endDate);
+  //   setDateDiff(diff);
+  // }, [startDate, endDate]);
 
   useEffect(() => {
     const updatedGuests: GuestsObject = {
@@ -180,53 +185,79 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       endDate: endDate,
     });
     localStorage.setItem("dates", savedDates);
+    const diff = calculateDifferenceBetweenDates(startDate, endDate);
+    setDateDiff(diff);
   }, [startDate, endDate]);
 
   const encryptToken = async (amount: number) => {
     setSubscribeLoader(true);
     try {
       const response = await axios.post("/api/encrypt", { amount });
-      console.log("token response: ", response.data);
+      // console.log("token response: ", response.data);
       setSubscribeLoader(false);
       return response.data.encryptedAmount;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       setSubscribeLoader(false);
     }
     setSubscribeLoader(false);
   };
-
   const handlePayment = async (amount: string) => {
     const val = parseInt(amount);
     const token = await encryptToken(val);
-    console.log("response token: ", token);
+    // console.log("response token: ", token);
 
     if (token) {
       router.push(
-        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}`
+        `/payment?pId=${particularProperty?._id}&amount=${val}&paymentToken=${token}&bookingId=${booking?._id}`
       );
     }
   };
-
   useEffect(() => {
     getLoggedInUser();
   }, []);
 
   const handleBookingConfirmation = async () => {
-    if (!loggedInUser || !loggedInUser.email) return;
+    setLoading(true);
+    const bookingStatus = particularProperty?.isInstantBooking
+      ? "confirmed"
+      : "pending";
+    if (!loggedInUser || !loggedInUser.email) {
+      toast.error("User Not Found");
+      return;
+    }
     try {
-      const response = await axios.post(`/api/bookings/confirmBooking`, {
-        propertyId: param,
-        user: loggedInUser,
-        portion,
+      setLoading(true);
+      const Price = calculatePrice(
         startDate,
         endDate,
-        guests
+        particularProperty?.pricePerDay
+      );
+      if (Price) setTotalPrice(Price);
+      const savedDates = JSON.stringify({
+        startDate: startDate,
+        endDate: endDate,
       });
-      console.log("Booking Response: ", response.data);
+      const response = await axios.post(`/api/bookings/createBooking`, {
+        propertyId: param,
+        ownerEmail: particularProperty?.email,
+        startDate,
+        endDate,
+        guests:
+          (guests?.guestAdults || 1) +
+          (guests?.guestChildren || 0) +
+          (guests?.guestInfants || 0),
+        price: Price,
+        bookingStatus,
+      });
+      setBooking(response.data.booking);
+      toast.success("Booking requested successfully");
+      setLoading(false);
     } catch (err: any) {
-      console.log("Error in booking confirmation: ", err);
+      toast.error(err.response.data.error);
+      setLoading(false);
     }
+    setLoading(false);
   };
 
   const renderSidebar = () => {
@@ -254,8 +285,8 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </div>
             <span className="block  text-sm text-neutral-500 dark:text-neutral-400">
               {/* 2 beds · 2 baths */}
-              {particularProperty?.bedrooms?.[0]} beds ·{" "}
-              {particularProperty?.bathroom?.[0]} bath
+              {particularProperty?.bedrooms} beds ·{" "}
+              {particularProperty?.bathroom} bath
             </span>
             <div className="w-10 border-b border-neutral-200  dark:border-neutral-700"></div>
             <StartRating />
@@ -265,8 +296,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <h3 className="text-2xl font-semibold">Price detail</h3>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
-              € {particularProperty?.basePrice?.[0]} x{" "}
-              {/* {calculateDifferenceBetweenDates(startDate, endDate)} day */}
+              € {particularProperty?.basePrice} x{" "}
               {startone &&
                 endone &&
                 calculateDifferenceBetweenDates(startone, endone)}{" "}
@@ -274,7 +304,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
             </span>
             <span>
               {/* € {(particularProperty?.basePrice[0] || 100) * dateDiff} */}€{" "}
-              {(particularProperty?.basePrice?.[0] || 100) *
+              {Number(particularProperty?.basePrice || 100) *
                 calculateDifferenceBetweenDates(startone, endone)}
             </span>
           </div>
@@ -291,12 +321,12 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               {" "} */}
               €{" "}
               {calculateDifferenceBetweenDates(startone, endone) *
-                (particularProperty?.basePrice?.[0] || 100) +
+                Number(particularProperty?.basePrice || 100) +
                 6}{" "}
             </span>
           </div>
           <div className=" w-full flex justify-center mt-2">
-            {particularProperty?.isInstantBooking && (
+            {particularProperty?.isInstantBooking && !!booking && (
               <ButtonPrimary
                 disabled={subscribeLoader}
                 onClick={() => handlePayment("6")}
@@ -394,112 +424,39 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           </div>
         </div>
 
-        {/* <div>
-          <h3 className="text-2xl font-semibold">Pay with</h3>
-          <div className="w-14 border-b border-neutral-200 dark:border-neutral-700 my-5"></div>
-
-          <div className="mt-6">
-            <Tab.Group>
-              <Tab.List className="flex my-5 gap-1">
-                <Tab as={Fragment}>
-                  {({ selected }) => (
-                    <button
-                      className={`px-4 py-1.5 sm:px-6 sm:py-2.5 rounded-full focus:outline-none ${
-                        selected
-                          ? "bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900"
-                          : "text-neutral-6000 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                      }`}
-                    >
-                      Paypal
-                    </button>
-                  )}
-                </Tab>
-                <Tab as={Fragment}>
-                  {({ selected }) => (
-                    <button
-                      className={`px-4 py-1.5 sm:px-6 sm:py-2.5  rounded-full flex items-center justify-center focus:outline-none  ${
-                        selected
-                          ? "bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900"
-                          : " text-neutral-6000 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                      }`}
-                    >
-                      <span className="mr-2.5">Credit card</span>
-                      <Image className="w-8" src={visaPng} alt="visa" />
-                      <Image
-                        className="w-8"
-                        src={mastercardPng}
-                        alt="mastercard"
-                      />
-                    </button>
-                  )}
-                </Tab>
-              </Tab.List>
-
-              <Tab.Panels>
-                <Tab.Panel className="space-y-5">
-                  <div className="space-y-1">
-                    <Label>Card number </Label>
-                    <Input defaultValue="111 112 222 999" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Card holder </Label>
-                    <Input defaultValue="JOHN DOE" />
-                  </div>
-                  <div className="flex space-x-5  ">
-                    <div className="flex-1 space-y-1">
-                      <Label>Expiration date </Label>
-                      <Input type="date" defaultValue="MM/YY" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <Label>CVC </Label>
-                      <Input />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Messager for author </Label>
-                    <Textarea placeholder="..." />
-                    <span className="text-sm text-neutral-500 block">
-                      Write a few sentences about yourself.
-                    </span>
-                  </div>
-                </Tab.Panel>
-                <Tab.Panel className="space-y-5">
-                  <div className="space-y-1">
-                    <Label>Email </Label>
-                    <Input type="email" defaultValue="example@gmail.com" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Password </Label>
-                    <Input type="password" defaultValue="***" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Messager for author </Label>
-                    <Textarea placeholder="..." />
-                    <span className="text-sm text-neutral-500 block">
-                      Write a few sentences about yourself.
-                    </span>
-                  </div>
-                </Tab.Panel>
-              </Tab.Panels>
-            </Tab.Group> */}
         <div className="pt-8 flex justify-between">
           {particularProperty?.isInstantBooking ? (
-            <ButtonPrimary>Instant Booking</ButtonPrimary>
+            <ButtonPrimary
+              className=" flex items-center gap-x-1"
+              onClick={handleBookingConfirmation}
+            >
+              Instant Booking{" "}
+              {loading && <LuLoader2 className=" animate-spin" />}
+            </ButtonPrimary>
           ) : (
-            <ButtonPrimary onClick={handleBookingConfirmation}>
-              Confirm and Request
+            <ButtonPrimary
+              onClick={handleBookingConfirmation}
+              disabled={!particularProperty || !loggedInUser || loading}
+              className={`disabled:opacity-50 ${loading ? "cursor-wait" : ""}`}
+            >
+              {loading ? (
+                <span className=" flex items-center">
+                  Requesting... <BiLoaderAlt className="animate-spin" />
+                </span>
+              ) : (
+                "Confirm and Request"
+              )}
             </ButtonPrimary>
           )}
           <ButtonPrimary>Any Queries?</ButtonPrimary>
         </div>
       </div>
-      //   </div>
-      // </div>
     );
   };
 
   return (
     <div className={`nc-CheckOutPagePageMain ${className}`}>
+      <Toaster />
       <main className="container mt-11 mb-24 lg:mb-32 flex flex-col-reverse lg:flex-row">
         <div className="w-full lg:w-3/5 xl:w-2/3 lg:pr-10 ">{renderMain()}</div>
         <div className="hidden lg:block flex-grow">{renderSidebar()}</div>

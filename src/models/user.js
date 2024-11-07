@@ -6,52 +6,52 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "PLease Enter your name"],
     },
-    email: {    
+    email: {
       type: String,
       required: [true, "PLease Enter  your email"],
     },
-    profilePic:{
-      type:String,
-      default:""
+    profilePic: {
+      type: String,
+      default: "",
     },
-    nationality:{
-      type:String,
-      default:""
+    nationality: {
+      type: String,
+      default: "",
     },
-    gender:{
-      type:String,
+    gender: {
+      type: String,
       enum: ["Male", "Female", "Other"],
-      default:"Male"
+      default: "Male",
     },
-    spokenLanguage:{
-      type:String,
-      default:"English"
+    spokenLanguage: {
+      type: String,
+      default: "English",
     },
-    bankDetails :{
+    bankDetails: {
       type: Object,
-      default:""
+      default: "",
     },
-    phone:{
-      type:String,
-      required: true
+    phone: {
+      type: String,
+      required: true,
     },
-    myRequests:{
-      type:[String],
-      require:false
+    myRequests: {
+      type: [String],
+      require: false,
     },
-    myUpcommingRequests:{
-      type:[String],
-      require:false
+    myUpcommingRequests: {
+      type: [String],
+      require: false,
     },
-    declinedRequests:{
-      type:[String],
-      require:false
+    declinedRequests: {
+      type: [Object],
+      require: false,
+      default: [],
     },
     address: {
       type: String,
-      default:""
+      default: "",
     },
-   
     password: {
       type: String,
       required: [true, "Password is required "],
@@ -66,7 +66,7 @@ const userSchema = new mongoose.Schema(
       default: "Owner", // Optional: you can set a default role if needed
     },
 
-    Payment:Object,
+    Payment: Object,
 
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,

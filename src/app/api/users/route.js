@@ -1,7 +1,6 @@
 import { connectDb } from "../../../helper/db";
 import { NextResponse } from "next/server";
 import { Property } from "@/models/listing";
-import { sendEmail } from "../user/newauth/route";
 import { sendUserDetailsToCompany } from "../../../helper/gmailMailer";
 connectDb();
 
@@ -120,7 +119,7 @@ export async function POST(request) {
       phone: phone,
       name: name,
       VSID: VSID,
-      Link: `https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`
+      Link: `https://www.vacationsaga.com/listing-stay-detail?id=${propertyId}`,
     });
 
     const response = NextResponse.json(createdProperty, { status: 200 });

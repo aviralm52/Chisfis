@@ -19,23 +19,23 @@ const generatedSignature = (razorpayOrderId, razorpayPaymentId) => {
 
 export async function POST(request) {
   const data = await request.json();
-  console.log("verify data: ", data);
+  // console.log("verify data: ", data);
   const { orderCreationId, razorpayPaymentId, razorpaySignature, amount } = {
     ...data.data,
   };
 
-  console.log(orderCreationId, razorpayPaymentId, razorpaySignature);
+  // console.log(orderCreationId, razorpayPaymentId, razorpaySignature);
 
   const signature = generatedSignature(orderCreationId, razorpayPaymentId);
-  console.log("signature: ", signature);
+  // console.log("signature: ", signature);
   if (signature !== razorpaySignature) {
-    console.log("invalid signature");
+    // console.log("invalid signature");
     return NextResponse.json(
       { message: "payment verification failed", isOk: false },
       { status: 400 }
     );
   }
-  console.log("valid signature");
+  // console.log("valid signature");
 
   const loggedInUserId = getDataFromToken();
   const user = await Users.findOne({ _id: loggedInUserId });
@@ -48,13 +48,17 @@ export async function POST(request) {
   const paymentObject = {
     OrderId: orderCreationId,
     PaymentId: razorpayPaymentId,
-    Plan: amount
-  }
+    Plan: amount,
+  };
 
-  try{
+  try {
     await user.updateOne({ Payment: paymentObject });
-  }catch(err){
-    console.log('Payment details not saved');
+  } catch (err) {
+    // console.log('Payment details not saved');
+    return NextResponse.json(
+      { error: "Payment details not saved" },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json(

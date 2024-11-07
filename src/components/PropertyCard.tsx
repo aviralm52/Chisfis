@@ -12,6 +12,8 @@ import axios from "axios";
 import CustomGallerySlider from "@/components/CustomGallerySlider";
 import PropertyGallerySlider from "@/components/PropertyGallerySlider";
 import { Properties } from "@/app/page";
+import { useRouter } from "next/navigation";
+import { Route } from "next";
 
 const DEMO_DATA = DEMO_STAY_LISTINGS[0];
 
@@ -47,6 +49,7 @@ const PropertyCard: FC<propertiesCardProps> = ({
     portionPictureUrls,
     portionCoverFileUrls,
     propertyPictureUrls,
+    propertyImages,
     monthlyDiscount,
     bedrooms,
     beds,
@@ -59,11 +62,18 @@ const PropertyCard: FC<propertiesCardProps> = ({
   const cardImages: string[] = [
     ...(propertyCoverFileUrl ? [propertyCoverFileUrl] : []),
     ...(propertyPictureUrls ? propertyPictureUrls : []),
-  ];
+    ...(propertyImages ? propertyImages : []),
+  ].filter((item) => item != "");
   // const customHref = `/listing-stay-detail/${_id}`;
   // const customRoute = { pathname: "/listing-stay-detail/[id]", query: { id: _id } };
 
   const renderSliderGallery = () => {
+    const arr: string[] = [
+      ...(propertyCoverFileUrl ? [propertyCoverFileUrl] : []),
+      ...(propertyPictureUrls ? propertyPictureUrls : []),
+      ...(propertyImages ? propertyImages : []),
+    ].filter((item) => item != "");
+
     return (
       // <Link
       //   href={{
@@ -72,29 +82,26 @@ const PropertyCard: FC<propertiesCardProps> = ({
       //   }}
       //   key={index}
       // >
-        <div className="relative w-full">
-          <PropertyGallerySlider
-            uniqueID={`StayCard2_${_id}`}
-            ratioClass="aspect-w-12 aspect-h-11"
-            galleryImgs={propertyPictureUrls}
-            imageClass="rounded-lg"
-            // href={href}
-            href={`/listing-stay-detail?id=${_id}`}
-            propertyPictureUrls={cardImages ? cardImages : propertyPictureUrls}
-            id={_id}
-          />
-          <BtnLikeIcon
-            isLiked={false}
-            className="absolute right-3 top-3 z-[1]"
-          />
-          {/* {saleOff && <SaleOffBadge className="absolute left-3 top-3" />} */}
-          {/* {monthlyDiscount?.length && (
+      <div className="relative w-full">
+        <PropertyGallerySlider
+          uniqueID={`StayCard2_${_id}`}
+          ratioClass="aspect-w-12 aspect-h-11"
+          galleryImgs={arr}
+          imageClass="rounded-lg"
+          // href={href}
+          href={`/listing-stay-detail/${_id}` as Route}
+          propertyPictureUrls={cardImages ? cardImages : propertyPictureUrls}
+          id={_id}
+        />
+        <BtnLikeIcon isLiked={false} className="absolute right-3 top-3 z-[1]" />
+        {/* {saleOff && <SaleOffBadge className="absolute left-3 top-3" />} */}
+        {/* {monthlyDiscount?.length && (
           <SaleOffBadge
             className="absolute left-3 top-3"
             discount={monthlyDiscount[0]}
           />
         )} */}
-        </div>
+      </div>
       // </Link>
     );
   };
@@ -102,10 +109,11 @@ const PropertyCard: FC<propertiesCardProps> = ({
   const renderContent = () => {
     return (
       <Link
-        href={{
-          pathname: "/listing-stay-detail",
-          query: { id: _id },
-        }}
+        // href={{
+        //   pathname: "/listing-stay-detail",
+        //   query: { id: _id },
+        // }}
+        href={`/listing-stay-detail/${_id}`}
         key={index}
       >
         <div
@@ -114,7 +122,7 @@ const PropertyCard: FC<propertiesCardProps> = ({
           <div className="space-y-2">
             <span className="text-sm text-neutral-500 dark:text-neutral-400">
               {/* {listingCategory.name} · {bedrooms} beds */}
-              {beds?.length && beds[0]} beds
+              {(beds?.length && beds[0]) || beds} beds
             </span>
             <div className="flex items-center space-x-2">
               {/*               {isAds && <Badge name="ADS" color="green" />} */}
@@ -161,7 +169,7 @@ const PropertyCard: FC<propertiesCardProps> = ({
           <div className="w-14 border-b border-neutral-100 dark:border-neutral-800"></div>
           <div className="flex justify-between items-center">
             <span className="text-base font-semibold">
-              {/* {price} */}€{basePrice?.length && basePrice[0]}
+              {/* {price} */}€{(basePrice?.length && basePrice[0]) || basePrice}
               {` `}
               {size === "default" && (
                 <span className="text-sm text-neutral-500 dark:text-neutral-400 font-normal">
@@ -182,10 +190,11 @@ const PropertyCard: FC<propertiesCardProps> = ({
     <div className={`nc-StayCard2 group relative ${className}`}>
       {renderSliderGallery()}
       <Link
-        href={{
-          pathname: "/listing-stay-detail",
-          query: { id: _id },
-        }}
+        // href={{
+        //   pathname: "/listing-stay-detail",
+        //   query: { id: _id },
+        // }}
+        href={`/listing-stay-detail/${_id}`}
       >
         {renderContent()}
       </Link>

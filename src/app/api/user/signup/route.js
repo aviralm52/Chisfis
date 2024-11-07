@@ -2,7 +2,7 @@ import { connectDb } from "../../../../helper/db";
 import User from "../../../../models/user";
 import bcryptjs from "bcryptjs";
 import { NextResponse } from "next/server";
-import { sendEmail } from "../newauth/route";
+import { sendEmail } from "../../../../helper/mailer";
 import Travellers from "../../../../models/traveller";
 
 await connectDb();
