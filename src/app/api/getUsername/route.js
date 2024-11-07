@@ -1,22 +1,18 @@
-import Users from "@/models/user";
+import Users from "../../../models/user";
 import { NextResponse } from "next/server";
+import { connectDb } from "../../../helper/db";
+
+connectDb();
 
 export async function POST(request) {
   const { userId } = await request.json();
-  console.log("userId: ", userId);
-
   if (!userId) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
   try {
-    const user = await Users.findById(userId);
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 400 });
-    }
-    console.log("user: ", user);
-    return NextResponse.json({ user }, { status: 200 });
+    const user = await Users.findOne({ _id: userId });
+    return NextResponse.json(user);
   } catch (error) {
     return NextResponse.json({ error: "Error fetching user" }, { status: 500 });
   }

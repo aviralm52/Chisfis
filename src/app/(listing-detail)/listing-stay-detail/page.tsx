@@ -70,6 +70,9 @@ import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
 import CustomDateRangePrice from "@/components/CustomDateRangePrice";
+import { useLoadScript } from "@react-google-maps/api";
+import Script from "next/script";
+import MapWithCircle from "@/components/MapWithCircle";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -188,6 +191,11 @@ interface Properties {
   isLive: boolean;
 }
 
+interface CenterDataType {
+  lat: number;
+  lng: number;
+}
+
 // const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({card}) => {
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const { user } = useAuth();
@@ -203,11 +211,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
-
+  const [center, setCenter] = useState<CenterDataType>();
   const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
+  const [languages, setLanguages] = useState("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
   const [propertyPortions, setPropertyPortions] = useState<number>(0);
   const [nearbyAccordion, setNearbyAccordion] = useState<boolean[]>(() =>
@@ -224,6 +233,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const dt2 = tomorrow.toISOString().split("T")[0];
   const [stdt, setStdt] = useState<string>(dt1);
   const [nddt, setNddt] = useState<string>(dt2);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Set your API key here
+  });
 
   // TODO: Accessing current Location
   useEffect(() => {
@@ -297,13 +309,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
-    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
+    // console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
 
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
@@ -343,6 +354,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
+          setCenter(response.data.center);
         }
 
         const languageResponse = await axios.get(
@@ -372,19 +384,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   useEffect(() => {
     const getUsername = async () => {
       try {
-        const response = await axios.get(
-          `/api/getUsername/${userIdOfPorperty}`
-        );
+        const response = await axios.post("/api/getUsername", {
+          userId: userIdOfPorperty,
+        });
         if (response.data) {
           const tempName = response.data.name;
           const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
           setUsername(name);
+          setLanguages(response.data.spokenLanguage);
         }
       } catch (err) {
         console.log("error: ", err);
       }
     };
-    getUsername();
+    if (userIdOfPorperty) getUsername();
   }, [userIdOfPorperty]);
 
   let portions = 0;
@@ -861,7 +874,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center gap-3">
             <IoLanguageOutline className=" text-lg md:text-xl" />
             <span className="text-sm md:text-base">
-              Language spoken - English, {language}
+              Language spoken - {languages ? languages : `English, ${language}`}
             </span>
           </div>
         </div>
@@ -926,13 +939,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         {/* MAP */}
         <div className="aspect-w-5 aspect-h-5 sm:aspect-h-3 ring-1 ring-black/10 rounded-xl z-0">
           <div className="rounded-xl overflow-hidden z-0">
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+              strategy="beforeInteractive"
+            />
+            {center && <MapWithCircle center={center} radius={3000} />}
             <iframe
               width="100%"
               height="100%"
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=Eiffel+Tower,Paris+France"
+              // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
             ></iframe>
           </div>
         </div>
@@ -977,12 +996,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                   <span>Check-in</span>
                   {/* <span>{time[0]}:00 am</span> */}
-                  <span>{particularProperty?.time[0]}:00 am</span>
+                  <span>{particularProperty?.time[0]}:00 </span>
                 </div>
                 <div className="flex space-x-10 justify-between p-3">
                   <span>Check-out</span>
                   {/* <span>{time[1]}:00 pm</span> */}
-                  <span>{particularProperty?.time[1]}:00 pm</span>
+                  <span>{particularProperty?.time[1]}:00 </span>
                 </div>
               </div>
             </div>
@@ -1044,12 +1063,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                               >
                                 <div>
                                   {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl != undefined ? (
+                                    ?.nearbyLocationUrl[index] != undefined &&
+                                  particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl[index] != "" ? (
                                     <Link
                                       href={
                                         new URL(
-                                          particularProperty?.nearbyLocations
-                                            ?.nearbyLocationUrl?.[index] || ""
+                                          particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
+                                            index
+                                          ]
                                         )
                                       }
                                       target="_blank"
@@ -1518,7 +1540,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     setAllImages(arr);
   }, [particularProperty]);
 
-
   const carouselSettings = {
     dots: true,
     infinite: true,
@@ -1554,6 +1575,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           </div>
 
           {/* Thumbnail images for larger screens */}
+          {/*           {carouselPictures?.[indexId] */}
+          {/*           {propertyPicturesTemp */}
           {allImages
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
@@ -1635,7 +1658,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {/* {renderSection7()} */}
+          {center &&
+            center?.lat != 0 &&
+            center?.lng != 0 &&
+            isLoaded &&
+            renderSection7()}
           {renderSection8()}
         </div>
 

@@ -6,7 +6,7 @@ connectDb();
 
 export async function GET(req) {
   try {
-    const blogs = await Blog.find().limit(5).sort({ _id: 1 });
+    const blogs = await Blog.find().limit(4).sort({ _id: 1 });
     return NextResponse.json(
       {
         success: true,

@@ -88,7 +88,7 @@ const BlogPage = () => {
       <BgGlassmorphism />
       <div className="container relative">
         <div className="pt-12 pb-4 lg:pb-28">
-          <SectionMagazine5 posts={posts.slice(0, 5)} />
+          <SectionMagazine5 posts={posts.slice(0, 4)} />
         </div>
         <SectionLatestPosts />
       </div>
