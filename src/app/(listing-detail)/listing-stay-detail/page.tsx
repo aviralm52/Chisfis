@@ -70,6 +70,9 @@ import { BentoGridDemo } from "@/components/BentoGrid";
 import { EventInterface } from "@/app/editproperty/page";
 import dateParser from "@/helper/dateParser";
 import CustomDateRangePrice from "@/components/CustomDateRangePrice";
+import { useLoadScript } from "@react-google-maps/api";
+import Script from "next/script";
+import MapWithCircle from "@/components/MapWithCircle";
 
 // export interface ListingStayDetailPageProps {
 //   card: {
@@ -188,6 +191,11 @@ interface Properties {
   isLive: boolean;
 }
 
+interface CenterDataType {
+  lat: number;
+  lng: number;
+}
+
 // const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({card}) => {
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const { user } = useAuth();
@@ -203,11 +211,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const [particularProperty, setParticualarProperty] = useState<Properties>();
   const [allImages, setAllImages] = useState<any[]>([]);
-
+  const [center, setCenter] = useState<CenterDataType>();
   const [propertyId, setPropertyId] = useState<string>("");
   const [username, setUsername] = useState<string | null>(null);
   const [userIdOfPorperty, setUserIdOfProperty] = useState<string>("");
   const [language, setLanguage] = useState<string>("");
+  const [languages, setLanguages] = useState("");
   const [allAmenities, setAllAmenities] = useState<any[]>([]);
   const [propertyPortions, setPropertyPortions] = useState<number>(0);
   const [nearbyAccordion, setNearbyAccordion] = useState<boolean[]>(() =>
@@ -224,6 +233,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const dt2 = tomorrow.toISOString().split("T")[0];
   const [stdt, setStdt] = useState<string>(dt1);
   const [nddt, setNddt] = useState<string>(dt2);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", // Set your API key here
+  });
 
   // TODO: Accessing current Location
   useEffect(() => {
@@ -297,13 +309,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     // const airbnbBookings = await fetchAndParseICal(
     //   (formData?.icalLinks as { Airbnb: string })?.["Airbnb"] || ""
     // );
-    console.log("url::: ", url);
     if (!url) {
       setBookedState(true);
       return;
     }
     const airbnbBookings = await fetchAndParseICal(url);
-    console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
+    // console.log("airbnbBookings", airbnbBookings, airbnbBookings?.length);
 
     const eventsFromAirbnb: EventInterface[] = [];
     airbnbBookings?.forEach((event) => {
@@ -343,7 +354,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           setUserIdOfProperty(response.data.userId);
           setPropertyId(response.data._id);
           setPropertyPortions(response?.data?.portionName.length);
+          setCenter(response.data.center);
         }
+
         const languageResponse = await axios.get(
           `https://restcountries.com/v3.1/name/${response?.data?.country}`
         );
@@ -362,7 +375,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         );
         setAllAmenities(filteredAllAmen);
       } catch (err) {
-        console.log(err);
+        console.log("error: ", err);
       }
     };
     getProperties();
@@ -371,19 +384,20 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   useEffect(() => {
     const getUsername = async () => {
       try {
-        const response = await axios.get(
-          `/api/getUsername/${userIdOfPorperty}`
-        );
+        const response = await axios.post("/api/getUsername", {
+          userId: userIdOfPorperty,
+        });
         if (response.data) {
           const tempName = response.data.name;
           const name = tempName.charAt(0).toUpperCase() + tempName.slice(1);
           setUsername(name);
+          setLanguages(response.data.spokenLanguage);
         }
       } catch (err) {
         console.log("error: ", err);
       }
     };
-    getUsername();
+    if (userIdOfPorperty) getUsername();
   }, [userIdOfPorperty]);
 
   let portions = 0;
@@ -506,7 +520,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderSection1 = () => {
     return (
-      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-4">
+      <div className="  lg:border lg:border-neutral-700 rounded-xl lg:p-2">
         <div className="flex justify-between items-center lg:mt-2">
           <Badge name={particularProperty?.propertyType} />
           <Badge name={particularProperty?.VSID} />
@@ -860,7 +874,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           <div className="flex items-center gap-3">
             <IoLanguageOutline className=" text-lg md:text-xl" />
             <span className="text-sm md:text-base">
-              Language spoken - English, {language}
+              Language spoken - {languages ? languages : `English, ${language}`}
             </span>
           </div>
         </div>
@@ -925,13 +939,19 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
         {/* MAP */}
         <div className="aspect-w-5 aspect-h-5 sm:aspect-h-3 ring-1 ring-black/10 rounded-xl z-0">
           <div className="rounded-xl overflow-hidden z-0">
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+              strategy="beforeInteractive"
+            />
+            {center && <MapWithCircle center={center} radius={3000} />}
             <iframe
               width="100%"
               height="100%"
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=Eiffel+Tower,Paris+France"
+              // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
             ></iframe>
           </div>
         </div>
@@ -976,12 +996,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                 <div className="flex space-x-10 justify-between p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                   <span>Check-in</span>
                   {/* <span>{time[0]}:00 am</span> */}
-                  <span>{particularProperty?.time[0]}:00 am</span>
+                  <span>{particularProperty?.time[0]}:00 </span>
                 </div>
                 <div className="flex space-x-10 justify-between p-3">
                   <span>Check-out</span>
                   {/* <span>{time[1]}:00 pm</span> */}
-                  <span>{particularProperty?.time[1]}:00 pm</span>
+                  <span>{particularProperty?.time[1]}:00 </span>
                 </div>
               </div>
             </div>
@@ -1007,6 +1027,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
             particularProperty?.nearbyLocations?.nearbyLocationName?.length >
               0 ? (
               <>
+                {" "}
                 <h2 className=" my-2 flex items-center gap-x-2 font-bold text-2xl ">
                   Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
                 </h2>
@@ -1042,12 +1063,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
                               >
                                 <div>
                                   {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl != undefined ? (
+                                    ?.nearbyLocationUrl[index] != undefined &&
+                                  particularProperty?.nearbyLocations
+                                    ?.nearbyLocationUrl[index] != "" ? (
                                     <Link
                                       href={
                                         new URL(
-                                          particularProperty?.nearbyLocations
-                                            ?.nearbyLocationUrl?.[index] || ""
+                                          particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
+                                            index
+                                          ]
                                         )
                                       }
                                       target="_blank"
@@ -1088,6 +1112,8 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               </>
             ) : (
               <div className=" ml-2">
+                {/* LONG TERM INFO */}
+
                 {particularProperty?.rentalType === "Long Term" && (
                   <div className="mt-3 text-neutral-500 dark:text-neutral-400 space-y-2 w-full">
                     <div className=" flex items-center gap-x-2">
@@ -1176,10 +1202,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     const calculateDateDifference = (start: Date | null, end: Date | null) => {
       if (start && end) {
         const timeDiff = end.getTime() - start.getTime();
-        return Math.ceil(timeDiff / (1000 * 3600 * 24));
+        return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Adding 1 to include both start and end dates
       }
       return 0;
     };
+
+    // const basePrice = particularProperty?.basePrice[indexId] ?? 0;
     const basePrice =
       particularProperty?.rentalType === "Short Term"
         ? particularProperty?.basePrice[indexId]
@@ -1280,7 +1308,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     dots: true,
     infinite: false,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: 3, // Adjust the number of cards to show at once
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
@@ -1325,80 +1353,79 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
 
   const renderPortionCards = () => {
     return (
-      <>
-        <div className=" border border-neutral-200 dark:border-neutral-700 p-4 rounded-xl">
-          <div className="ml-2 mb-2">
-            <h2 className="text-2xl font-semibold">Portions</h2>
-            <span className="block mt-2 text-neutral-500 dark:text-neutral-400">
-              {` Details about the portions`}
-            </span>
-          </div>
-          <Slider {...settings} className="">
-            {Array.from({ length: propertyPortions }, () => 1).map(
-              (item, index) => (
-                <div className="flex  items-center px-2  " key={index}>
-                  <Link
-                    href={{
-                      pathname: `/listing-stay-detail`,
-                      query: {
-                        id: propertyId,
-                        portion: index,
-                      },
-                    }}
-                  >
-                    <div className="lg:h-48 md:h-44 sm:h-40 h-36 w-full bg-white rounded-xl shadow-md">
-                      {particularProperty?.portionCoverFileUrls[index] ? (
-                        <img
-                          src={particularProperty?.portionCoverFileUrls[index]}
-                          alt="Portion Image"
-                          className="h-full w-full rounded-xl object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col justify-center items-center">
-                          <BsExclamationCircleFill className="w-1/4 h-1/4 mb-2 text-neutral-600" />
-                          <span className="text-neutral-600 font-medium">
-                            Image not found
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="flex items-center px-2 gap-x-2">
-                    <div className="flex items-center">
-                      <h2 className="">{particularProperty?.beds[index]}</h2>
-                      <IoIosBed className="text-sm" />
-                    </div>
-                    <div className="flex items-center">
-                      <h2 className="">
-                        {particularProperty?.bathroom[index]}
-                      </h2>
-                      <FaBath className="text-sm" />
-                    </div>
-                    <div className="flex items-center">
-                      <h2 className="text-lg">
-                        {particularProperty?.guests[index]}
-                      </h2>
-                      <FaUser className="text-xs" />
-                    </div>
-                    <div className="flex items-center">
-                      <h2 className="">
-                        {particularProperty?.portionSize[index]}sq
-                      </h2>
-                      <SlSizeFullscreen className="text-xs" />
-                    </div>
+      <div className=" flex gap-4 property-carousel-container">
+        <Slider {...settings} className="w-full">
+          {Array.from({ length: propertyPortions }, () => 1).map(
+            (item, index) => (
+              <div
+                className=" border border-gray-600 rounded-xl overflow-hidden cursor-pointer"
+                key={index}
+              >
+                <Link
+                  href={{
+                    pathname: `/listing-stay-detail`,
+                    query: {
+                      id: propertyId,
+                      portion: index,
+                    },
+                  }}
+                >
+                  <div className=" lg:h-48 md:h-44 sm:h-40 w-full">
+                    {particularProperty?.portionCoverFileUrls[index] ? (
+                      <img
+                        src={particularProperty?.portionCoverFileUrls[index]}
+                        alt="Portion Image"
+                        className="cover w-full object-fill h-full rounded-xl hover:opacity-60"
+                      />
+                    ) : (
+                      <div className=" w-full h-full flex flex-col justify-center items-center">
+                        <BsExclamationCircleFill className=" w-1/4 h-1/4 mb-2 text-neutral-600" />
+                        <span className=" text-neutral-600 font-medium">
+                          Image not found
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex px-2 items-center justify-between">
-                    <p className="line-clamp-1">Portion {index + 1}</p>
-                    <p className="line-clamp-1">
-                      € {particularProperty?.basePrice[index]}/night
-                    </p>
+                </Link>
+                <div className=" flex gap-4 justify-center items-center my-2">
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.beds[index]}
+                    </h2>{" "}
+                    <IoIosBed className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.bathroom[index]}
+                    </h2>{" "}
+                    <FaBath className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.guests[index]}
+                    </h2>{" "}
+                    <FaUser className="text-md" />
+                  </div>
+                  <div className=" flex items-center gap-2 ">
+                    <h2 className=" text-sm">
+                      {particularProperty?.portionSize[index]} sq
+                    </h2>{" "}
+                    <SlSizeFullscreen className="text-md" />
                   </div>
                 </div>
-              )
-            )}
-          </Slider>
-        </div>
-      </>
+                <div className=" px-2 py-4">
+                  <h2 className=" font-semibold text-xl">
+                    Portion {index + 1}
+                  </h2>
+                  <p className=" text-lg font-medium">
+                    € {particularProperty?.basePrice[index]}/night
+                  </p>
+                </div>
+              </div>
+            )
+          )}
+        </Slider>
+      </div>
     );
   };
 
@@ -1488,7 +1515,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
   const [propertyPicturesTemp, setPropertyPicturesTemp] = useState<string[]>(
     []
   );
-
+  const [carouselPictures, setCarouselPictures] = useState<string[][]>([]);
   useEffect(() => {
     if (particularProperty?.propertyPictureUrls) {
       setPropertyPicturesTemp(particularProperty?.propertyPictureUrls);
@@ -1507,6 +1534,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
       for (let i = 0; i < particularProperty?.portionPictureUrls.length; i++) {
         if (particularProperty?.portionPictureUrls[i] != undefined)
           arr = [...arr, ...particularProperty?.portionPictureUrls[i]];
+        setCarouselPictures((prev) => {
+          return [...prev, particularProperty?.portionPictureUrls[i]];
+        });
       }
     }
     arr = arr.filter((item) => item != "");
@@ -1527,14 +1557,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
     <div
       className={`nc-ListingStayDetailPage ${modalIsOpen ? "blur-md" : ""} `}
     >
-      <header className="rounded-md md:max-h-[60vh] sm:rounded-xl">
+      <header className="rounded-md sm:rounded-xl">
+        {/* Main Grid Layout for larger screens */}
         <div className="relative  hidden  w-full h-full md:grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-          <div className="col-span-2   row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
+          <div className="col-span-2  row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden">
             {particularProperty?.propertyCoverFileUrl ? (
               <img
                 src={particularProperty?.propertyCoverFileUrl}
                 alt="Cover Image"
-                className=" object-fill h-full w-full"
+                className="object-cover h-full w-full"
               />
             ) : (
               <div className="w-full h-full flex flex-col justify-center items-center">
@@ -1545,12 +1576,15 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
               </div>
             )}
           </div>
+
           {/* Thumbnail images for larger screens */}
+          {/*           {carouselPictures?.[indexId] */}
+          {/*           {propertyPicturesTemp */}
           {allImages
             ?.filter((_, i) => i >= 1 && i < 5)
             .map((item, index) => (
               <div
-                className="w-full aspect-w-4 aspect-h-3 max-h-[60vh] rounded-xl overflow-hidden"
+                className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5 rounded-xl"
                 key={index}
               >
                 {allImages[index] ? (
@@ -1627,7 +1661,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = () => {
           {propertyPortions > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {/* {renderSection7()} */}
+          {center &&
+            center?.lat != 0 &&
+            center?.lng != 0 &&
+            isLoaded &&
+            renderSection7()}
           {renderSection8()}
         </div>
 

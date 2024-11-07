@@ -1,7 +1,7 @@
 import { connectDb } from "../../../helper/db";
 import { NextRequest, NextResponse } from "next/server";
 import { NextApiRequest } from "next";
-import { Property } from "@/models/listing";
+import { Properties } from "@/models/property";
 
 connectDb();
 
@@ -12,7 +12,7 @@ export async function GET(req) {
   const queryLimit = limit ? parseInt(limit, 10) : undefined;
 
   try {
-    const allProperties = await Property.aggregate([
+    const allProperties = await Properties.aggregate([
       { $match: { isLive: true } },
       { $sample: { size: queryLimit || 0 } },
     ]);

@@ -103,10 +103,11 @@ export default function GallerySlider({
                   sizes="(max-width: 1025px) 100vw, 300px"
                 /> */}
                 <Link
-                  href={{
-                    pathname: "/listing-stay-detail",
-                    query: { id: id },
-                  }}
+                  // href={{
+                  //   pathname: "/listing-stay-detail",
+                  //   query: { id: id },
+                  // }}
+                  href={`listing-stay-detail/${id}` as Route}
                   key={index}
                 >
                   {currentImage ? (

@@ -168,6 +168,7 @@ export interface PropertyDataType {
   propertyPictureUrls?: string[];
   portionCoverFileUrls?: string[];
   portionPictureUrls?: string[][];
+  propertyImages?: string[];
 
   night?: number[];
   time?: number[];
