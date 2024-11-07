@@ -1,6 +1,6 @@
 import { connectDb } from "../../../helper/db";
 import { NextRequest, NextResponse } from "next/server";
-import { Property } from "@/models/listing";
+import { Properties } from "@/models/property";
 
 connectDb();
 
@@ -22,7 +22,7 @@ export async function GET(req) {
   }
 
   try {
-    const allProperties = await Property.find(filter).skip(skip).limit(limit);
+    const allProperties = await Properties.find(filter).skip(skip).limit(limit);
     return NextResponse.json(allProperties);
   } catch (error) {
     console.error("Error fetching properties: ", error);
