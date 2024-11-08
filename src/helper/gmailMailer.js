@@ -74,7 +74,7 @@ export const sendUserDetailsToCompany = async (userDetails) => {
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "aviralm52@gmail.com",
+      to: process.env.COMPANY_EMAIL,
       subject: subject,
       text: text,
     };
@@ -187,7 +187,7 @@ export const sendBookingConfirmationEmailToCompany = async (
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "aviralm522@gmail.com",
+      to: process.env.COMPANY_EMAIL,
       subject: subject,
       html: html,
     };
@@ -324,7 +324,7 @@ export const sendBookingEmailToCompany = async (
 
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "amantrivedi598@gmail.com",
+      to: process.env.COMPANY_EMAIL,
       subject: subject,
       text: text,
     };
@@ -505,7 +505,7 @@ export const sendBookingCancellationEmailToCompany = async (
     `;
     const mailOptions = {
       from: `No Reply <no-reply@yourdomain.com>`,
-      to: "amantrivedi598@gmail.com",
+      to: process.env.COMPANY_EMAIL,
       subject: subject,
       text: text,
     };

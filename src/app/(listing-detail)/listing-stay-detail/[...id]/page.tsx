@@ -782,8 +782,10 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
               src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
               strategy="beforeInteractive"
             />
-            {center && <MapWithCircle center={center} radius={3000} />}
-            <iframe
+            {center && isLoaded && (
+              <MapWithCircle center={center} radius={3000} />
+            )}
+            {/* <iframe
               width="100%"
               height="100%"
               loading="lazy"
@@ -791,7 +793,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
               referrerPolicy="no-referrer-when-downgrade"
               // src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&center=${center?.lat},${center?.lng}&zoom=15`}
               src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${center?.lat},${center?.lng}&q=37.087287,25.373241`}
-            ></iframe>
+            ></iframe> */}
           </div>
         </div>
       </div>
@@ -849,82 +851,96 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
                   Nearby Locations <FaMapMarkerAlt className=" w-6 h-6" />
                 </h2>
                 <div className=" h-full max-h-64 overflow-y-auto scrollbar-thin">
-                  {["Cafe", "Restaurant", "Mall"]?.map((item, ind) => (
-                    <div key={ind} className=" px-2">
-                      <h3
-                        className=" flex items-center gap-x-2 text-lg font-medium cursor-pointer"
-                        onClick={() => {
-                          setNearbyAccordion((prev) => {
-                            const newState = [...prev];
-                            newState[ind] = !newState[ind];
-                            return newState;
-                          });
-                        }}
-                      >
-                        {item}{" "}
-                        {nearbyAccordion[ind] ? (
-                          <IoIosArrowDropdownCircle />
-                        ) : (
-                          <IoIosArrowDroprightCircle />
-                        )}
-                      </h3>
-                      {nearbyAccordion[ind] &&
-                        particularProperty?.nearbyLocations?.nearbyLocationName?.map(
-                          (innerItem, index) =>
-                            item ===
-                              particularProperty?.nearbyLocations
-                                ?.nearbyLocationTag[index] && (
-                              <div
-                                key={index}
-                                className=" flex justify-between text-sm text-neutral-500 px-2 font-medium"
-                              >
-                                <div>
-                                  {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl[index] != undefined &&
-                                  particularProperty?.nearbyLocations
-                                    ?.nearbyLocationUrl[index] != "" ? (
-                                    <Link
-                                      href={
-                                        new URL(
-                                          particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
-                                            index
-                                          ]
-                                        )
-                                      }
-                                      target="_blank"
-                                    >
-                                      {" "}
-                                      {
-                                        particularProperty?.nearbyLocations
-                                          ?.nearbyLocationName[index]
-                                      }
-                                    </Link>
-                                  ) : (
-                                    <p>
-                                      {
-                                        particularProperty?.nearbyLocations
-                                          ?.nearbyLocationName[index]
-                                      }
-                                    </p>
-                                  )}
+                  {/* {["Cafe", "Restaurant", "Mall"]?.map((item, ind) => ( */}
+                  {Array.from(
+                    new Set(
+                      particularProperty?.nearbyLocations?.nearbyLocationTag
+                    )
+                  )?.map((item, ind) =>
+                    particularProperty?.nearbyLocations?.nearbyLocationName?.[
+                      particularProperty?.nearbyLocations?.nearbyLocationTag?.indexOf(
+                        item
+                      )
+                    ] ? (
+                      <div key={ind} className=" px-2">
+                        <h3
+                          className=" flex items-center gap-x-2 text-lg font-medium cursor-pointer"
+                          onClick={() => {
+                            setNearbyAccordion((prev) => {
+                              const newState = [...prev];
+                              newState[ind] = !newState[ind];
+                              return newState;
+                            });
+                          }}
+                        >
+                          {item}{" "}
+                          {nearbyAccordion[ind] ? (
+                            <IoIosArrowDropdownCircle />
+                          ) : (
+                            <IoIosArrowDroprightCircle />
+                          )}
+                        </h3>
+                        {nearbyAccordion[ind] &&
+                          particularProperty?.nearbyLocations?.nearbyLocationName?.map(
+                            (innerItem, index) =>
+                              item ===
+                                particularProperty?.nearbyLocations
+                                  ?.nearbyLocationTag[index] && (
+                                <div
+                                  key={index}
+                                  className=" flex justify-between text-sm text-neutral-500 px-2 font-medium"
+                                >
+                                  <div>
+                                    {particularProperty?.nearbyLocations
+                                      ?.nearbyLocationUrl?.[index] !=
+                                      undefined &&
+                                    particularProperty?.nearbyLocations
+                                      ?.nearbyLocationUrl?.[index] != "" ? (
+                                      <Link
+                                        href={
+                                          new URL(
+                                            particularProperty?.nearbyLocations?.nearbyLocationUrl?.[
+                                              index
+                                            ]
+                                          )
+                                        }
+                                        target="_blank"
+                                      >
+                                        {" "}
+                                        {
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationName[index]
+                                        }
+                                      </Link>
+                                    ) : (
+                                      <p>
+                                        {
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationName[index]
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div>
+                                    {particularProperty?.nearbyLocations
+                                      ?.nearbyLocationDistance[index] >= 1000
+                                      ? (
+                                          particularProperty?.nearbyLocations
+                                            ?.nearbyLocationDistance[index] /
+                                          1000
+                                        ).toFixed(1) + " km"
+                                      : particularProperty?.nearbyLocations
+                                          ?.nearbyLocationDistance[index] +
+                                        " m"}
+                                  </div>
                                 </div>
-                                <div>
-                                  {particularProperty?.nearbyLocations
-                                    ?.nearbyLocationDistance[index] >= 1000
-                                    ? (
-                                        particularProperty?.nearbyLocations
-                                          ?.nearbyLocationDistance[index] / 1000
-                                      ).toFixed(1) + " km"
-                                    : particularProperty?.nearbyLocations
-                                        ?.nearbyLocationDistance[index] + " m"}
-                                </div>
-                              </div>
-                            )
-                        )}
+                              )
+                          )}
 
-                      <div className=" w-full h-0.5 bg-neutral-700 my-2"></div>
-                    </div>
-                  ))}
+                        <div className=" w-full h-0.5 bg-neutral-700 my-2"></div>
+                      </div>
+                    ) : null
+                  )}
                 </div>
               </>
             ) : (
@@ -1425,11 +1441,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           {(commonProperties?.length || 0) > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {center &&
-            center?.lat != 0 &&
-            center?.lng != 0 &&
-            isLoaded &&
-            renderSection7()}
+          {center && center?.lat != 0 && center?.lng != 0 && renderSection7()}
           {renderSection8()}
         </div>
 

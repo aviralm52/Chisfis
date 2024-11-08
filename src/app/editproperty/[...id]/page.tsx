@@ -57,13 +57,18 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [numberOfPortions, setNumberOfPortions] = useState<number>(1);
   const [refreshState, setRefreshState] = useState(false);
+  const [allImages, setAllImages] = useState<string[]>([]);
 
   const BlurFadeDemo = (images: string[]) => {
     return (
       <section id="photos" className=" mt-2">
         <div className="columns-2 gap-4 sm:columns-3">
           {images.map((imageUrl, idx) => (
-            <BlurFade key={imageUrl} delay={0.25 + idx * 0.05} inView>
+            <BlurFade
+              key={`${imageUrl}-${idx}`}
+              delay={0.25 + idx * 0.05}
+              inView
+            >
               <Link href={{ pathname: imageUrl }} target="_blank">
                 {/* <NeonGradientCard> */}
                 {imageUrl && (
@@ -269,7 +274,9 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
           pricePerDay: properties[i].pricePerDay,
           weekendPrice: properties[i].weekendPrice,
           weeklyDiscount: properties[i].weeklyDiscount,
+          isInstantBooking: properties[i].isInstantBooking,
         };
+        setAllImages((prev) => [...prev, ...properties[i].propertyImages]);
         portionSpecificFields.push(newObj);
       }
       setPortionFields(portionSpecificFields);
@@ -278,7 +285,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
-    const trimmedValue = value.trim();
+    const trimmedValue = value?.trim();
     setCommonFields((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : trimmedValue,
@@ -324,15 +331,21 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
   const [bookedDates, setBookedDates] = useState<EventInterface[]>([
     // { start: "2024-10-07", end: "2024-10-09", title: "Booked" }
   ]); //! {start: "YYYY-MM-DD"}
-  const handleAddIcalLink = () => {
+  const handleAddIcalLink = (index: number) => {
     if (icalLinkRef.current?.value == "") return;
-    const newObj = {
-      [icalPlatform]: icalLinkRef.current?.value,
-    };
-    setFormData((prevState) => ({
-      ...prevState,
-      icalLinks: { ...(prevState.icalLinks || {}), ...newObj },
-    }));
+
+    const link = icalLinkRef.current?.value;
+
+    setPortionFields((prev) => {
+      const newPortionArray = [...prev];
+      const newPortionObj = newPortionArray[index];
+      const newIcalObj: { [key: string]: string } = {};
+      newIcalObj["Airbnb"] = link ?? "";
+      newPortionObj.icalLinks = newIcalObj;
+      newPortionArray[index] = newPortionObj;
+      return newPortionArray;
+    });
+
     if (icalLinkRef.current) {
       icalLinkRef.current.value = "";
     }
@@ -564,38 +577,14 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
       <Toaster />
       <div className=" w-full md:flex md:justify-between">
         <div className=" w-full md:w-2/5 max-h-screen mt-2 overflow-auto overflow-x-hidden p-2">
-          {BlurFadeDemo(properties?.[0]?.propertyImages || [])}
+          {/* {BlurFadeDemo(properties?.[0]?.propertyImages || [])} */}
+          {BlurFadeDemo(allImages || [])}
         </div>
         <form
           onSubmit={handleSubmit}
           className=" md:w-3/5 border-white overflow-scroll overflow-x-hidden max-h-screen scroll-smooth relative mb-4 px-4 scrollbar-thin"
         >
           <div className="flex flex-col gap-x-2 gap-y-4 ">
-            {formData?.icalLinks && (
-              <h1 className="text-xl font-medium bg-background">Ical links</h1>
-            )}
-            {formData?.icalLinks &&
-              Object.entries(formData?.icalLinks)?.map(([key, value]) => (
-                <div key={key} className="flex items-center justify-around">
-                  <Label className=" w-2/12  text-lg font-semibold ml-1 p-2">
-                    {key}
-                  </Label>
-                  <Input
-                    type="text"
-                    value={value || ""}
-                    className=" w-9/12 p-2 text-base bg-background border rounded-xl disabled:cursor-not-allowed"
-                    disabled
-                  />
-
-                  <div className=" w-1/12 flex justify-center">
-                    <TrashIcon
-                      className=" w-6 h-6 cursor-pointer"
-                      onClick={() => handleRemoveIcalLink(key)}
-                    />
-                  </div>
-                </div>
-              ))}
-
             <div className="">
               <h1 className="text-base sm:text-lg md:text-3xl font-medium mt-2 inline-block border-b-2 border-dashed">
                 Common Data
@@ -608,7 +597,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <Input
                   type="text"
                   name="placeName"
-                  value={commonFields?.propertyName}
+                  value={commonFields?.propertyName ?? ""}
                   onChange={handleChange}
                 />
               </label>
@@ -621,17 +610,17 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <select
                   name="rentalType"
                   id="rentalType"
-                  value={commonFields?.rentalType || ""}
+                  defaultValue={commonFields?.rentalType || ""}
                   className=" dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-lg p-2 w-full"
                 >
                   <option
-                    value="Short Term"
+                    defaultValue="Short Term"
                     className=" text-black dark:text-white dark:bg-neutral-800"
                   >
                     Short Term
                   </option>
                   <option
-                    value="Long Term"
+                    defaultValue="Long Term"
                     className=" text-black dark:text-white dark:bg-neutral-800"
                   >
                     Long Term
@@ -645,124 +634,124 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <select
                   name="propertyType"
                   id="propertyType"
-                  value={commonFields.propertyType}
+                  value={commonFields.propertyType ?? ""}
                   onChange={(e) => handleChange(e)}
                   className=" dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-2xl w-full"
                 >
-                  <option value="" disabled>
+                  <option defaultValue="" disabled>
                     Select an option
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Hotel"
+                    defaultValue="Hotel"
                   >
                     Hotel
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Cottage"
+                    defaultValue="Cottage"
                   >
                     Cottage
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Villa"
+                    defaultValue="Villa"
                   >
                     Villa
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Cabin"
+                    defaultValue="Cabin"
                   >
                     Cabin
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Farm stay"
+                    defaultValue="Farm stay"
                   >
                     Farm stay
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Houseboat"
+                    defaultValue="Houseboat"
                   >
                     Houseboat
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Lighthouse"
+                    defaultValue="Lighthouse"
                   >
                     Lighthouse
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Studio"
+                    defaultValue="Studio"
                   >
                     Studio
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Apartment"
+                    defaultValue="Apartment"
                   >
                     Apartment
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Penthouse"
+                    defaultValue="Penthouse"
                   >
                     Penthouse
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Detached House"
+                    defaultValue="Detached House"
                   >
                     Detached House
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Loft"
+                    defaultValue="Loft"
                   >
                     Loft
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Maisonette"
+                    defaultValue="Maisonette"
                   >
                     Maisonette
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Farmhouse"
+                    defaultValue="Farmhouse"
                   >
                     Farmhouse
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Holiday Homes"
+                    defaultValue="Holiday Homes"
                   >
                     Holiday Homes
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Farmstay"
+                    defaultValue="Farmstay"
                   >
                     Farmstay
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Resort"
+                    defaultValue="Resort"
                   >
                     Resort
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Lodge"
+                    defaultValue="Lodge"
                   >
                     Lodge
                   </option>
                   <option
                     className=" text-black dark:text-white dark:bg-neutral-800"
-                    value="Apart Hotel"
+                    defaultValue="Apart Hotel"
                   >
                     Apart Hotel
                   </option>
@@ -778,7 +767,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                 <Input
                   type="text"
                   name="rentalForm"
-                  value={commonFields?.rentalForm || ""}
+                  value={commonFields?.rentalForm ?? ""}
                   onChange={handleChange}
                   disabled
                 />
@@ -916,7 +905,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
               </h1>
             </div>
 
-            {properties?.map((item, index) => {
+            {properties?.map((item, index: number) => {
               return (
                 <div className=" flex flex-col space-y-4 mt-4" key={index}>
                   <h1
@@ -958,8 +947,8 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               name="calendar"
                               id="calendar"
                               className="dark:text-white border-neutral-200 focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50 bg-white dark:border-neutral-700 dark:focus:ring-primary-6000 dark:focus:ring-opacity-25 dark:bg-neutral-900 rounded-2xl p-2"
+                              value={icalPlatform ?? "Booking"}
                               onChange={(e) => setIcalPlatform(e.target.value)}
-                              value={icalPlatform}
                             >
                               <option
                                 className=" bg-transparent dark:bg-transparent"
@@ -969,7 +958,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                               </option>
                               <option
                                 className=" bg-transparent dark:bg-transparent"
-                                value="Airbnb"
+                                defaultValue="Airbnb"
                               >
                                 Airbnb
                               </option>
@@ -983,12 +972,33 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                             <div className=" w-1/12 flex items-center justify-center cursor-pointer">
                               <FaCirclePlus
                                 className=" h-6 w-6 cursor-pointer"
-                                onClick={handleAddIcalLink}
+                                onClick={() => handleAddIcalLink(index)}
                               />
                             </div>
                           </div>
                         </div>
                       </div>
+
+                      {portionFields?.[index]?.icalLinks && (
+                        <div className=" my-1">
+                          <p className=" text-base">Added Ical Links</p>
+                          {Object.keys(portionFields?.[index]?.icalLinks)?.map(
+                            (platform, icalIndex) => (
+                              <p key={icalIndex}>
+                                {platform} -{" "}
+                                {
+                                  (
+                                    portionFields?.[index]?.icalLinks as {
+                                      [key: string]: string;
+                                    }
+                                  )?.[platform]
+                                }
+                              </p>
+                            )
+                          )}
+                        </div>
+                      )}
+
                       <div className="w-full">
                         <label htmlFor="portionName" className=" w-full">
                           Portion&apos;s Name
@@ -1261,7 +1271,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                         <Input
                           type="text"
                           disabled
-                          value={`https://vacationsaga.com/api/ical/${properties[index]._id}`}
+                          defaultValue={`https://vacationsaga.com/api/ical/${properties[index]._id}`}
                           className=" w-4/6"
                         />
                         <div className=" flex flex-col items-center box-border relative">
@@ -1269,7 +1279,7 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                             onClick={() => {
                               navigator.clipboard
                                 .writeText(
-                                  `https://vacationsaga.com/api/ical/${id}`
+                                  `https://vacationsaga.com/api/ical/${properties[index]._id}`
                                 )
                                 .then(() => {
                                   handleClickedOnCopy();
