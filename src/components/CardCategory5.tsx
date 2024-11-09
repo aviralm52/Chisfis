@@ -4,6 +4,7 @@ import convertNumbThousand from "@/utils/convertNumbThousand";
 import Link from "next/link";
 import Image from "next/image";
 import { PathName } from "@/routers/types";
+import { useSearchParams } from "next/navigation";
 
 export interface CardCategory5Props {
   className?: string;
@@ -15,11 +16,15 @@ const CardCategory5: FC<CardCategory5Props> = ({
   taxonomy,
 }) => {
   const { count, name, href = "/", thumbnail } = taxonomy;
+
+  const params = useSearchParams();
+  const location = params.get("place") || params.get("location") || "Greece";
+
   return (
     <Link
       href={{
         pathname: href as PathName,
-        query: { propertyType: name },
+        query: { propertyType: name, location: location },
       }}
       className={`nc-CardCategory5 flex flex-col ${className}`}
       data-nc-id="CardCategory5"

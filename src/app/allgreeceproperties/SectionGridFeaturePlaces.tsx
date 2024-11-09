@@ -28,7 +28,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const params = useSearchParams();
-  const country = params.get("place") || "Greece";
+  const country = params.get("place") || params.get("location") || "Greece";
   const pType = params.get("propertyType") || "";
   const recordPerPage = 12;
 
@@ -43,10 +43,12 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   const [houserool, setHouseRool] = useState<string>();
 
   const fetchProperties = async (page: number = 1) => {
+    console.log(page, currentPage);
     setLoading(true);
     setRentalType("");
     try {
       if (!pType) {
+        console.log("without property type");
         const response = await axios.get(
           `/api/countryspecificproperties/${country}`,
           {
@@ -65,10 +67,19 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
       } else {
         console.log("with property type");
         const response = await axios.post(`/api/getSpecificPropertyType`, {
-          propertyType:pType,
+          propertyType: pType,
+          country: country,
+          params: {
+            limit: recordPerPage,
+            page: currentPage,
+          },
         });
-        if (response.data) {
+        console.log("response: ", page,  response);
+        console.log(fetchedData.length);
+        if (page === 1) {
           setFetchedData(response.data);
+        } else {
+          setFetchedData((prevData) => [...prevData, ...response.data]);
         }
       }
     } catch (error) {
@@ -82,10 +93,26 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
     fetchProperties(currentPage);
   }, [currentPage, country]);
 
+  useEffect(() => {
+    setFetchedData([]);
+    fetchProperties(currentPage);
+  }, [pType]);
+
   const handleFilters = async () => {
     setLoading(true);
     setCurrentPage(1);
-    console.log(rentalForm, propertyType, beds, bedrooms, bathrooms, minPrice, maxPrice, country, rentalType, houserool);
+    console.log(
+      rentalForm,
+      propertyType,
+      beds,
+      bedrooms,
+      bathrooms,
+      minPrice,
+      maxPrice,
+      country,
+      rentalType,
+      houserool
+    );
     try {
       const response = await axios.post("api/filters", {
         rentalForm,
@@ -204,12 +231,12 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
                 </div>
               </div>
             ))
-          ) : fetchedData.length === 0 ? (
+          ) : fetchedData?.length === 0 ? (
             <div className="flex items-center justify-center w-full h-full">
               <p className="text-2xl text-center">No data available</p>
             </div>
           ) : (
-            fetchedData.map((item, index) => (
+            fetchedData?.map((item, index) => (
               <PropertyCard key={index} data={item} />
             ))
           )}
