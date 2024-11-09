@@ -982,20 +982,20 @@ const EditPropertyPage: React.FC<PageProps> = ({ params }) => {
                       {portionFields?.[index]?.icalLinks && (
                         <div className=" my-1">
                           <p className=" text-base">Added Ical Links</p>
-                          {Object.keys(portionFields?.[index]?.icalLinks)?.map(
-                            (platform, icalIndex) => (
-                              <p key={icalIndex}>
-                                {platform} -{" "}
-                                {
-                                  (
-                                    portionFields?.[index]?.icalLinks as {
-                                      [key: string]: string;
-                                    }
-                                  )?.[platform]
-                                }
-                              </p>
-                            )
-                          )}
+                          {Object.keys(
+                            portionFields?.[index]?.icalLinks ?? {}
+                          )?.map((platform, icalIndex) => (
+                            <p key={icalIndex}>
+                              {platform} -{" "}
+                              {
+                                (
+                                  portionFields?.[index]?.icalLinks as {
+                                    [key: string]: string;
+                                  }
+                                )?.[platform]
+                              }
+                            </p>
+                          ))}
                         </div>
                       )}
 
