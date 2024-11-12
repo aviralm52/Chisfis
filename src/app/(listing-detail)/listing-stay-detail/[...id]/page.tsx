@@ -1441,7 +1441,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           {(commonProperties?.length || 0) > 1 && renderPortionCards()}
           {renderSection5()}
           {/* {renderSection6()} */}
-          {center && center?.lat != 0 && center?.lng != 0 && renderSection7()}
+          {/* {center && center?.lat != 0 && center?.lng != 0 && renderSection7()} */}
           {renderSection8()}
         </div>
 
