@@ -32,7 +32,7 @@ const pricings: PricingItem[] = [
   {
     isPopular: false,
     name: "Action  Plan",
-    pricing: "49",
+    pricing: "299",
     per: "/12 months",
     features: [
       "12 Months Listing",
