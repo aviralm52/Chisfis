@@ -86,7 +86,12 @@ const pricings: PricingItem[] = [
 ];
 const PAYMENT_SECRET = process.env.PAYMENT_TOKEN_SECRET!;
 
-const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propertyId }) => {
+const PageSubcription: FC<PageSubcriptionProps> = ({
+  email,
+  name,
+  phone,
+  propertyId,
+}) => {
   const [selectedCard, setSelectedCard] = useState<selectedCard>();
   const [clickedCard, setClickedCard] = useState<string>("");
 
@@ -140,7 +145,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
     setShowPopup(false);
   };
 
-  const [amount, setAmount] = useState<number>(49);
+  const [amount, setAmount] = useState<number>(299);
   const [paymentToken, setPaymentToken] = useState<string>("");
   const [subscribeLoader, setSubscribeLoader] = useState<boolean>(false);
   const [subscribeButton, setSubscribeButton] = useState<boolean[]>(
@@ -157,7 +162,7 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
 
     const encryptToken = async () => {
       try {
-        const response = await axios.post("/api/encrypt", { amount: 49 });
+        const response = await axios.post("/api/encrypt", { amount: 299 });
         console.log("token response: ", response.data);
         setPaymentToken(response.data.encryptedAmount);
         setSubscribeLoader(true);
@@ -225,7 +230,13 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
                   subscribeButton[index] && "bg-orange-500 text-white"
                 }`}
               >
-                Subscribe to this plan {subscribeButton[index] && (subscribeLoader ? "✔️" : <LuLoader2 className=" animate-spin" />)}
+                Subscribe to this plan{" "}
+                {subscribeButton[index] &&
+                  (subscribeLoader ? (
+                    "✔️"
+                  ) : (
+                    <LuLoader2 className=" animate-spin" />
+                  ))}
               </span>
             </ButtonSecondary>
           </div>
@@ -258,14 +269,20 @@ const PageSubcription: FC<PageSubcriptionProps> = ({ email, name, phone, propert
           <ButtonPrimary
             onClick={handlePlan}
             className="absolute -top-20 ml-10 disabled:cursor-not-allowed"
-            disabled={!paymentToken || isPlanDisabled && !subscribeLoader}
+            disabled={!paymentToken || (isPlanDisabled && !subscribeLoader)}
           >
             <Link
               href={{
                 pathname: "/payment",
-                query: {  pId: propertyId, amount: 49, paymentToken: paymentToken },
+                query: {
+                  pId: propertyId,
+                  amount: 299,
+                  paymentToken: paymentToken,
+                },
               }}
-              onClick={(e) => {if(!subscribeLoader || !paymentToken) e.preventDefault()}}
+              onClick={(e) => {
+                if (!subscribeLoader || !paymentToken) e.preventDefault();
+              }}
             >
               {isLoading ? "Processing..." : "Continue"}
             </Link>
