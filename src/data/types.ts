@@ -262,6 +262,17 @@ export interface PropertiesDataType {
   updatedAt: Date;
 }
 
+export interface QuickListingInterface {
+  QID: string;
+  ownerName: string;
+  ownerMobile: string;
+  propertyName: string;
+  propertyImages: string[];
+  description: string;
+  basePrice: number;
+  address: string;
+}
+
 //
 export interface ExperiencesDataType {
   id: string | number;
