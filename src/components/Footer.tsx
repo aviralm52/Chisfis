@@ -31,7 +31,7 @@ const widgetMenus: WidgetFooterMenu[] = [
     menus: [
       { href: "/about", label: "About Us" },
       { href: "#", label: "How we Work" },
-      { href: "/subscription", label: "Becoma a Host" },
+      { href: "/subscription", label: "Becoma Host" },
       { href: "/blog", label: "Blogs" },
       { href: "/contact", label: "Contact Us" },
     ],
@@ -119,11 +119,11 @@ const renderItem = (item: SocialType, index: number) => {
       className="flex items-center text-2xl my-4 text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white leading-none space-x-2 group"
       key={index}
     >
-      {item.name == "Facebook"&& <FaFacebookSquare className=" text-md"  />}
-      {item.name == "Twitter" && <FaXTwitter className=" text-md" /> }
-      {item.name == "Community" && <GrGroup className=" text-md" /> }
-      {item.name == "Instagram" && <FiInstagram className=" text-md" /> }
-      {item.name == "Pinterest" && <FaPinterest className=" text-md" /> }
+      {item.name == "Facebook" && <FaFacebookSquare className=" text-md" />}
+      {item.name == "Twitter" && <FaXTwitter className=" text-md" />}
+      {item.name == "Community" && <GrGroup className=" text-md" />}
+      {item.name == "Instagram" && <FiInstagram className=" text-md" />}
+      {item.name == "Pinterest" && <FaPinterest className=" text-md" />}
       <span className="hidden lg:block text-sm ml-8">{item.name}</span>
     </a>
   );
@@ -132,11 +132,11 @@ const renderItem = (item: SocialType, index: number) => {
 const Footer: React.FC = () => {
   const renderWidgetMenuItem = (menu: WidgetFooterMenu, index: number) => {
     return (
-      <div key={index} className="text-sm">
+      <div key={index} className="text-sm px-4">
         <h2 className="font-semibold text-neutral-700 dark:text-neutral-200">
           {menu.title}
         </h2>
-        <ul className="mt-5 space-y-4">
+        <ul className="mt-5 space-y-2">
           {menu.menus.map((item, index) => (
             <li key={index}>
               <a
@@ -154,41 +154,44 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <>
+    <div className=" py-2 px-8">
       <FooterNav />
 
-      <div className="nc-Footer relative py-24 lg:py-28 border-t border-neutral-200 dark:border-neutral-700 ">
-        <div className="container grid grid-cols-2 gap-y-10 gap-x-5 sm:gap-x-8 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-10 ">
-          <div className="grid grid-cols-4 gap-5 col-span-2 md:col-span-4 lg:md:col-span-1 lg:flex lg:flex-col ">
-            <div className="col-span-2 md:col-span-1 flex flex-col items-center mr-8">
-              {/* <Logo /> */}
-              <img src={roundLogo.src} alt="Logo" className=" w-28 mb-2" />
-              <p className=" text-primary-6000 text-2xl my-2 font-bold">
-                Vacation Saga
-              </p>
-              <p className="whitespace-nowrap my-2">
-                117/N/70 3rd Floor Kakadeo Kanpur
-              </p>
-              <a href="mailto:info@vacationsaga.com">info@vacationsaga.com</a>
-            </div>
-            <div className="col-span-2 flex items-center md:col-span-3">
-              {/* <SocialsList1 className="flex items-center space-x-3 lg:space-x-0 lg:flex-col lg:space-y-2.5 lg:items-start" /> */}
-            </div>
+      <div className="nc-Footer relative  border-t border-neutral-200 dark:border-neutral-700">
+        <div className=" w-full">
+          <div className=" w-full flex flex-col items-center mt-4">
+            {/* <Logo /> */}
+            <img src={roundLogo.src} alt="Logo" className=" w-28 mb-2" />
+            <p className=" text-primary-6000 text-2xl my-2 font-bold whitespace-nowrap">
+              Vacation Saga
+            </p>
+            <p className="text-center my-2">
+              117/N/70 3rd Floor Kakadeo Kanpur
+            </p>
+            <a href="mailto:info@vacationsaga.com">info@vacationsaga.com</a>
           </div>
+          <div className="col-span-2 flex items-center md:col-span-3">
+            {/* <SocialsList1 className="flex items-center space-x-3 lg:space-x-0 lg:flex-col lg:space-y-2.5 lg:items-start" /> */}
+          </div>
+        </div>
+        <div className=" mt-8 flex flex-wrap gap-y-8 justify-around">
           {widgetMenus.map(renderWidgetMenuItem)}
-          <div>
+          <div className="flex flex-col items-center ">
             <h3 className="font-semibold text-neutral-700 dark:text-neutral-200 text-sm">
               Social Handles
             </h3>
-            {socials.map(renderItem)}
+            <p>{socials.map(renderItem)}</p>
           </div>
         </div>
         <div className=" w-full flex justify-center">
-          <h1>Managed by <span className=" text-md">Zairo International Pvt. Ltd.</span></h1>
+          <h1>
+            Managed by{" "}
+            <span className=" text-md">Zairo International Pvt. Ltd.</span>
+          </h1>
           {/* <img src="/zairo.jfif" alt="" /> */}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
